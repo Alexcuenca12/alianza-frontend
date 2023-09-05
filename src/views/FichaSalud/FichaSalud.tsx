@@ -5,11 +5,12 @@ import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
 import { Fieldset } from "primereact/fieldset";
 import { Card } from "primereact/card";
-import { Dropdown } from "primereact/dropdown";
+import { InputTextarea } from 'primereact/inputtextarea';
+  
 import cardHeader from "../../shared/CardHeader";
 import { Divider } from "primereact/divider";
-import { IFichaInscripcion } from "../../interfaces/IFichaInscripcion";
-import { FichaInscripcionService } from "../../services/FichaInscripcionService";
+import { IFichaSalud } from "../../interfaces/IFichaSalud";
+import { FichaSaludService } from "../../services/FichaSaludService";
 import swal from "sweetalert";
 
 function FichaInscripcionContext() {
@@ -28,25 +29,27 @@ function FichaInscripcionContext() {
     { label: "Vespertina", value: "Vespertina" },
   ];
 
-  const [contra1, setcontra1] = useState<IFichaInscripcion[]>([]);
-  const [formData, setFormData] = useState<IFichaInscripcion>({
-    idFichaInscripcion: 0,
-    fechaIngresoInscrip: "",
-    fechaEgreso: "",
-    proyectoInscrip: "",
-    situacionIngresoInscrip: "",
-    asistenciaInscrip: "",
-    jornadaAsistenciaInscrip: "",
+  const [contra1, setcontra1] = useState<IFichaSalud[]>([]);
+  const [formData, setFormData] = useState<IFichaSalud>({
+    idFichaSalud: 0,
+    condicionesMedicas: "",
+    pesoFichaSalud: 0,
+    tallaFichaSalud: 0,
+    discapacidadNNAFichaSalud: false,
+    tipoDiscapacidadFichaSalud: "",
+    porcentajeDiscapacidadFichaSalud: 0,
+    enfermedadesPrevalentesFichaSalud: "",
+    fichaInscripcion: null,
   });
 
   const fileUploadRef = useRef<FileUpload>(null);
   const [dataLoaded, setDataLoaded] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [editItemId, setEditItemId] = useState<number | undefined>(undefined);
-  const inscripService = new FichaInscripcionService();
+  const saludService = new FichaSaludService();
 
   const loadData = () => {
-    inscripService
+    saludService
       .getAll()
       .then((data) => {
         setcontra1(data);
@@ -63,36 +66,25 @@ function FichaInscripcionContext() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validación: Verificar que la fecha de ingreso sea menor que la fecha de egreso
     if (
-      new Date(formData.fechaIngresoInscrip) >= new Date(formData.fechaEgreso)
-    ) {
-      swal(
-        "Advertencia",
-        "La Fecha de Ingreso debe ser menor que la Fecha de Egreso",
-        "warning"
-      );
-      return;
-    }
-
-    if (
-      !formData.asistenciaInscrip ||
-      !formData.fechaEgreso ||
-      !formData.jornadaAsistenciaInscrip ||
-      !formData.proyectoInscrip ||
-      !formData.situacionIngresoInscrip ||
-      !formData.fechaIngresoInscrip
+      !formData.condicionesMedicas ||
+      !formData.pesoFichaSalud ||
+      !formData.tallaFichaSalud ||
+      !formData.discapacidadNNAFichaSalud ||
+      !formData.tipoDiscapacidadFichaSalud ||
+      !formData.enfermedadesPrevalentesFichaSalud ||
+      !formData.porcentajeDiscapacidadFichaSalud
     ) {
       swal("Advertencia", "Por favor, complete todos los campos", "warning");
       return;
     }
-    inscripService
+    saludService
       .save(formData)
       .then((response) => {
         resetForm();
         swal("Publicacion", "Datos Guardados Correctamente", "success");
 
-        inscripService
+        saludService
           .getAll()
           .then((data) => {
             setcontra1(data);
@@ -129,11 +121,11 @@ function FichaInscripcionContext() {
         },
       }).then((confirmed) => {
         if (confirmed) {
-          inscripService
+          saludService
             .delete(id)
             .then(() => {
               setcontra1(
-                contra1.filter((contra) => contra.idFichaInscripcion !== id)
+                contra1.filter((contra) => contra.idFichaSalud !== id)
               );
               swal(
                 "Eliminado",
@@ -156,9 +148,7 @@ function FichaInscripcionContext() {
 
   const handleEdit = (id: number | undefined) => {
     if (id !== undefined) {
-      const editItem = contra1.find(
-        (contra) => contra.idFichaInscripcion === id
-      );
+      const editItem = contra1.find((contra) => contra.idFichaSalud === id);
       if (editItem) {
         setFormData(editItem);
 
@@ -171,20 +161,9 @@ function FichaInscripcionContext() {
   const handleUpdate = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validación: Verificar que la fecha de ingreso sea menor que la fecha de egreso
-    if (
-      new Date(formData.fechaIngresoInscrip) >= new Date(formData.fechaEgreso)
-    ) {
-      swal(
-        "Advertencia",
-        "La Fecha de Ingreso debe ser menor que la Fecha de Egreso",
-        "warning"
-      );
-      return;
-    }
     if (editItemId !== undefined) {
-      inscripService
-        .update(Number(editItemId), formData as IFichaInscripcion)
+      saludService
+        .update(Number(editItemId), formData as IFichaSalud)
         .then((response) => {
           swal({
             title: "Publicaciones",
@@ -192,17 +171,18 @@ function FichaInscripcionContext() {
             icon: "success",
           });
           setFormData({
-            idFichaInscripcion: 0,
-            fechaIngresoInscrip: "",
-            fechaEgreso: "",
-            proyectoInscrip: "",
-            situacionIngresoInscrip: "",
-            asistenciaInscrip: "",
-            jornadaAsistenciaInscrip: "",
+            condicionesMedicas: "",
+            pesoFichaSalud: 0,
+            tallaFichaSalud: 0,
+            discapacidadNNAFichaSalud: false,
+            tipoDiscapacidadFichaSalud: "",
+            porcentajeDiscapacidadFichaSalud: 0,
+            enfermedadesPrevalentesFichaSalud: "",
+            fichaInscripcion: null,
           });
           setcontra1(
             contra1.map((contra) =>
-              contra.idFichaInscripcion === editItemId ? response : contra
+              contra.idFichaSalud === editItemId ? response : contra
             )
           );
           setEditMode(false);
@@ -216,13 +196,14 @@ function FichaInscripcionContext() {
 
   const resetForm = () => {
     setFormData({
-      idFichaInscripcion: 0,
-      fechaIngresoInscrip: "",
-      fechaEgreso: "",
-      proyectoInscrip: "",
-      situacionIngresoInscrip: "",
-      asistenciaInscrip: "",
-      jornadaAsistenciaInscrip: "",
+      condicionesMedicas: "",
+      pesoFichaSalud: 0,
+      tallaFichaSalud: 0,
+      discapacidadNNAFichaSalud: false,
+      tipoDiscapacidadFichaSalud: "",
+      porcentajeDiscapacidadFichaSalud: 0,
+      enfermedadesPrevalentesFichaSalud: "",
+      fichaInscripcion: null,
     });
     setEditMode(false);
     setEditItemId(undefined);
@@ -243,10 +224,10 @@ function FichaInscripcionContext() {
       >
         <div
           className="h1-rem"
-          style={{ marginLeft: "40%", marginBottom: "20px" }}
+          style={{ marginLeft: "42%", marginBottom: "20px" }}
         >
           <h1 className="text-5xl font-smibold lg:md-2  w-full h-full max-w-full max-h-full min-w-min">
-            Ficha de Inscripción
+            Ficha Médica
           </h1>
         </div>
 
@@ -258,124 +239,142 @@ function FichaInscripcionContext() {
             <div className="flex flex-wrap flex-row">
               <div className="flex align-items-center justify-content-center">
                 <div className="flex flex-column flex-wrap gap-4">
-                  <div className="flex flex-wrap w-full h-full justify-content-between">
-                    <label
-                      htmlFor="evento"
-                      className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginRight: "20px" }}
-                    >
-                      Fecha de Ingreso:
-                    </label>
-                    <Calendar
-                      className="text-2xl"
-                      id="inicio"
-                      name="inicio"
-                      placeholder="Ingrese la Fecha de Ingreso"
-                      required
-                      dateFormat="yy-mm-dd" // Cambiar el formato a ISO 8601
-                      showIcon
-                      maxDate={new Date()}
-                      onChange={(e) => {
-                        const selectedDate =
-                          e.value instanceof Date ? e.value : null;
-                        const formattedDate = selectedDate
-                          ? selectedDate.toISOString().split("T")[0] // Formatear a ISO 8601
-                          : "";
-                        setFormData({
-                          ...formData,
-                          fechaIngresoInscrip: formattedDate,
-                        });
-                      }}
-                      value={
-                        formData.fechaIngresoInscrip
-                          ? new Date(formData.fechaIngresoInscrip)
-                          : null
-                      }
-                    />
-                  </div>
-                  <div className="flex flex-wrap w-full h-full justify-content-between">
-                    <label
-                      htmlFor="inicio"
-                      className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginRight: "20px" }}
-                    >
-                      Fecha de Egreso:
-                    </label>
-                    <Calendar
-                      className="text-2xl"
-                      id="inicio"
-                      name="inicio"
-                      required
-                      placeholder="Ingrese la Fecha de Egreso"
-                      dateFormat="yy-mm-dd" // Cambiar el formato a ISO 8601
-                      showIcon
-                      maxDate={new Date()}
-                      onChange={(e) => {
-                        const selectedDate =
-                          e.value instanceof Date ? e.value : null;
-                        const formattedDate = selectedDate
-                          ? selectedDate.toISOString().split("T")[0] // Formatear a ISO 8601
-                          : "";
-                        setFormData({
-                          ...formData,
-                          fechaEgreso: formattedDate,
-                        });
-                      }}
-                      value={
-                        formData.fechaEgreso
-                          ? new Date(formData.fechaEgreso)
-                          : null
-                      }
-                    />
-                  </div>
-                  <div className="flex flex-wrap w-full h-full justify-content-between">
-                    <label
-                      htmlFor="tiempo_dedicacion"
-                      className="text-3xl font-medium w-auto min-w-min"
-                    >
-                      Tipo de Proyecto:
-                    </label>
-                    <Dropdown
-                      className="text-2xl"
-                      id="tiempo_dedicacion"
-                      name="tiempo_dedicacion"
-                      style={{ width: "220px" }}
-                      options={tipoProyectoOptions}
-                      onChange={(e) =>
-                        setFormData({ ...formData, proyectoInscrip: e.value })
-                      }
-                      value={formData.proyectoInscrip}
-                      optionLabel="label"
-                      optionValue="value"
-                      placeholder="Seleccione el Proyecto"
-                    />
-                  </div>
-                </div>
-                <div
-                  className="flex flex-column flex-wrap gap-4"
-                  style={{ marginTop: "5px", marginLeft: "25px" }}
-                >
                   <div className="flex flex-wrap w-full h-full  justify-content-between">
                     <label
-                      htmlFor="doi"
+                      htmlFor="condiciones"
                       className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginRight: "20px", marginLeft: "25px" }}
+                      style={{ marginRight: "20px" }}
                     >
-                      Situación de Ingreso:
+                      Condiciones Médicas:
                     </label>
-                    <InputText
+                    <InputTextarea
                       className="text-2xl"
-                      placeholder="Ingrese la Situacion de Ingreso"
-                      id="doi"
-                      name="doi"
+                      placeholder="Ingrese las Condiciones Médicas"
+                      id="condiciones"
+                      name="condiciones"
                       style={{ width: "221px" }}
                       onChange={(e) =>
                         setFormData({
                           ...formData,
-                          situacionIngresoInscrip: e.currentTarget.value,
+                          condicionesMedicas: e.currentTarget.value,
                         })
                       }
-                      value={formData.situacionIngresoInscrip}
+                      value={formData.condicionesMedicas}
+                    />
+                  </div>
+                  <div className="flex flex-wrap w-full h-full  justify-content-between">
+                    <label
+                      htmlFor="condiciones"
+                      className="text-3xl font-medium w-auto min-w-min"
+                      style={{ marginRight: "20px" }}
+                    >
+                      Peso:
+                    </label>
+                    <InputText
+                      className="text-2xl"
+                      placeholder="Ingrese las Condiciones Médicas"
+                      id="peso"
+                      name="peso"
+                      style={{ width: "221px" }}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          pesoFichaSalud: parseFloat(e.currentTarget.value),
+                        })
+                      }
+                      value={formData.pesoFichaSalud.toString()}
+                    />
+                  </div>
+
+                  <div className="flex flex-wrap w-full h-full  justify-content-between">
+                    <label
+                      htmlFor="condiciones"
+                      className="text-3xl font-medium w-auto min-w-min"
+                      style={{ marginRight: "20px" }}
+                    >
+                      Talla:
+                    </label>
+                    <InputText
+                      className="text-2xl"
+                      placeholder="Ingrese las Condiciones Médicas"
+                      id="peso"
+                      name="peso"
+                      style={{ width: "221px" }}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          tallaFichaSalud: parseFloat(e.currentTarget.value),
+                        })
+                      }
+                      value={formData.tallaFichaSalud.toString()}
+                    />
+                  </div>
+                  <div className="flex flex-wrap w-full h-full justify-content-between">
+                    <label
+                      className="text-3xl font-medium w-auto min-w-min"
+                      style={{ marginRight: "20px" }}
+                    >
+                      Discapacidad:
+                    </label>
+                    <div>
+                      <input
+                        type="radio"
+                        id="discapacidadTrue"
+                        name="discapacidad"
+                        value="true"
+                        checked={formData.discapacidadNNAFichaSalud === true}
+                        onChange={() =>
+                          setFormData({
+                            ...formData,
+                            discapacidadNNAFichaSalud: true,
+                          })
+                        }
+                      />
+                      <label htmlFor="discapacidadTrue">Si</label>
+                    </div>
+                    <div>
+                      <input
+                        type="radio"
+                        id="discapacidadFalse"
+                        name="discapacidad"
+                        value="false"
+                        checked={formData.discapacidadNNAFichaSalud === false}
+                        onChange={() =>
+                          setFormData({
+                            ...formData,
+                            discapacidadNNAFichaSalud: false,
+                          })
+                        }
+                      />
+                      <label htmlFor="discapacidadFalse">No</label>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="flex flex-column flex-wrap gap-4"
+                  style={{ marginTop: "-25px", marginLeft: "25px" }}
+                >
+                  <div className="flex flex-wrap w-full h-full  justify-content-between">
+                    <label
+                      htmlFor="tipoDiscapacidad"
+                      className="text-3xl font-medium w-auto min-w-min"
+                      style={{ marginRight: "20px", marginLeft: "25px" }}
+                    >
+                      Tipo de Discapacidad:
+                    </label>
+                    <InputTextarea
+                      className="text-2xl"
+                      placeholder="Ingrese el Tipo de Discapacidad"
+                      id="tipoDiscapacidad"
+                      name="tipoDiscapacidad"
+                      style={{ width: "221px" }}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          tipoDiscapacidadFichaSalud: e.currentTarget.value,
+                        })
+                      }
+                      value={formData.tipoDiscapacidadFichaSalud}
                     />
                   </div>
                   <div className="flex flex-wrap w-full h-full  justify-content-between">
@@ -384,7 +383,7 @@ function FichaInscripcionContext() {
                       className="text-3xl font-medium w-auto min-w-min"
                       style={{ marginRight: "20px", marginLeft: "25px" }}
                     >
-                      Asistencia:
+                      Porcentaje de Discapacidad:
                     </label>
                     <InputText
                       className="text-2xl"
@@ -395,39 +394,37 @@ function FichaInscripcionContext() {
                       onChange={(e) =>
                         setFormData({
                           ...formData,
-                          asistenciaInscrip: e.currentTarget.value,
+                          porcentajeDiscapacidadFichaSalud: parseFloat(
+                            e.currentTarget.value
+                          ),
                         })
                       }
-                      value={formData.asistenciaInscrip}
+                      value={formData.porcentajeDiscapacidadFichaSalud.toString()}
                     />
                   </div>
                   <div className="flex flex-wrap w-full h-full  justify-content-between">
-                    <div className="flex flex-wrap w-full h-full justify-content-between">
-                      <label
-                        htmlFor="tiempo_dedicacion"
-                        className="text-3xl font-medium w-auto min-w-min"
-                        style={{ marginRight: "20px", marginLeft: "25px" }}
-                      >
-                        Jornada de Asistencia:
-                      </label>
-                      <Dropdown
-                        className="text-2xl"
-                        id="tiempo_dedicacion"
-                        name="tiempo_dedicacion"
-                        style={{ width: "220px", marginLeft: "15px" }}
-                        options={jornadaOptions}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            jornadaAsistenciaInscrip: e.value,
-                          })
-                        }
-                        value={formData.jornadaAsistenciaInscrip}
-                        optionLabel="label"
-                        optionValue="value"
-                        placeholder="Seleccione la Jornada"
-                      />
-                    </div>
+                    <label
+                      htmlFor="enfermedades"
+                      className="text-3xl font-medium w-auto min-w-min"
+                      style={{ marginRight: "20px", marginLeft: "25px" }}
+                    >
+                      Enfermedades Prevalentes:
+                    </label>
+                    <InputTextarea
+                      className="text-2xl"
+                      placeholder="Ingrese las Enfermedades"
+                      id="enfermedades"
+                      name="enfermedades"
+                      style={{ width: "221px" }}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          enfermedadesPrevalentesFichaSalud:
+                            e.currentTarget.value,
+                        })
+                      }
+                      value={formData.enfermedadesPrevalentesFichaSalud}
+                    />
                   </div>
                 </div>
               </div>
@@ -464,13 +461,14 @@ function FichaInscripcionContext() {
           >
             <thead>
               <tr style={{ backgroundColor: "#871b1b", color: "white" }}>
-                <th>Nº de Publicacion</th>
-                <th>Fecha de Ingreso</th>
-                <th>Proyecto </th>
-                <th>Situación de Ingreso</th>
-                <th>Asistencia</th>
-                <th>Jornada de Asistencia</th>
-                <th>Fecha de Egreso </th>
+                <th>Nº de Ficha</th>
+                <th>Condiciones Médicas</th>
+                <th>Peso </th>
+                <th>Talla</th>
+                <th>Discapacidad</th>
+                <th>Porcentaje de Discapacidad</th>
+                <th>Tipo de Discapacidad</th>
+                <th>Enfermedades Prevalentes</th>
                 <th>Operaciones</th>
               </tr>
             </thead>
@@ -478,36 +476,16 @@ function FichaInscripcionContext() {
               {contra1.map((contrato) => (
                 <tr
                   className="text-center"
-                  key={contrato.idFichaInscripcion?.toString()}
+                  key={contrato.idFichaSalud?.toString()}
                 >
-                  <td>{contrato.idFichaInscripcion}</td>
-                  <td>
-                    {contrato.fechaIngresoInscrip
-                      ? new Date(
-                          contrato.fechaIngresoInscrip
-                        ).toLocaleDateString("es-ES", {
-                          year: "numeric",
-                          month: "2-digit",
-                          day: "2-digit",
-                        })
-                      : ""}
-                  </td>
-                  <td>{contrato.proyectoInscrip}</td>
-                  <td>{contrato.situacionIngresoInscrip}</td>
-                  <td>{contrato.asistenciaInscrip}</td>
-                  <td>{contrato.jornadaAsistenciaInscrip}</td>
-                  <td>
-                    {contrato.fechaEgreso
-                      ? new Date(contrato.fechaEgreso).toLocaleDateString(
-                          "es-ES",
-                          {
-                            year: "numeric",
-                            month: "2-digit",
-                            day: "2-digit",
-                          }
-                        )
-                      : ""}
-                  </td>
+                  <td>{contrato.idFichaSalud}</td>
+                  <td>{contrato.condicionesMedicas}</td>
+                  <td>{contrato.pesoFichaSalud}</td>
+                  <td>{contrato.tallaFichaSalud}</td>
+                  <td>{contrato.discapacidadNNAFichaSalud ? 'Si' : 'No'}</td>
+                  <td>{contrato.tipoDiscapacidadFichaSalud}</td>
+                  <td>{contrato.porcentajeDiscapacidadFichaSalud +"%"}</td>
+                  <td>{contrato.enfermedadesPrevalentesFichaSalud}</td>
                   <td>
                     <Button
                       type="button"
@@ -522,7 +500,7 @@ function FichaInscripcionContext() {
                         justifyContent: "center",
                       }}
                       onClick={() =>
-                        handleEdit(contrato.idFichaInscripcion?.valueOf())
+                        handleEdit(contrato.idFichaSalud?.valueOf())
                       }
                       // Agrega el evento onClick para la operación de editar
                     />
@@ -539,7 +517,7 @@ function FichaInscripcionContext() {
                         justifyContent: "center",
                       }}
                       onClick={() =>
-                        handleDelete(contrato.idFichaInscripcion?.valueOf())
+                        handleDelete(contrato.idFichaSalud?.valueOf())
                       }
                     />
                   </td>

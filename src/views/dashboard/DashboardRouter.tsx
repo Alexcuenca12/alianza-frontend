@@ -5,12 +5,15 @@ import React, { useRef } from "react";
 import Footer from "../../common/Footer";
 import { FcBusinessman } from "react-icons/fc";
 import { FcHome } from "react-icons/fc";
+import { FcExport } from "react-icons/fc";
 import { FcGraduationCap } from "react-icons/fc";
 import { FcViewDetails } from "react-icons/fc";
+import { FcConferenceCall } from "react-icons/fc";
 import { FcLike } from "react-icons/fc";
 import { SideBarMenuCard, SideBarMenuItem } from "../../interfaces/types";
 import { SideBarMenu } from "../../common/SideBar/SideBarMenu";
 import FichaInscripcionContext from "../../views/FichaInscripcion/FichaInscripcion";
+import FichaSalud from "../../views/FichaSalud/FichaSalud";
 
 export const DashboardRouter = () => {
   //Datos del sessionStorage
@@ -43,12 +46,24 @@ export const DashboardRouter = () => {
       id: "4",
       label: "Ficha Salud",
       icon: FcLike,
-      url: "/",
+      url: "/salud",
     },
     {
       id: "5",
       label: "Ficha Educativa",
       icon: FcGraduationCap,
+      url: "/",
+    },
+    {
+      id: "6",
+      label: "Ficha Representante",
+      icon: FcConferenceCall,
+      url: "/",
+    },
+    {
+      id: "7",
+      label: "Ficha de Desvinculación",
+      icon: FcExport,
       url: "/",
     },
   ];
@@ -108,7 +123,21 @@ export const DashboardRouter = () => {
                   </>
                 ) : (
                   <SideBarMenu items={items} card={card} />
-                    
+                )}
+              </Route>
+              <Route path="/salud">
+                {rol === 1 ? (
+                  <>
+                    <SideBarMenu items={items} card={card} />
+                    <FichaSalud />
+                    <Footer />
+                  </>
+                ) : rol === 2 ? (
+                  <>
+                    <SideBarMenu items={items} card={card} />
+                  </>
+                ) : (
+                  <SideBarMenu items={items} card={card} />
                 )}
               </Route>
 

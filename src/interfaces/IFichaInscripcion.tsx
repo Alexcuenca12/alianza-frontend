@@ -1,5 +1,5 @@
 export interface IFichaInscripcion {
-  idFichaInscripcion: number | null;
+  idFichaInscripcion?: number;
   fechaIngresoInscrip: string;
   fechaEgreso: string;
   proyectoInscrip: string;
