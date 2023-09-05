@@ -1,0 +1,61 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800;900&display=swap');
+
+:root {
+  --brown-color: #b09a68;
+  --dark-color: #303034;
+  --grey-color: #dfdfe0;
+  --light-grey-color: #eaeaea;
+  --white-color: #fff;
+  --black-color: #000;
+  --transition: all 300ms ease-in-out;
+}
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 10px;
+}
+
+body {
+  line-height: 1.7;
+  font-family: "Poppins", sans-serif;
+}
+
+
+.p-calendar .p-inputtext {
+  font-size: 15px; 
+}
+
+.p-dropdown .p-dropdown-label {
+  font-size: 15px; 
+}
+
+.p-component, .p-component * {
+  font-size: 15px; 
+}
+.p-datepicker-year{
+  color: #c74747;
+  transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
+  font-weight: 600;
+  padding: 0.5rem;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
