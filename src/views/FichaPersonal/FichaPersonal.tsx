@@ -15,7 +15,8 @@ import cardHeader from "../../shared/CardHeader";
 import { Calendar } from "primereact/calendar";
 import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
-
+import { ICalcularEdad } from '../../interfaces/ICalcularEdad';
+import CalcularEdad from "../../common/CalcularEdad";
 
 
 function FichaPersonal() {
@@ -263,6 +264,8 @@ function FichaPersonal() {
 
     };
 
+
+
     return (
 
         <Fieldset className="fgrid col-fixed " style={{ display: 'flex', justifyContent: 'center' }}>
@@ -270,7 +273,7 @@ function FichaPersonal() {
             <Card
                 header={cardHeader}
                 className="border-solid border-red-800 border-3 flex-1 flex-wrap"
-                style={{ width: "1500px", marginLeft: "90px", marginTop: "15px", marginBottom: "35px", height: "1125px" }}
+                style={{ width: "1200px", marginLeft: "90px", marginTop: "15px", marginBottom: "35px", height: "1125px" }}
             >
 
                 <div
@@ -382,11 +385,11 @@ function FichaPersonal() {
                                 <Calendar
                                     style={{ marginLeft: "20px", width: "60%" }}
                                     className="text-2xl"
-                                    id="fechaNacimiento"
-                                    name="fechaNacimiento"
+                                    id="inicio"
+                                    name="inicio"
                                     placeholder="Ingrese la fecha de nacimiento"
                                     required
-                                    dateFormat="yy-mm-dd" // Cambiar el formato a ISO 8601
+                                    dateFormat="dd-mm-yy" // Cambiar el formato a ISO 8601
                                     showIcon
                                     maxDate={new Date()}
                                     onChange={(e) => {
@@ -491,9 +494,11 @@ function FichaPersonal() {
                                 </div>
 
                             </div >
+
+
                             <div className='input-box'>
                                 <label className="font-medium w-auto min-w-min" htmlFor="rangoEdad">Rango de Edad:</label>
-                                <div className="select-box">
+                                <div className="">
                                     <Dropdown
                                         className="text-2xl"
                                         id="tiempo_dedicacion"
@@ -780,18 +785,25 @@ function FichaPersonal() {
                         <div className='btnSend'>
                             {/* <button type="submit"
                                     className='btn' >Registrarse</button> */}
-                            <div className="flex align-items-center justify-content-center w-auto min-w-min">
+                            <div className="flex align-items-center justify-content-center w-auto min-w-min"
+                                style={{ gap: "25px" }}>
                                 <Button
                                     type="submit"
                                     label={editMode ? "Actualizar" : "Guardar"}
                                     className="btn"
                                     rounded
+                                    style={{
+                                        width: "100px",
+                                    }}
                                     onClick={editMode ? handleUpdate : handleSubmit}
                                 />
                                 <Button
                                     type="button"
                                     label="Cancelar"
                                     className="btn"
+                                    style={{
+                                        width: "100px",
+                                    }}
                                     rounded
                                     onClick={resetForm}
                                 />
@@ -811,19 +823,18 @@ function FichaPersonal() {
                             <tr style={{ backgroundColor: "#871b1b", color: "white" }}>
                                 <th>Nº Ficha</th>
                                 <th>Cedula</th>
-                                <th>Nombres</th>
-                                <th>Apellidos </th>
+                                <th>Nombre</th>
                                 <th>Nacionalidad</th>
                                 <th>Fecha de Nacimiento</th>
-                                <th>Rango de edad</th>
+                                {/* <th>Rango de edad</th> */}
                                 <th>Genero</th>
                                 <th>Etnia</th>
                                 <th>Canton</th>
-                                <th>Zona</th>
-                                <th>Barrio/Sector</th>
+                                {/* <th>Zona</th> */}
+                                {/* <th>Barrio/Sector</th> */}
                                 <th>Direccion</th>
-                                <th>Referencia</th>
-                                <th>Longitud (X) Latitud (Y)</th>
+                                {/* <th>Referencia</th> */}
+                                {/* <th>Longitud (X) Latitud (Y)</th> */}
                                 <th>Acción</th>
                             </tr>
                         </thead>
@@ -836,10 +847,9 @@ function FichaPersonal() {
 
                                     <td>{ficha.idFichaPersonal}</td>
                                     <td>{ficha.ciIdentidad}</td>
-                                    <td>{ficha.nombres}</td>
-                                    <td>{ficha.apellidos}</td>
+                                    <td>{ficha.apellidos} {ficha.nombres}</td>
                                     <td>{ficha.nacionalidad}</td>
-                                    <td>{ficha.fechaNacimiento
+                                    {/* <td>{ficha.fechaNacimiento
                                         ? new Date(
                                             ficha.fechaNacimiento
                                         ).toLocaleDateString("es-ES", {
@@ -847,24 +857,26 @@ function FichaPersonal() {
                                             month: "2-digit",
                                             day: "2-digit",
                                         })
-                                        : ""}</td>
-                                    <td>{ficha.rangoEdad?.limInferior} - {ficha.rangoEdad?.limSuperior}</td>
+                                        : ""}</td> */}
+
+                                    <td>{ficha.fechaNacimiento}</td>
+                                    {/* <td>{ficha.rangoEdad?.limInferior} - {ficha.rangoEdad?.limSuperior}</td> */}
                                     <td>{ficha.genero}</td>
                                     <td>{ficha.etnia?.etniaNombre}</td>
                                     <td>{ficha.parroquia?.canton.cantonNombre}</td>
-                                    <td>{ficha.zona}</td>
-                                    <td>{ficha.barrioSector}</td>
+                                    {/* <td>{ficha.zona}</td> */}
+                                    {/* <td>{ficha.barrioSector}</td> */}
                                     <td>{ficha.direccion}</td>
-                                    <td>{ficha.referencia}</td>
-                                    <td>{ficha.coordenadaX}  {ficha.coordenadaY}</td>
-                                    <td>
+                                    {/* <td>{ficha.referencia}</td> */}
+                                    {/* <td>{ficha.coordenadaX}  {ficha.coordenadaY}</td> */}
+                                    <td style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
                                         <Button
                                             type="button"
                                             className=""
                                             label="✎"
                                             style={{
-                                                background: "#ff9800",
-                                                borderRadius: "5%",
+                                                background: "#ff0000",
+                                                borderRadius: "10%",
                                                 fontSize: "25px",
                                                 width: "50px",
                                                 color: "black",

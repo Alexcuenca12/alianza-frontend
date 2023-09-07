@@ -132,16 +132,17 @@ select {
 }
 
 .btn {
-    padding: 12.5px 30px;
+    /* padding: 12.5px 30px;
     border: 0;
     border-radius: 100px;
     background-color: #B0252A;
     color: #ffffff;
     font-weight: Bold;
     transition: all 0.5s;
-    -webkit-transition: all 0.5s;
+    -webkit-transition: all 0.5s; */
 }
 
+/* 
 .btn:hover {
     background-color: #f41e26;
     box-shadow: 0 0 20px #6fff9150;
@@ -154,7 +155,7 @@ select {
     -webkit-transition: all 0.25s;
     box-shadow: none;
     transform: scale(0.98);
-}
+} */
 
 /* .btn {
     border: 2px solid #B0252A;

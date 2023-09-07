@@ -303,6 +303,7 @@ function FichaInscripcionContext() {
                     >
                       Fecha de Egreso:
                     </label>
+
                     <Calendar
                       className="text-2xl"
                       id="inicio"

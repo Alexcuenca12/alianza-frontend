@@ -10,11 +10,14 @@ import { FcGraduationCap } from "react-icons/fc";
 import { FcViewDetails } from "react-icons/fc";
 import { FcConferenceCall } from "react-icons/fc";
 import { FcLike } from "react-icons/fc";
+import { MdFamilyRestroom } from "react-icons/md";
 import { SideBarMenuCard, SideBarMenuItem } from "../../interfaces/types";
 import { SideBarMenu } from "../../common/SideBar/SideBarMenu";
 import FichaInscripcionContext from "../../views/FichaInscripcion/FichaInscripcion";
 import FichaSalud from "../../views/FichaSalud/FichaSalud";
 import FichaPersonal from "../FichaPersonal/FichaPersonal";
+import FichaFamiliar from "../FichaFamiliar/FichaFamiliar";
+
 import { wrap } from "module";
 
 export const DashboardRouter = () => {
@@ -67,6 +70,12 @@ export const DashboardRouter = () => {
       label: "Ficha de Desvinculación",
       icon: FcExport,
       url: "/",
+    },
+    {
+      id: "8",
+      label: "Ficha Familiar",
+      icon: MdFamilyRestroom,
+      url: "/familiar",
     },
   ];
 
@@ -149,6 +158,24 @@ export const DashboardRouter = () => {
                     <div className="estructura" >
                       <SideBarMenu items={items} card={card} />
                       <FichaPersonal />
+                    </div>
+                    <Footer />
+                  </>
+                ) : rol === 2 ? (
+                  <>
+                    <SideBarMenu items={items} card={card} />
+                  </>
+                ) : (
+                  <SideBarMenu items={items} card={card} />
+                )}
+              </Route>
+
+              <Route path="/familiar">
+                {rol === 1 ? (
+                  <>
+                    <div className="estructura" >
+                      <SideBarMenu items={items} card={card} />
+                      <FichaFamiliar />
                     </div>
                     <Footer />
                   </>
