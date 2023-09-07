@@ -14,6 +14,8 @@ import { SideBarMenuCard, SideBarMenuItem } from "../../interfaces/types";
 import { SideBarMenu } from "../../common/SideBar/SideBarMenu";
 import FichaInscripcionContext from "../../views/FichaInscripcion/FichaInscripcion";
 import FichaSalud from "../../views/FichaSalud/FichaSalud";
+import FichaPersonal from "../FichaPersonal/FichaPersonal";
+import { wrap } from "module";
 
 export const DashboardRouter = () => {
   //Datos del sessionStorage
@@ -40,7 +42,7 @@ export const DashboardRouter = () => {
       id: "3",
       label: "Ficha Personal",
       icon: FcViewDetails,
-      url: "/",
+      url: "/personal",
     },
     {
       id: "4",
@@ -130,6 +132,24 @@ export const DashboardRouter = () => {
                   <>
                     <SideBarMenu items={items} card={card} />
                     <FichaSalud />
+                    <Footer />
+                  </>
+                ) : rol === 2 ? (
+                  <>
+                    <SideBarMenu items={items} card={card} />
+                  </>
+                ) : (
+                  <SideBarMenu items={items} card={card} />
+                )}
+              </Route>
+
+              <Route path="/personal">
+                {rol === 1 ? (
+                  <>
+                    <div className="estructura" >
+                      <SideBarMenu items={items} card={card} />
+                      <FichaPersonal />
+                    </div>
                     <Footer />
                   </>
                 ) : rol === 2 ? (

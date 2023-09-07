@@ -86,6 +86,7 @@ function FichaInscripcionContext() {
       swal("Advertencia", "Por favor, complete todos los campos", "warning");
       return;
     }
+
     inscripService
       .save(formData)
       .then((response) => {
@@ -182,6 +183,7 @@ function FichaInscripcionContext() {
       );
       return;
     }
+
     if (editItemId !== undefined) {
       inscripService
         .update(Number(editItemId), formData as IFichaInscripcion)
@@ -484,12 +486,12 @@ function FichaInscripcionContext() {
                   <td>
                     {contrato.fechaIngresoInscrip
                       ? new Date(
-                          contrato.fechaIngresoInscrip
-                        ).toLocaleDateString("es-ES", {
-                          year: "numeric",
-                          month: "2-digit",
-                          day: "2-digit",
-                        })
+                        contrato.fechaIngresoInscrip
+                      ).toLocaleDateString("es-ES", {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                      })
                       : ""}
                   </td>
                   <td>{contrato.proyectoInscrip}</td>
@@ -499,13 +501,13 @@ function FichaInscripcionContext() {
                   <td>
                     {contrato.fechaEgreso
                       ? new Date(contrato.fechaEgreso).toLocaleDateString(
-                          "es-ES",
-                          {
-                            year: "numeric",
-                            month: "2-digit",
-                            day: "2-digit",
-                          }
-                        )
+                        "es-ES",
+                        {
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
+                        }
+                      )
                       : ""}
                   </td>
                   <td>
@@ -524,7 +526,7 @@ function FichaInscripcionContext() {
                       onClick={() =>
                         handleEdit(contrato.idFichaInscripcion?.valueOf())
                       }
-                      // Agrega el evento onClick para la operación de editar
+                    // Agrega el evento onClick para la operación de editar
                     />
                     <Button
                       type="button"
