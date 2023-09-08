@@ -17,8 +17,11 @@ import FichaInscripcionContext from "../../views/FichaInscripcion/FichaInscripci
 import FichaSalud from "../../views/FichaSalud/FichaSalud";
 import FichaPersonal from "../FichaPersonal/FichaPersonal";
 import FichaFamiliar from "../FichaFamiliar/FichaFamiliar";
+import FichaEducativa from "../FichaEducativa/FichaEducativa";
+import FichaDesvinculacion from "../FichaDesvinculacion/FichaDesvinculacion";
+import FichaRepresentante from "../FichaRepresentante/FichaRepresentante";
 
-import { wrap } from "module";
+
 
 export const DashboardRouter = () => {
   //Datos del sessionStorage
@@ -57,19 +60,19 @@ export const DashboardRouter = () => {
       id: "5",
       label: "Ficha Educativa",
       icon: FcGraduationCap,
-      url: "/",
+      url: "/educar",
     },
     {
       id: "6",
       label: "Ficha Representante",
       icon: FcConferenceCall,
-      url: "/",
+      url: "/representante",
     },
     {
       id: "7",
       label: "Ficha de Desvinculación",
       icon: FcExport,
-      url: "/",
+      url: "/desvinculacion",
     },
     {
       id: "8",
@@ -155,7 +158,7 @@ export const DashboardRouter = () => {
               <Route path="/personal">
                 {rol === 1 ? (
                   <>
-                    <div className="estructura" >
+                    <div className="estructura">
                       <SideBarMenu items={items} card={card} />
                       <FichaPersonal />
                     </div>
@@ -173,7 +176,7 @@ export const DashboardRouter = () => {
               <Route path="/familiar">
                 {rol === 1 ? (
                   <>
-                    <div className="estructura" >
+                    <div className="estructura">
                       <SideBarMenu items={items} card={card} />
                       <FichaFamiliar />
                     </div>
@@ -187,7 +190,51 @@ export const DashboardRouter = () => {
                   <SideBarMenu items={items} card={card} />
                 )}
               </Route>
-
+              <Route path="/educar">
+                {rol === 1 ? (
+                  <>
+                    <SideBarMenu items={items} card={card} />
+                    <FichaEducativa />
+                    <Footer />
+                  </>
+                ) : rol === 2 ? (
+                  <>
+                    <SideBarMenu items={items} card={card} />
+                  </>
+                ) : (
+                  <SideBarMenu items={items} card={card} />
+                )}
+              </Route>
+              <Route path="/desvinculacion">
+                {rol === 1 ? (
+                  <>
+                    <SideBarMenu items={items} card={card} />
+                    <FichaDesvinculacion />
+                    <Footer />
+                  </>
+                ) : rol === 2 ? (
+                  <>
+                    <SideBarMenu items={items} card={card} />
+                  </>
+                ) : (
+                  <SideBarMenu items={items} card={card} />
+                )}
+              </Route>
+              <Route path="/representante">
+                {rol === 1 ? (
+                  <>
+                    <SideBarMenu items={items} card={card} />
+                    <FichaRepresentante />
+                    <Footer />
+                  </>
+                ) : rol === 2 ? (
+                  <>
+                    <SideBarMenu items={items} card={card} />
+                  </>
+                ) : (
+                  <SideBarMenu items={items} card={card} />
+                )}
+              </Route>
               <Route path="*">
                 {rol === 1 ? (
                   <SideBarMenu items={items} card={card} />
