@@ -17,11 +17,14 @@ import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
 import { ICalcularEdad } from '../../interfaces/ICalcularEdad';
 import CalcularEdad from "../../common/CalcularEdad";
+import { CantonService } from "../../services/CantonService";
+import { ICanton } from "../../interfaces/ICanton";
 
 
 function FichaPersonal() {
 
     const fichaPersonalService = new FichaPersonalService();
+    const cantonService = new CantonService();
 
 
     const fileUploadRef = useRef<FileUpload>(null);
@@ -61,6 +64,8 @@ function FichaPersonal() {
 
     const [parroquiasOpc, setParroquiasOpc] = useState<{ label: string, value: number }[]>([]);
 
+    const [cantonOpc, setCantonOpc] = useState<{ label: string, value: number }[]>([]);
+
     const [etniasOpc, setEtniasOpc] = useState<{ label: string, value: number }[]>([]);
 
     useEffect(() => {
@@ -74,7 +79,32 @@ function FichaPersonal() {
             setRangosEdadOpc(opciones);
         };
 
+
+        const cargarComboCantones = () => {
+
+            cantonService
+                .getAll()
+                .then((data: ICanton[]) => {
+                    // Mapear los datos y crear un nuevo array en el formato deseado
+                    const mappedData = data.map((canton: ICanton) => ({
+                        label: canton.cantonNombre,
+                        value: canton.idCanton,
+                    }));
+
+                    // Actualizar el estado con los datos mapeados
+                    setCantonOpc(mappedData);
+                })
+                .catch((error) => {
+                    console.error("Error al obtener los datos:", error);
+                });
+
+        };
+
+
         const cargarComboParroquias = () => {
+
+
+
             const opciones = parroquias.map((dato) => ({
                 label: `${dato.parroquiaNombre}`,
                 value: dato.idParroquia,
@@ -92,6 +122,9 @@ function FichaPersonal() {
         cargarComboRangos();
         cargarComboEtnias();
         cargarComboParroquias();
+
+
+        cargarComboCantones();
         loadData();
     }, []);
 
@@ -588,6 +621,31 @@ function FichaPersonal() {
                             <span className="input-border"></span>
 
                         </div>
+
+                        <div className="column">
+                            <div className='input-box'>
+                                <label className="font-medium w-auto min-w-min" htmlFor="parroquia">Canton:</label>
+                                <div className="select-box">
+
+                                    <Dropdown
+                                        className="text-2xl"
+                                        id="tiempo_dedicacion"
+                                        name="tiempo_dedicacion"
+                                        style={{ width: "100%" }}
+                                        options={parroquiasOpc}
+                                        // onChange={
+                                        // }
+                                        value={formData.parroquia?.idParroquia}
+                                        optionLabel="label"
+                                        optionValue="value"
+                                        placeholder="Seleccione la Parroquia"
+                                    />
+                                </div>
+
+                            </div>
+
+                        </div>
+
                         <div className="column">
 
                             <div className='input-box'>
@@ -619,29 +677,6 @@ function FichaPersonal() {
                                         optionValue="value"
                                         placeholder="Seleccione la Parroquia"
                                     />
-
-                                    {/* <select id="parroquia" value={formData.parroquia?.idParroquia} onChange={(e) => setFormData({
-                                        ...formData, parroquia: {
-                                            idParroquia: parseInt(e.target.value), parroquiaNombre: '',
-                                            idCanton: {
-                                                idCanton: 0, cantonNombre: '',
-                                                idProvincia: {
-                                                    idProvincia: 0, provinciaNombre: ''
-                                                }
-                                            }
-
-
-
-
-                                        }
-                                    })}//(Parroquia:)}
-                                        required>
-                                        <option value={0} >Seleccione una opción</option>
-                                        {parroquias.map((parroquia, index) => (
-                                            <option key={index} value={parroquia.idParroquia}>{parroquia.parroquiaNombre} </option>
-                                        ))}
-
-                                    </select> */}
                                 </div>
 
                             </div>
