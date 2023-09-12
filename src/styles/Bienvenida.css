@@ -1,7 +1,7 @@
 .header {
   min-height: 100vh;
   background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.4)),
-    url("https://scontent.fcue2-1.fna.fbcdn.net/v/t39.30808-6/364064561_290376973524310_2212779540903185788_n.jpg?_nc_cat=102&ccb=1-7&_nc_sid=49d041&_nc_ohc=TKd1fUEYBf4AX_GSQOR&_nc_ht=scontent.fcue2-1.fna&oh=00_AfCcybgtWWt_xsCdWnabimXkNv0mPQeij27FTjGgANIf0w&oe=64FB1EB8") center/cover no-repeat;
+    url("https://scontent.fcue2-1.fna.fbcdn.net/v/t39.30808-6/364064561_290376973524310_2212779540903185788_n.jpg?_nc_cat=102&ccb=1-7&_nc_sid=49d041&_nc_eui2=AeF6Bcg_uIOdtYA9EotaYcd7Py3I4JFtTSI_LcjgkW1NIpH7NUWSzp0aBvIN9-T4-ubieK-O-YxctKcgo671wb_p&_nc_ohc=tqEhbvsDncgAX_azfDj&_nc_ht=scontent.fcue2-1.fna&oh=00_AfBUCpXDwm4thhTSbZw5qVIdd-CqWx4SKff4mlktyXu0fw&oe=650307B8") center/cover no-repeat;
   justify-content: stretch;
   position: fixed; /* Agregado */
   top: 0; /* Agregado */

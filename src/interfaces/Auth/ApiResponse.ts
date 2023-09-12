@@ -3,8 +3,8 @@ export interface ApiResponse{
    id_usuario: number;
    username: string;
    password: string;
-   fichaPersonal: {
-    idFichaPersonal: number;
+   persona: {
+    idPersona: number;
    };
    rol: {
      idRol: number;

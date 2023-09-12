@@ -29,7 +29,7 @@ export function Login() {
       e.preventDefault();
       const resp = await AuthService.login(auth);
       const rol = resp.rol.idRol;
-      const id = resp.fichaPersonal.idFichaPersonal;
+      const id = resp.persona.idPersona;
       sessionStorage.setItem(
         "user",
         JSON.stringify({ id, rol, loggedIn: true })

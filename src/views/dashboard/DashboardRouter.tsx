@@ -70,24 +70,25 @@ export const DashboardRouter = () => {
     },
     {
       id: "7",
-      label: "Ficha de Desvinculación",
-      icon: FcExport,
-      url: "/desvinculacion",
-    },
-    {
-      id: "8",
       label: "Ficha Familiar",
       icon: MdFamilyRestroom,
       url: "/familiar",
     },
+    {
+      id: "8",
+      label: "Ficha de Desvinculación",
+      icon: FcExport,
+      url: "/desvinculacion",
+    },
+
   ];
 
   const card: SideBarMenuCard = {
     id: "card001",
-    displayName: "Bryan Curillo",
+    displayName: "Fundación Alianza",
     title: "Administrador",
     photoUrl:
-      "https://cdn.computerhoy.com/sites/navi.axelspringer.es/public/media/image/2018/08/fotos-perfil-whatsapp_16.jpg?tf=3840x",
+      "https://falianza.org.ec/wp-content/uploads/2020/12/Recurso-1@1000x.png",
     url: "/",
   };
   return (

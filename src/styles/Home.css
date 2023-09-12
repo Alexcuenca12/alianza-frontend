@@ -1,7 +1,7 @@
 .home {
-    min-height: 91vh;
+    min-height: 100vh;
     background: linear-gradient(rgba(255, 255, 255, 0.363), rgba(0, 0, 0, 0.1)),
-    url("https://scontent.fcue2-1.fna.fbcdn.net/v/t1.6435-9/48405159_404582593619826_8301089623208099840_n.jpg?_nc_cat=104&cb=99be929b-59f725be&ccb=1-7&_nc_sid=e3f864&_nc_eui2=AeFykPSTyVlRBbKspd5RTdqsN0pvqUYFhNI3Sm-pRgWE0k3Sclu_E1HBFppsEqTiIaA6MfaWpKz86slNkn-oyeLP&_nc_ohc=7kOgoR9nfMQAX--7wgu&_nc_ht=scontent.fcue2-1.fna&oh=00_AfA-fW_9-LT2cCKyRPIimJlStotgpiOEUgHHUoK7kYaZOQ&oe=64E56437") center/cover no-repeat;
+    url("https://falianza.org.ec/wp-content/uploads/2021/09/Tareas-escolares-2-1024x683.jpg") center/cover no-repeat;
   
 }
 .welcome {
