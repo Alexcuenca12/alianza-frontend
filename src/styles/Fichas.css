@@ -295,7 +295,7 @@ input:focus~.input-border {
     display: flex;
     flex-wrap: wrap;
     /* margin-top: 0.5rem; */
-    justify-content: center;
+    /* justify-content: center; */
 }
 
 .mydict input[type="radio"] {

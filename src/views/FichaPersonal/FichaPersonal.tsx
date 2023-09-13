@@ -18,20 +18,30 @@ import { Button } from "primereact/button";
 import { ICalcularEdad } from '../../interfaces/ICalcularEdad';
 import CalcularEdad from "../../common/CalcularEdad";
 import { CantonService } from "../../services/CantonService";
+
+import { ParroquiaService } from "../../services/ParroquiaService";
 import { ICanton } from "../../interfaces/ICanton";
+import { RangoEdadService } from "../../services/RangoEdadService";
 
 
 function FichaPersonal() {
 
     const fichaPersonalService = new FichaPersonalService();
+    const parroquiaService = new ParroquiaService();
     const cantonService = new CantonService();
+    const rangoEdadService = new RangoEdadService();
 
 
     const fileUploadRef = useRef<FileUpload>(null);
     const [dataLoaded, setDataLoaded] = useState(false);
     const [editItemId, setEditItemId] = useState<number | undefined>(undefined);
     const [editMode, setEditMode] = useState(false);
+
+
     const [listFichaPersonal, setFichaPersonal] = useState<IFichaPersonal[]>([]);
+    const [listParroquias, setListParroquias] = useState<IParroquia[]>([]);
+    const [listRangoEdades, setListRangoEdades] = useState<IRangoEdad[]>([]);
+
     const [formData, setFormData] = useState<IFichaPersonal>({
         idFichaPersonal: 0,
         foto: '',
@@ -49,20 +59,21 @@ function FichaPersonal() {
         direccion: '',
         referencia: '',
         coordenadaX: 0,
-        coordenadaY: 0
+        coordenadaY: 0,
+        estVinculacion: false
     });
 
     //LISTA DE PARA CARGAR LOS OBJETOS TRAIDOS DEL BACK PARA LOS COMBOS
     const etnias: IEtnia[] = [{ idEtnia: 1, etniaNombre: 'Mestizo' }, { idEtnia: 2, etniaNombre: 'Montuvio' }]
     const parroquias: IParroquia[] = [{ idParroquia: 1, parroquiaNombre: 'Bellavista', canton: { idCanton: 1, cantonNombre: 'Cuenca', provincia: { idProvincia: 1, provinciaNombre: 'Azuay' } } }]
-    const rangosEdad: IRangoEdad[] = [{ idRangoEdad: 1, limInferior: 12, limSuperior: 20 }, { idRangoEdad: 2, limInferior: 21, limSuperior: 40 }];
+    // const rangosEdad: IRangoEdad[] = [{ idRangoEdad: 1, limInferior: 12, limSuperior: 20 }, { idRangoEdad: 2, limInferior: 21, limSuperior: 40 }];
 
 
 
     // const rangosEdadOpc: { label: string, value: number }[] = [];
-    const [rangosEdadOpc, setRangosEdadOpc] = useState<{ label: string, value: number }[]>([]);
+    // const [rangosEdadOpc, setRangosEdadOpc] = useState<{ label: string, value: number }[]>([]);
 
-    const [parroquiasOpc, setParroquiasOpc] = useState<{ label: string, value: number }[]>([]);
+    // const [parroquiasOpc, setParroquiasOpc] = useState<{ label: string, value: number }[]>([]);
 
     const [cantonOpc, setCantonOpc] = useState<{ label: string, value: number }[]>([]);
 
@@ -71,61 +82,16 @@ function FichaPersonal() {
     useEffect(() => {
 
         //METODOS PARA CARGAR LOS COMBOS DEL FORMILARIO
-        const cargarComboRangos = () => {
-            const opciones = rangosEdad.map((dato) => ({
-                label: `${dato.limInferior} - ${dato.limSuperior}`,
-                value: dato.idRangoEdad,
-            }));
-            setRangosEdadOpc(opciones);
-        };
-
-
-        const cargarComboCantones = () => {
-
-            cantonService
-                .getAll()
-                .then((data: ICanton[]) => {
-                    // Mapear los datos y crear un nuevo array en el formato deseado
-                    const mappedData = data.map((canton: ICanton) => ({
-                        label: canton.cantonNombre,
-                        value: canton.idCanton,
-                    }));
-
-                    // Actualizar el estado con los datos mapeados
-                    setCantonOpc(mappedData);
-                })
-                .catch((error) => {
-                    console.error("Error al obtener los datos:", error);
-                });
-
-        };
-
-
-        const cargarComboParroquias = () => {
 
 
 
-            const opciones = parroquias.map((dato) => ({
-                label: `${dato.parroquiaNombre}`,
-                value: dato.idParroquia,
-            }));
-            setParroquiasOpc(opciones);
-        };
 
-        const cargarComboEtnias = () => {
-            const opciones = etnias.map((dato) => ({
-                label: `${dato.etniaNombre}`,
-                value: dato.idEtnia,
-            }));
-            setEtniasOpc(opciones);
-        };
-        cargarComboRangos();
+        // cargarComboRangos();
         cargarComboEtnias();
-        cargarComboParroquias();
-
-
         cargarComboCantones();
         loadData();
+        loadParroquias();
+        loadComboEdades();
     }, []);
 
     const loadData = () => {
@@ -140,7 +106,76 @@ function FichaPersonal() {
             });
     };
 
+    // const cargarComboRangos = () => {
+    //     const opciones = rangosEdad.map((dato) => ({
+    //         label: `${dato.limInferior} - ${dato.limSuperior}`,
+    //         value: dato.idRangoEdad,
+    //     }));
+    //     setRangosEdadOpc(opciones);
+    // };
+
+
+    const cargarComboCantones = () => {
+
+        cantonService
+            .getAll()
+            .then((data: ICanton[]) => {
+                // Mapear los datos y crear un nuevo array en el formato deseado
+                const mappedData = data.map((canton: ICanton) => ({
+                    label: canton.cantonNombre,
+                    value: canton.idCanton,
+                }));
+
+                // Actualizar el estado con los datos mapeados
+                setCantonOpc(mappedData);
+            })
+            .catch((error) => {
+                console.error("Error al obtener los datos:", error);
+            });
+
+    };
+
+    const cargarComboEtnias = () => {
+        const opciones = etnias.map((dato) => ({
+            label: `${dato.etniaNombre}`,
+            value: dato.idEtnia,
+        }));
+        setEtniasOpc(opciones);
+    };
+
+    const loadParroquias = () => {
+        parroquiaService
+            .getAll()
+            .then((data) => {
+                setListParroquias(data);
+                setDataLoaded(true); // Marcar los datos como cargados
+            })
+            .catch((error) => {
+                console.error("Error al obtener los datos:", error);
+            });
+    };
+
+    const loadComboEdades = () => {
+        rangoEdadService
+            .getAll()
+            .then((data: IRangoEdad[]) => { // Proporciona un tipo explícito para "data"
+                // Transforma los datos para agregar la propiedad "label"
+                const dataWithLabel = data.map((rangoEdad) => ({
+                    ...rangoEdad,
+                    label: `${rangoEdad.limInferior} - ${rangoEdad.limSuperior}`,
+                }));
+
+                // Establece la lista de rango de edades en el estado
+                setListRangoEdades(dataWithLabel);
+                setDataLoaded(true); // Marcar los datos como cargados
+            })
+            .catch((error) => {
+                console.error("Error al obtener los datos:", error);
+            });
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
+        formData.estVinculacion = true;
         e.preventDefault();
         fichaPersonalService
             .save(formData)
@@ -258,7 +293,8 @@ function FichaPersonal() {
                         direccion: '',
                         referencia: '',
                         coordenadaX: 0,
-                        coordenadaY: 0
+                        coordenadaY: 0,
+                        estVinculacion: false
                     });
                     setFichaPersonal(
                         listFichaPersonal.map((contra) =>
@@ -292,7 +328,8 @@ function FichaPersonal() {
             direccion: '',
             referencia: '',
             coordenadaX: 0,
-            coordenadaY: 0
+            coordenadaY: 0,
+            estVinculacion: false
         });
 
     };
@@ -496,32 +533,7 @@ function FichaPersonal() {
 
                                             </div>
                                         </div>
-                                        {/* <input
-                                            className="input"
-                                            type="radio"
-                                            id="genMasculino"
-                                            name="masculino"
-                                            value="Masculino"
-                                            checked={formData.genero === 'Masculino'}
-                                            onChange={(e) => setFormData({ ...formData, genero: e.target.value })}
 
-                                        />
-                                        <label htmlFor="genMasculino">Masculino</label> */}
-                                        {/* <span className="input-border"></span> */}
-
-
-                                        {/* <input
-                                            className="input"
-                                            type="radio"
-                                            id="genFemenino"
-                                            name="femenino"
-                                            value="Femenino"
-                                            checked={formData.genero === 'Femenino'}
-                                            onChange={(e) => setFormData({ ...formData, genero: e.target.value })}
-
-                                        />
-                                        <label htmlFor="genFemenino">Femenino</label> */}
-                                        {/* <span className="input-border"></span> */}
 
                                     </div>
                                 </div>
@@ -537,7 +549,7 @@ function FichaPersonal() {
                                         id="tiempo_dedicacion"
                                         name="tiempo_dedicacion"
                                         style={{ width: "100%" }}
-                                        options={rangosEdadOpc}
+                                        options={listRangoEdades}
                                         onChange={(e) =>
                                             setFormData({
                                                 ...formData,
@@ -546,7 +558,7 @@ function FichaPersonal() {
                                         }
                                         value={formData.rangoEdad?.idRangoEdad}
                                         optionLabel="label"
-                                        optionValue="value"
+                                        optionValue="idRangoEdad"
                                         placeholder="Seleccione el rango de edad"
                                     />
                                     {/* <select id="rangoEdad" value={formData.rangoEdad?.idRangoEdad} onChange={(e) => setFormData({ ...formData, rangoEdad: { idRangoEdad: parseInt(e.target.value), limInferior: 18, limSuperior: 30 } })}
@@ -622,7 +634,7 @@ function FichaPersonal() {
 
                         </div>
 
-                        <div className="column">
+                        {/* <div className="column">
                             <div className='input-box'>
                                 <label className="font-medium w-auto min-w-min" htmlFor="parroquia">Canton:</label>
                                 <div className="select-box">
@@ -632,7 +644,7 @@ function FichaPersonal() {
                                         id="tiempo_dedicacion"
                                         name="tiempo_dedicacion"
                                         style={{ width: "100%" }}
-                                        options={parroquiasOpc}
+                                        options={listParroquias}
                                         // onChange={
                                         // }
                                         value={formData.parroquia?.idParroquia}
@@ -644,7 +656,7 @@ function FichaPersonal() {
 
                             </div>
 
-                        </div>
+                        </div> */}
 
                         <div className="column">
 
@@ -657,7 +669,7 @@ function FichaPersonal() {
                                         id="tiempo_dedicacion"
                                         name="tiempo_dedicacion"
                                         style={{ width: "100%" }}
-                                        options={parroquiasOpc}
+                                        options={listParroquias}
                                         onChange={(e) =>
                                             setFormData({
                                                 ...formData,
@@ -673,8 +685,8 @@ function FichaPersonal() {
                                             })
                                         }
                                         value={formData.parroquia?.idParroquia}
-                                        optionLabel="label"
-                                        optionValue="value"
+                                        optionLabel="parroquiaNombre"
+                                        optionValue="idParroquia"
                                         placeholder="Seleccione la Parroquia"
                                     />
                                 </div>

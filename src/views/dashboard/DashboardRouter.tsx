@@ -3,12 +3,13 @@ import Home from "./home/Home";
 import { Toast } from "primereact/toast";
 import React, { useRef } from "react";
 import Footer from "../../common/Footer";
-import { FcBusinessman } from "react-icons/fc";
+import { FcDocument } from "react-icons/fc";
 import { FcHome } from "react-icons/fc";
 import { FcExport } from "react-icons/fc";
 import { FcGraduationCap } from "react-icons/fc";
-import { FcViewDetails } from "react-icons/fc";
+import { FcPortraitMode } from "react-icons/fc";
 import { FcConferenceCall } from "react-icons/fc";
+import { FcElectricalThreshold } from "react-icons/fc";
 import { FcLike } from "react-icons/fc";
 import { MdFamilyRestroom } from "react-icons/md";
 import { SideBarMenuCard, SideBarMenuItem } from "../../interfaces/types";
@@ -20,6 +21,7 @@ import FichaFamiliar from "../FichaFamiliar/FichaFamiliar";
 import FichaEducativa from "../FichaEducativa/FichaEducativa";
 import FichaDesvinculacion from "../FichaDesvinculacion/FichaDesvinculacion";
 import FichaRepresentante from "../FichaRepresentante/FichaRepresentante";
+import Reporte from "../Reportes/Reporte";
 
 
 
@@ -41,13 +43,13 @@ export const DashboardRouter = () => {
     {
       id: "2",
       label: "Ficha de Inscripción",
-      icon: FcBusinessman,
+      icon: FcDocument,
       url: "/inscripción",
     },
     {
       id: "3",
       label: "Ficha Personal",
-      icon: FcViewDetails,
+      icon: FcPortraitMode,
       url: "/personal",
     },
     {
@@ -79,6 +81,12 @@ export const DashboardRouter = () => {
       label: "Ficha de Desvinculación",
       icon: FcExport,
       url: "/desvinculacion",
+    },
+    {
+      id: "9",
+      label: "Reportes",
+      icon: FcElectricalThreshold,
+      url: "/reporte",
     },
 
   ];
@@ -226,6 +234,21 @@ export const DashboardRouter = () => {
                   <>
                     <SideBarMenu items={items} card={card} />
                     <FichaRepresentante />
+                    <Footer />
+                  </>
+                ) : rol === 2 ? (
+                  <>
+                    <SideBarMenu items={items} card={card} />
+                  </>
+                ) : (
+                  <SideBarMenu items={items} card={card} />
+                )}
+              </Route>
+              <Route path="/reporte">
+                {rol === 1 ? (
+                  <>
+                    <SideBarMenu items={items} card={card} />
+                    <Reporte />
                     <Footer />
                   </>
                 ) : rol === 2 ? (
