@@ -23,9 +23,21 @@ import { ParroquiaService } from "../../services/ParroquiaService";
 import { ICanton } from "../../interfaces/ICanton";
 import { RangoEdadService } from "../../services/RangoEdadService";
 import { EtniaService } from "../../services/EtniaService";
+import { Toast } from "primereact/toast";
 
 
 function FichaPersonal() {
+
+    const toast = useRef<Toast>(null);
+
+    const showError = (errorPrincipal: string, detalleError: string) => {
+        toast.current?.show({
+            severity: "error",
+            summary: errorPrincipal,
+            detail: detalleError,
+            life: 3000,
+        });
+    };
 
     const fichaPersonalService = new FichaPersonalService();
     const parroquiaService = new ParroquiaService();
