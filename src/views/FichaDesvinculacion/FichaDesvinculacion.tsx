@@ -394,7 +394,7 @@ function FichaDesvinculacion() {
           className="mt-4  w-full h-full text-3xl font-large"
         >
           <thead>
-          <tr style={{ backgroundColor: "#871b1b", color: "white" }}>
+            <tr style={{ backgroundColor: "#871b1b", color: "white" }}>
               <th>Nº de Registro </th>
               <th>Fecha de Desvinculación </th>
               <th>Motvio</th>
@@ -412,13 +412,13 @@ function FichaDesvinculacion() {
                 <td>
                   {cargaF.fechaDesvinculacion
                     ? new Date(cargaF.fechaDesvinculacion).toLocaleDateString(
-                        "es-ES",
-                        {
-                          year: "numeric",
-                          month: "2-digit",
-                          day: "2-digit",
-                        }
-                      )
+                      "es-ES",
+                      {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                      }
+                    )
                     : ""}
                 </td>
                 <td>{cargaF.motivo}</td>
@@ -438,7 +438,7 @@ function FichaDesvinculacion() {
                     onClick={() =>
                       handleEdit(cargaF.idFichaDesvinculacion?.valueOf())
                     }
-                    // Agrega el evento onClick para la operación de editar
+                  // Agrega el evento onClick para la operación de editar
                   />
                   <Button
                     type="button"
@@ -455,7 +455,7 @@ function FichaDesvinculacion() {
                     onClick={() =>
                       handleDelete(cargaF.idFichaDesvinculacion?.valueOf())
                     }
-                    // Agrega el evento onClick para la operación de eliminar
+                  // Agrega el evento onClick para la operación de eliminar
                   />
                 </td>
                 <td>

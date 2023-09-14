@@ -12,11 +12,11 @@ import { IRangoEdad } from "../../interfaces/IRangoEdad";
 
 
 
-import '../../styles/Reporte.css'
 import { IFichaPersonal } from "../../interfaces/IFichaPersonal";
 import { FichaPersonalService } from "../../services/FichaPersonalService";
 import { IBusquedaReporte } from "../../interfaces/IBusquedaReporte";
-
+import '../../styles/Reporte.css'
+import * as XLSX from 'xlsx';
 
 function Reporte() {
 
@@ -101,6 +101,21 @@ function Reporte() {
             });
     };
 
+    const generarExcel = () => {
+        const wb = XLSX.utils.book_new();
+
+        // Crear una copia de la lista excluyendo el campo 'foto'
+        const listSinFoto = listFichaPersonal.map(({ foto, ...rest }) => rest);
+
+        const ws = XLSX.utils.json_to_sheet(listSinFoto);
+
+        // Resto del código para aplicar estilos y encabezados (como se mostró en tu código original) ...
+
+        XLSX.utils.book_append_sheet(wb, ws, 'FichaPersonal');
+
+        // Descargar el archivo Excel
+        XLSX.writeFile(wb, 'fichapersonal.xlsx');
+    };
 
 
     const resetForm = () => {
@@ -113,11 +128,11 @@ function Reporte() {
     };
 
     return (
-        <Fieldset className="fgrid col-fixed ">
+        <Fieldset className="" style={{ display: 'flex', justifyContent: 'center' }}>
             <Card
                 header={cardHeader}
-                className="border-solid border-red-800 border-3 flex-1 flex-wrap"
-                style={{ width: "1350px", marginLeft: "90px", height: "688px" }}
+                className="border-solid border-red-800 border-3 "
+                style={{ width: "1200px", marginLeft: "90px", height: "688px" }}
             >
                 <div
                     className="h1-rem"
@@ -138,8 +153,11 @@ function Reporte() {
 
                         <div></div>
                         <div></div>
-                        <div></div>
-                        <div style={{ textAlign: 'right', marginRight: "36px" }}>
+                        <div>
+                            <button onClick={generarExcel}>Generar Excel</button>
+
+                        </div>
+                        <div style={{ textAlign: 'right', marginRight: "" }}>
                             <label className="font-medium w-auto min-w-min" htmlFor="rangoEdad" style={{ marginRight: "15px" }}>Limpiar filtros:</label>
 
                             <Button icon="pi pi-times" rounded severity="danger" aria-label="Cancel" onClick={() => resetForm()} />
@@ -228,7 +246,7 @@ function Reporte() {
                                     className="text-2xl"
                                     id="tiempo_dedicacion"
                                     name="tiempo_dedicacion"
-                                    style={{ width: "75%" }}
+                                    style={{ width: "100%" }}
                                     options={listRangoEdades}
                                     onChange={(e) => {
                                         setFormData({

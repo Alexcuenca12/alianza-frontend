@@ -23,7 +23,7 @@ import FichaDesvinculacion from "../FichaDesvinculacion/FichaDesvinculacion";
 import FichaRepresentante from "../FichaRepresentante/FichaRepresentante";
 import Reporte from "../Reportes/Reporte";
 
-
+import "../../styles/DashBoard.css"
 
 export const DashboardRouter = () => {
   //Datos del sessionStorage
@@ -167,11 +167,18 @@ export const DashboardRouter = () => {
               <Route path="/personal">
                 {rol === 1 ? (
                   <>
-                    <div className="estructura">
-                      <SideBarMenu items={items} card={card} />
-                      <FichaPersonal />
+                    <section className="layout">
+                      <div className="sidebar">
+                        <SideBarMenu items={items} card={card} />
+                      </div>
+                      <div className="body">
+                        <FichaPersonal />
+                      </div>
+
+                    </section>
+                    <div className="footer">
+                      <Footer />
                     </div>
-                    <Footer />
                   </>
                 ) : rol === 2 ? (
                   <>
@@ -272,7 +279,7 @@ export const DashboardRouter = () => {
             </Switch>
           </div>
         </div>
-      </main>
+      </main >
     </>
   );
 };

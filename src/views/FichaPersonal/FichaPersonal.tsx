@@ -22,6 +22,7 @@ import { CantonService } from "../../services/CantonService";
 import { ParroquiaService } from "../../services/ParroquiaService";
 import { ICanton } from "../../interfaces/ICanton";
 import { RangoEdadService } from "../../services/RangoEdadService";
+import { EtniaService } from "../../services/EtniaService";
 
 
 function FichaPersonal() {
@@ -30,6 +31,7 @@ function FichaPersonal() {
     const parroquiaService = new ParroquiaService();
     const cantonService = new CantonService();
     const rangoEdadService = new RangoEdadService();
+    const etniaService = new EtniaService();
 
 
     const fileUploadRef = useRef<FileUpload>(null);
@@ -41,6 +43,7 @@ function FichaPersonal() {
     const [listFichaPersonal, setFichaPersonal] = useState<IFichaPersonal[]>([]);
     const [listParroquias, setListParroquias] = useState<IParroquia[]>([]);
     const [listRangoEdades, setListRangoEdades] = useState<IRangoEdad[]>([]);
+    const [listEtnias, setListEtnias] = useState<IEtnia[]>([]);
 
     const [formData, setFormData] = useState<IFichaPersonal>({
         idFichaPersonal: 0,
@@ -63,21 +66,6 @@ function FichaPersonal() {
         estVinculacion: false
     });
 
-    //LISTA DE PARA CARGAR LOS OBJETOS TRAIDOS DEL BACK PARA LOS COMBOS
-    const etnias: IEtnia[] = [{ idEtnia: 1, etniaNombre: 'Mestizo' }, { idEtnia: 2, etniaNombre: 'Montuvio' }]
-    const parroquias: IParroquia[] = [{ idParroquia: 1, parroquiaNombre: 'Bellavista', canton: { idCanton: 1, cantonNombre: 'Cuenca', provincia: { idProvincia: 1, provinciaNombre: 'Azuay' } } }]
-    // const rangosEdad: IRangoEdad[] = [{ idRangoEdad: 1, limInferior: 12, limSuperior: 20 }, { idRangoEdad: 2, limInferior: 21, limSuperior: 40 }];
-
-
-
-    // const rangosEdadOpc: { label: string, value: number }[] = [];
-    // const [rangosEdadOpc, setRangosEdadOpc] = useState<{ label: string, value: number }[]>([]);
-
-    // const [parroquiasOpc, setParroquiasOpc] = useState<{ label: string, value: number }[]>([]);
-
-    const [cantonOpc, setCantonOpc] = useState<{ label: string, value: number }[]>([]);
-
-    const [etniasOpc, setEtniasOpc] = useState<{ label: string, value: number }[]>([]);
 
     useEffect(() => {
 
@@ -88,7 +76,7 @@ function FichaPersonal() {
 
         // cargarComboRangos();
         cargarComboEtnias();
-        cargarComboCantones();
+        // cargarComboCantones();
         loadData();
         loadParroquias();
         loadComboEdades();
@@ -115,19 +103,13 @@ function FichaPersonal() {
     // };
 
 
-    const cargarComboCantones = () => {
+    const cargarComboEtnias = () => {
 
-        cantonService
+        etniaService
             .getAll()
-            .then((data: ICanton[]) => {
-                // Mapear los datos y crear un nuevo array en el formato deseado
-                const mappedData = data.map((canton: ICanton) => ({
-                    label: canton.cantonNombre,
-                    value: canton.idCanton,
-                }));
-
-                // Actualizar el estado con los datos mapeados
-                setCantonOpc(mappedData);
+            .then((data) => {
+                setListEtnias(data);
+                setDataLoaded(true); // Marcar los datos como cargados
             })
             .catch((error) => {
                 console.error("Error al obtener los datos:", error);
@@ -135,13 +117,25 @@ function FichaPersonal() {
 
     };
 
-    const cargarComboEtnias = () => {
-        const opciones = etnias.map((dato) => ({
-            label: `${dato.etniaNombre}`,
-            value: dato.idEtnia,
-        }));
-        setEtniasOpc(opciones);
-    };
+    // const cargarComboCantones = () => {
+
+    //     cantonService
+    //         .getAll()
+    //         .then((data: ICanton[]) => {
+    //             // Mapear los datos y crear un nuevo array en el formato deseado
+    //             const mappedData = data.map((canton: ICanton) => ({
+    //                 label: canton.cantonNombre,
+    //                 value: canton.idCanton,
+    //             }));
+
+    //             // Actualizar el estado con los datos mapeados
+    //             setCantonOpc(mappedData);
+    //         })
+    //         .catch((error) => {
+    //             console.error("Error al obtener los datos:", error);
+    //         });
+
+    // };
 
     const loadParroquias = () => {
         parroquiaService
@@ -310,6 +304,64 @@ function FichaPersonal() {
         }
     };
 
+    const customBytesUploader = (event: FileUploadSelectEvent) => {
+        if (event.files && event.files.length > 0) {
+            const file = event.files[0];
+            const reader = new FileReader();
+
+            reader.onloadend = function () {
+                const base64data = reader.result as string;
+                setFormData({ ...formData, foto: base64data });
+            };
+
+            reader.onerror = (error) => {
+                console.error("Error al leer el archivo:", error);
+            };
+
+            reader.readAsDataURL(file);
+
+            if (fileUploadRef.current) {
+                fileUploadRef.current.clear();
+            }
+        }
+    };
+
+
+
+    const decodeBase64Download = (base64Data: string) => {
+        try {
+            // Eliminar encabezados o metadatos de la cadena base64
+            const base64WithoutHeader = base64Data.replace(/^data:.*,/, "");
+
+            const decodedData = atob(base64WithoutHeader); // Decodificar la cadena base64
+            const byteCharacters = new Uint8Array(decodedData.length);
+
+            for (let i = 0; i < decodedData.length; i++) {
+                byteCharacters[i] = decodedData.charCodeAt(i);
+            }
+
+            const byteArray = new Blob([byteCharacters], { type: "image/jpeg" });
+            const fileUrl = URL.createObjectURL(byteArray);
+
+            const link = document.createElement("a");
+            link.href = fileUrl;
+            link.download = "FotoNNA.jpeg";
+            link.click();
+            swal({
+                title: "Descarga completada",
+                text: "Descargando imagen....",
+                icon: "success",
+                timer: 1000,
+            });
+
+            URL.revokeObjectURL(fileUrl);
+        } catch (error) {
+            console.error("Error al decodificar la cadena base64:", error);
+        }
+    };
+
+
+
     const resetForm = () => {
         setFormData({
             idFichaPersonal: 0,
@@ -343,7 +395,7 @@ function FichaPersonal() {
             <Card
                 header={cardHeader}
                 className="border-solid border-red-800 border-3 flex-1 flex-wrap"
-                style={{ width: "1200px", marginLeft: "90px", marginTop: "15px", marginBottom: "35px", height: "1125px" }}
+                style={{ marginBottom: "35px" }}
             >
 
                 <div
@@ -354,7 +406,7 @@ function FichaPersonal() {
                         Ficha de Personal
                     </h1>
                 </div>
-                <section className='container'>
+                <section className='container' style={{}}>
 
                     {/* <header className="title">
                         Ficha Personal
@@ -380,10 +432,24 @@ function FichaPersonal() {
                             </div>
 
 
-                            <div className="inputContainer">
+                            <div className="input-box" >
                                 <label className="font-medium w-auto min-w-min" htmlFor="foto;">Foto:</label>
 
-                                <input type="file" accept="image/*" ></input>
+                                <FileUpload
+                                    name="pdf"
+                                    style={{}}
+                                    chooseLabel="Escoger"
+                                    uploadLabel="Cargar"
+                                    cancelLabel="Cancelar"
+                                    emptyTemplate={
+                                        <p className="m-0 p-button-rounded">
+                                            Arrastre y suelte los archivos aquí para cargarlos.
+                                        </p>
+                                    }
+                                    customUpload
+                                    onSelect={customBytesUploader}
+                                    accept="image/*"
+                                />
 
 
                             </div>
@@ -591,7 +657,7 @@ function FichaPersonal() {
                                     id="tiempo_dedicacion"
                                     name="tiempo_dedicacion"
                                     style={{ width: "100%" }}
-                                    options={etniasOpc}
+                                    options={listEtnias}
                                     onChange={(e) =>
                                         setFormData({
                                             ...formData,
@@ -599,8 +665,8 @@ function FichaPersonal() {
                                         })
                                     }
                                     value={formData.etnia?.idEtnia}
-                                    optionLabel="label"
-                                    optionValue="value"
+                                    optionLabel="etniaNombre"
+                                    optionValue="idEtnia"
                                     placeholder="Seleccione la etnia"
                                 />
                                 {/* <select id="etnia" value={formData.etnia?.idEtnia} onChange={(e) => setFormData({ ...formData, etnia: { idEtnia: parseInt(e.target.value), etniaNombre: '' } })}
@@ -879,7 +945,7 @@ function FichaPersonal() {
                                 <th>Canton</th>
                                 {/* <th>Zona</th> */}
                                 {/* <th>Barrio/Sector</th> */}
-                                <th>Direccion</th>
+                                <th>Foto</th>
                                 {/* <th>Referencia</th> */}
                                 {/* <th>Longitud (X) Latitud (Y)</th> */}
                                 <th>Acción</th>
@@ -913,7 +979,38 @@ function FichaPersonal() {
                                     <td>{ficha.parroquia?.canton.cantonNombre}</td>
                                     {/* <td>{ficha.zona}</td> */}
                                     {/* <td>{ficha.barrioSector}</td> */}
-                                    <td>{ficha.direccion}</td>
+                                    <td>
+                                        {ficha.foto ? (
+                                            <>
+                                                <section className="imgSection">
+                                                    <div>
+                                                        <img src={ficha.foto}
+                                                            alt="FotoNNA"
+                                                            style={{ width: "65px" }}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <button className="BtnDown"
+                                                            onClick={() => decodeBase64Download(ficha.foto)}>
+                                                            <svg className="svgIcon" viewBox="0 0 384 512" height="1em" xmlns="http://www.w3.org/2000/svg"><path d="M169.4 470.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 370.8 224 64c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 306.7L54.6 265.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"></path></svg>
+                                                            <span className="icon2"></span>
+                                                            <span className="tooltip">Download</span>
+                                                        </button>
+                                                    </div>
+                                                </section>
+
+
+
+
+
+                                            </>
+                                        ) : (
+                                            <span>Sin evidencia</span>
+                                        )}
+
+
+
+                                    </td>
                                     {/* <td>{ficha.referencia}</td> */}
                                     {/* <td>{ficha.coordenadaX}  {ficha.coordenadaY}</td> */}
                                     <td style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
