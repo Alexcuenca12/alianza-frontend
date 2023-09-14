@@ -1,34 +1,18 @@
 import React, { useEffect, useState, useRef } from "react";
 import { InputText } from "primereact/inputtext";
-import { FileUpload, FileUploadSelectEvent } from "primereact/fileupload";
+import { FileUpload } from "primereact/fileupload";
 import { Button } from "primereact/button";
-import { Calendar } from "primereact/calendar";
 import { Fieldset } from "primereact/fieldset";
 import { Card } from "primereact/card";
 import { InputTextarea } from 'primereact/inputtextarea';
   
 import cardHeader from "../../shared/CardHeader";
-import { Divider } from "primereact/divider";
 import { IFichaSalud } from "../../interfaces/IFichaSalud";
 import { FichaSaludService } from "../../services/FichaSaludService";
 import swal from "sweetalert";
 
 function FichaInscripcionContext() {
-  //Session Storage
-  /*const userData = sessionStorage.getItem("user");
-  const userObj = JSON.parse(userData || "{}");
-  const idPersona = userObj.id;*/
-
-  const tipoProyectoOptions = [
-    { label: "MIES", value: "MIES" },
-    { label: "MUNICIPIO", value: "MUNICIPIO" },
-    { label: "EMAC", value: "EMAC" },
-  ];
-  const jornadaOptions = [
-    { label: "Matutina", value: "Matutina" },
-    { label: "Vespertina", value: "Vespertina" },
-  ];
-
+  
   const [contra1, setcontra1] = useState<IFichaSalud[]>([]);
   const [formData, setFormData] = useState<IFichaSalud>({
     idFichaSalud: 0,
