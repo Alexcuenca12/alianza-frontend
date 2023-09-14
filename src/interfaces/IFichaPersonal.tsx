@@ -20,5 +20,6 @@ export interface IFichaPersonal {
     referencia: string;
     coordenadaX: number;
     coordenadaY: number;
+    estVinculacion: boolean;
 }
 

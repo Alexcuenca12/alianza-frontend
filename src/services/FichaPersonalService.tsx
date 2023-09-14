@@ -19,6 +19,22 @@ export class FichaPersonalService {
         return this.api.get("get").then((res) => res.data);
     }
 
+    getBusquedaRE(ci: string, gen: string, rang: number, est: boolean) {
+        //Método para listar todas los Usuarios
+        ci = ci || "NA";
+        gen = gen || "NA";
+        console.log(`busquedaRE/${ci}/${gen}/${rang}/${est}`)
+        return this.api.get(`busquedaRE/${ci}/${gen}/${rang}/${est}`).then((res) => res.data);
+    }
+
+    getBusqueda(ci: string, gen: string, est: boolean) {
+        //Método para listar todas los Usuarios
+        ci = ci || "NA";
+        gen = gen || "NA";
+        console.log(`busqueda/${ci}/${gen}/${est}`)
+        return this.api.get(`busqueda/${ci}/${gen}/${est}`).then((res) => res.data);
+    }
+
     save(fichaPersonal: any) {
         console.log(fichaPersonal)
         return this.api.post("post", fichaPersonal).then((res) => res.data)

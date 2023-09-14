@@ -207,7 +207,7 @@ function FichaInscripcionContext() {
       <Card
         header={cardHeader}
         className="border-solid border-red-800 border-3 flex-1 flex-wrap"
-        style={{ width: "1350px", marginLeft: "90px", height: "688px" }}
+        style={{ marginLeft: "90px", height: "100%" }}
       >
         <div
           className="h1-rem"
@@ -305,7 +305,7 @@ function FichaInscripcionContext() {
                       className="text-3xl font-medium w-auto min-w-min"
                       style={{ marginRight: "20px", marginLeft: "25px" }}
                     >
-                     Jornada de Estudio:
+                      Jornada de Estudio:
                     </label>
                     <InputText
                       className="text-2xl"
@@ -355,19 +355,19 @@ function FichaInscripcionContext() {
                         Grado Actual:
                       </label>
                       <InputText
-                      className="text-2xl"
-                      placeholder="Ingrese el Grado"
-                      id="doi"
-                      name="doi"
-                      style={{ width: "221px" }}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          gradoEducativo: e.currentTarget.value,
-                        })
-                      }
-                      value={formData.gradoEducativo}
-                    />
+                        className="text-2xl"
+                        placeholder="Ingrese el Grado"
+                        id="doi"
+                        name="doi"
+                        style={{ width: "221px" }}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            gradoEducativo: e.currentTarget.value,
+                          })
+                        }
+                        value={formData.gradoEducativo}
+                      />
                     </div>
                   </div>
                 </div>
@@ -444,7 +444,7 @@ function FichaInscripcionContext() {
                       onClick={() =>
                         handleEdit(contrato.idFichaEducativa?.valueOf())
                       }
-                      // Agrega el evento onClick para la operación de editar
+                    // Agrega el evento onClick para la operación de editar
                     />
                     <Button
                       type="button"

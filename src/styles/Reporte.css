@@ -1,0 +1,14 @@
+.layout {
+    width: 100%;
+    height: 100%;
+
+    display: grid;
+    grid-template-rows: 1fr;
+    grid-template-columns: repeat(4, auto);
+    column-gap: 15px;
+}
+
+.filter {
+    display: grid;
+    place-items: center;
+}
