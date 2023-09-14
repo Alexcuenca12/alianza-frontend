@@ -3,13 +3,14 @@ import Home from "./home/Home";
 import { Toast } from "primereact/toast";
 import React, { useRef } from "react";
 import Footer from "../../common/Footer";
-import { FcDocument } from "react-icons/fc";
+import { FcBusinessman, FcBusinesswoman } from "react-icons/fc";
 import { FcHome } from "react-icons/fc";
 import { FcExport } from "react-icons/fc";
 import { FcGraduationCap } from "react-icons/fc";
-import { FcPortraitMode } from "react-icons/fc";
+import { FcViewDetails } from "react-icons/fc";
+import { FcPodiumWithSpeaker } from "react-icons/fc";
+import { FcReadingEbook } from "react-icons/fc";
 import { FcConferenceCall } from "react-icons/fc";
-import { FcElectricalThreshold } from "react-icons/fc";
 import { FcLike } from "react-icons/fc";
 import { MdFamilyRestroom } from "react-icons/md";
 import { SideBarMenuCard, SideBarMenuItem } from "../../interfaces/types";
@@ -21,9 +22,9 @@ import FichaFamiliar from "../FichaFamiliar/FichaFamiliar";
 import FichaEducativa from "../FichaEducativa/FichaEducativa";
 import FichaDesvinculacion from "../FichaDesvinculacion/FichaDesvinculacion";
 import FichaRepresentante from "../FichaRepresentante/FichaRepresentante";
-import Reporte from "../Reportes/Reporte";
-
-import "../../styles/DashBoard.css"
+import Docente from "../Docente/Docente";
+import Encargado from "../Encargado/Encargado";
+import SecretariaContext from "../Secretaria/Secretaria";
 
 export const DashboardRouter = () => {
   //Datos del sessionStorage
@@ -42,16 +43,17 @@ export const DashboardRouter = () => {
     },
     {
       id: "2",
-      label: "Ficha de Inscripción",
-      icon: FcDocument,
-      url: "/inscripción",
+      label: "Ficha Personal",
+      icon: FcViewDetails,
+      url: "/personal",
     },
     {
       id: "3",
-      label: "Ficha Personal",
-      icon: FcPortraitMode,
-      url: "/personal",
+      label: "Ficha de Inscripción",
+      icon: FcBusinessman,
+      url: "/inscripción",
     },
+
     {
       id: "4",
       label: "Ficha Salud",
@@ -82,12 +84,26 @@ export const DashboardRouter = () => {
       icon: FcExport,
       url: "/desvinculacion",
     },
+
     {
       id: "9",
-      label: "Reportes",
-      icon: FcElectricalThreshold,
-      url: "/reporte",
+      label: "Docente",
+      icon: FcReadingEbook,
+      url: "/docente",
     },
+    {
+      id: "10",
+      label: "Secretaria",
+      icon: FcBusinesswoman,
+      url: "/secretaria",
+    },
+    {
+      id: "11",
+      label: "Encargado",
+      icon: FcPodiumWithSpeaker,
+      url: "/encargado",
+    },
+
 
   ];
 
@@ -123,7 +139,6 @@ export const DashboardRouter = () => {
                   </>
                 )}
               </Route>
-
               <Route path="/login">
                 {rol === 1 ? (
                   <SideBarMenu items={items} card={card} />
@@ -163,22 +178,14 @@ export const DashboardRouter = () => {
                   <SideBarMenu items={items} card={card} />
                 )}
               </Route>
-
               <Route path="/personal">
                 {rol === 1 ? (
                   <>
-                    <section className="layout">
-                      <div className="sidebar">
-                        <SideBarMenu items={items} card={card} />
-                      </div>
-                      <div className="body">
-                        <FichaPersonal />
-                      </div>
-
-                    </section>
-                    <div className="footer">
-                      <Footer />
+                    <div className="estructura">
+                      <SideBarMenu items={items} card={card} />
+                      <FichaPersonal />
                     </div>
+                    <Footer />
                   </>
                 ) : rol === 2 ? (
                   <>
@@ -188,7 +195,6 @@ export const DashboardRouter = () => {
                   <SideBarMenu items={items} card={card} />
                 )}
               </Route>
-
               <Route path="/familiar">
                 {rol === 1 ? (
                   <>
@@ -251,11 +257,41 @@ export const DashboardRouter = () => {
                   <SideBarMenu items={items} card={card} />
                 )}
               </Route>
-              <Route path="/reporte">
+              <Route path="/docente">
                 {rol === 1 ? (
                   <>
                     <SideBarMenu items={items} card={card} />
-                    <Reporte />
+                    <Docente />
+                    <Footer />
+                  </>
+                ) : rol === 2 ? (
+                  <>
+                    <SideBarMenu items={items} card={card} />
+                  </>
+                ) : (
+                  <SideBarMenu items={items} card={card} />
+                )}
+              </Route>
+              <Route path="/encargado">
+                {rol === 1 ? (
+                  <>
+                    <SideBarMenu items={items} card={card} />
+                    <Encargado />
+                    <Footer />
+                  </>
+                ) : rol === 2 ? (
+                  <>
+                    <SideBarMenu items={items} card={card} />
+                  </>
+                ) : (
+                  <SideBarMenu items={items} card={card} />
+                )}
+              </Route>
+              <Route path="/secretaria">
+                {rol === 1 ? (
+                  <>
+                    <SideBarMenu items={items} card={card} />
+                    <SecretariaContext />
                     <Footer />
                   </>
                 ) : rol === 2 ? (
@@ -279,7 +315,7 @@ export const DashboardRouter = () => {
             </Switch>
           </div>
         </div>
-      </main >
+      </main>
     </>
   );
 };
