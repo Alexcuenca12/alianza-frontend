@@ -43,16 +43,17 @@ export const DashboardRouter = () => {
     },
     {
       id: "2",
-      label: "Ficha de Inscripción",
-      icon: FcBusinessman,
-      url: "/inscripción",
-    },
-    {
-      id: "3",
       label: "Ficha Personal",
       icon: FcViewDetails,
       url: "/personal",
     },
+    {
+      id: "3",
+      label: "Ficha de Inscripción",
+      icon: FcBusinessman,
+      url: "/inscripción",
+    },
+
     {
       id: "4",
       label: "Ficha Salud",
@@ -90,20 +91,20 @@ export const DashboardRouter = () => {
       icon: FcReadingEbook,
       url: "/docente",
     },
-
     {
       id: "10",
+      label: "Secretaria",
+      icon: FcBusinesswoman,
+      url: "/secretaria",
+    },
+    {
+      id: "11",
       label: "Encargado",
       icon: FcPodiumWithSpeaker,
       url: "/encargado",
     },
 
-    {
-      id: "11",
-      label: "Secretaria",
-      icon: FcBusinesswoman,
-      url: "/secretaria",
-    },
+
   ];
 
   const card: SideBarMenuCard = {

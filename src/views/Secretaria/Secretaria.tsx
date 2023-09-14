@@ -378,7 +378,7 @@ function SecretariaContext() {
                     >
                       Nombres:
                     </label>
-                    <InputTextarea
+                    <InputText
                       className="text-2xl"
                       placeholder="Ingrese los Nombres"
                       id="nombre"
@@ -450,19 +450,19 @@ function SecretariaContext() {
                 </div>
                 <div
                   className="flex flex-column flex-wrap gap-4"
-                  style={{ marginTop: "-50px", marginLeft: "50px" }}
+                  style={{ marginTop: "-20px", marginLeft: "50px" }}
                 >
                   <div className="flex flex-wrap w-full h-full justify-content-between">
                     <label
                       htmlFor="titulo"
                       className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginLeft: "25px" }}
+                      style={{ marginLeft: "25px", marginRight: "10px" }}
                     >
                       Actividades:
                     </label>
-                    <InputText
+                    <InputTextarea
                       className="text-2xl"
-                      placeholder="Ingrese el Titulo"
+                      placeholder="Ingrese las Actividades"
                       id="titulo"
                       name="titulo"
                       style={{ width: "221px" }}
