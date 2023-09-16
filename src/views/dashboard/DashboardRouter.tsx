@@ -11,6 +11,10 @@ import { FcViewDetails } from "react-icons/fc";
 import { FcPodiumWithSpeaker } from "react-icons/fc";
 import { FcReadingEbook } from "react-icons/fc";
 import { FcConferenceCall } from "react-icons/fc";
+import { FcDocument } from "react-icons/fc";
+import { FcPortraitMode } from "react-icons/fc";
+import { FcElectricalThreshold } from "react-icons/fc";
+
 import { FcLike } from "react-icons/fc";
 import { MdFamilyRestroom } from "react-icons/md";
 import { SideBarMenuCard, SideBarMenuItem } from "../../interfaces/types";
@@ -25,6 +29,8 @@ import FichaRepresentante from "../FichaRepresentante/FichaRepresentante";
 import Docente from "../Docente/Docente";
 import Encargado from "../Encargado/Encargado";
 import SecretariaContext from "../Secretaria/Secretaria";
+import Reporte from "../Reportes/Reporte";
+
 
 export const DashboardRouter = () => {
   //Datos del sessionStorage
@@ -44,13 +50,13 @@ export const DashboardRouter = () => {
     {
       id: "2",
       label: "Ficha Personal",
-      icon: FcViewDetails,
+      icon: FcDocument,
       url: "/personal",
     },
     {
       id: "3",
       label: "Ficha de Inscripción",
-      icon: FcBusinessman,
+      icon: FcPortraitMode,
       url: "/inscripción",
     },
 
@@ -103,7 +109,12 @@ export const DashboardRouter = () => {
       icon: FcPodiumWithSpeaker,
       url: "/encargado",
     },
-
+    {
+      id: "12",
+      label: "Reportes",
+      icon: FcElectricalThreshold,
+      url: "/reporte",
+    },
 
   ];
 
@@ -148,7 +159,7 @@ export const DashboardRouter = () => {
                   <SideBarMenu items={items} card={card} />
                 )}
               </Route>
-              <Route path="/inscripción">
+              <Route path="/">
                 {rol === 1 ? (
                   <>
                     <SideBarMenu items={items} card={card} />
@@ -292,6 +303,22 @@ export const DashboardRouter = () => {
                   <>
                     <SideBarMenu items={items} card={card} />
                     <SecretariaContext />
+                    <Footer />
+                  </>
+                ) : rol === 2 ? (
+                  <>
+                    <SideBarMenu items={items} card={card} />
+                  </>
+                ) : (
+                  <SideBarMenu items={items} card={card} />
+                )}
+              </Route>
+
+              <Route path="/reporte">
+                {rol === 1 ? (
+                  <>
+                    <SideBarMenu items={items} card={card} />
+                    <Reporte />
                     <Footer />
                   </>
                 ) : rol === 2 ? (
