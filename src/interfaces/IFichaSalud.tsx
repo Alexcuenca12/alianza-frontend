@@ -7,5 +7,5 @@ export interface IFichaSalud {
   tipoDiscapacidadFichaSalud: string;
   porcentajeDiscapacidadFichaSalud: number;
   enfermedadesPrevalentesFichaSalud: string;
-  fichaInscripcion: object | null;
+  fichaPersonal: object | null;
 }

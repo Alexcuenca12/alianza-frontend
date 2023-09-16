@@ -6,5 +6,5 @@ export interface IFichaEducativa {
   jornadaEducativa: string;
   observacionesEducativa: string;
   gradoEducativo: string;
-  fichaInscripcion: object | null;
+  fichaPersonal: object | null;
 }

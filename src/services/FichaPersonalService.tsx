@@ -19,6 +19,13 @@ export class FichaPersonalService {
         return this.api.get("get").then((res) => res.data);
     }
 
+    getByPersona(cedula: string) {
+        return this.api
+          .get(`search/${cedula}`)
+          .then((res) => res.data);
+      }
+    
+
     getBusquedaRE(ci: string, gen: string, rang: number, est: boolean) {
         //Método para listar todas los Usuarios
         ci = ci || "NA";
