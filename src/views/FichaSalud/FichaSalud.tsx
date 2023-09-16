@@ -250,11 +250,11 @@ function FichaSaludContext() {
       <Card
         header={cardHeader}
         className="border-solid border-red-800 border-3 flex-1 flex-wrap"
-        style={{ width: "1350px", marginLeft: "90px", height: "688px" }}
+        style={{ width: "90%", marginLeft: "7%", height: "100%" }}
       >
         <div
           className="h1-rem"
-          style={{ marginLeft: "42%", marginBottom: "20px" }}
+          style={{ marginLeft: "40%", marginBottom: "20px" }}
         >
           <h1 className="text-5xl font-smibold lg:md-2  w-full h-full max-w-full max-h-full min-w-min">
             Ficha Médica

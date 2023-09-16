@@ -15,7 +15,6 @@ import { FichaInscripcionService } from "../../services/FichaInscripcionService"
 import { FichaPersonalService } from "../../services/FichaPersonalService";
 import { CursoService } from "../../services/CursoService";
 import swal from "sweetalert";
-import { IDocente } from "../../interfaces/IDocente";
 
 function FichaInscripcionContext() {
   const [idPersona, setIDPersona] = useState<number>(0);
@@ -313,7 +312,7 @@ function FichaInscripcionContext() {
       <Card
         header={cardHeader}
         className="border-solid border-red-800 border-3 flex-1 flex-wrap"
-        style={{ width: "1350px", marginLeft: "90px", height: "688px" }}
+        style={{ width: "90%", marginLeft: "7%", height: "100%" }}
       >
         <div
           className="h1-rem"
