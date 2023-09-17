@@ -34,7 +34,7 @@ function FichaSaludContext() {
     referencia: "",
     coordenadaX: 0,
     coordenadaY: 0,
-    estVinculacion: false,
+    estVinculacion: true,
   });
   const [contra1, setcontra1] = useState<IFichaSalud[]>([]);
   const [formData, setFormData] = useState<IFichaSalud>({
@@ -57,8 +57,9 @@ function FichaSaludContext() {
       swal("Advertencia", "Ingrese una cédula válida para buscar", "warning");
       return;
     }
+    const estBoolean = formDataPersona.estVinculacion;
     personalService
-      .getByPersona(cedula)
+      .getByPersona(estBoolean, cedula)
       .then((data) => {
         setFormDataPersona(data);
         setIDPersona(data.idFichaPersonal);

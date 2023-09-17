@@ -19,9 +19,10 @@ export class FichaPersonalService {
         return this.api.get("get").then((res) => res.data);
     }
 
-    getByPersona(cedula: string) {
+    getByPersona(est: boolean, busqueda: string) {
+        busqueda = busqueda || "NA";
         return this.api
-          .get(`search/${cedula}`)
+          .get(`busquedaCiNombre/${est}/${busqueda}`)
           .then((res) => res.data);
       }
     

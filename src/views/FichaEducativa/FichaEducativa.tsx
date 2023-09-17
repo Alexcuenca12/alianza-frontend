@@ -43,7 +43,7 @@ function FichaInscripcionContext() {
       return;
     }
     personalService
-      .getByPersona(cedula)
+      .getByPersona(true,cedula)
       .then((data) => {
         console.log("p1", data);
         setFormDataPersona(data);

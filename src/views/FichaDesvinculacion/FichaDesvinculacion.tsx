@@ -291,13 +291,21 @@ function FichaDesvinculacion() {
                       onChange={(e) => {
                         const selectedDate =
                           e.value instanceof Date ? e.value : null;
-                        const formattedDate = selectedDate
-                          ? selectedDate.toISOString().split("T")[0]
-                          : "";
-                        setFormData({
-                          ...formData,
-                          fechaDesvinculacion: formattedDate,
-                        });
+                        if (selectedDate) {
+                          selectedDate.setDate(selectedDate.getDate() + 1);
+                          const formattedDate = selectedDate
+                            .toISOString()
+                            .split("T")[0];
+                          setFormData({
+                            ...formData,
+                            fechaDesvinculacion: formattedDate,
+                          });
+                        } else {
+                          setFormData({
+                            ...formData,
+                            fechaDesvinculacion: "", // Si no se selecciona ninguna fecha
+                          });
+                        }
                       }}
                       value={
                         formData.fechaDesvinculacion
@@ -412,13 +420,13 @@ function FichaDesvinculacion() {
                 <td>
                   {cargaF.fechaDesvinculacion
                     ? new Date(cargaF.fechaDesvinculacion).toLocaleDateString(
-                      "es-ES",
-                      {
-                        year: "numeric",
-                        month: "2-digit",
-                        day: "2-digit",
-                      }
-                    )
+                        "es-ES",
+                        {
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
+                        }
+                      )
                     : ""}
                 </td>
                 <td>{cargaF.motivo}</td>
@@ -438,7 +446,7 @@ function FichaDesvinculacion() {
                     onClick={() =>
                       handleEdit(cargaF.idFichaDesvinculacion?.valueOf())
                     }
-                  // Agrega el evento onClick para la operación de editar
+                    // Agrega el evento onClick para la operación de editar
                   />
                   <Button
                     type="button"
@@ -455,7 +463,7 @@ function FichaDesvinculacion() {
                     onClick={() =>
                       handleDelete(cargaF.idFichaDesvinculacion?.valueOf())
                     }
-                  // Agrega el evento onClick para la operación de eliminar
+                    // Agrega el evento onClick para la operación de eliminar
                   />
                 </td>
                 <td>

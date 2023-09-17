@@ -46,7 +46,7 @@ function FichaInscripcionContext() {
       return;
     }
     personalService
-      .getByPersona(cedula)
+      .getByPersona(true, cedula)
       .then((data) => {
         console.log("p1", data);
         setFormDataPersona(data);
@@ -75,7 +75,6 @@ function FichaInscripcionContext() {
   const inscripService = new FichaInscripcionService();
 
   const [cedula, setCedula] = useState<string>("");
-  const [selectedDias, setSelectedDias] = useState<string>("");
   const [busquedaCedulaCompleta, setBusquedaCedulaCompleta] = useState(false);
 
   const tipoProyectoOptions = [
