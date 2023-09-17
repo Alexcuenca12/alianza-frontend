@@ -159,7 +159,7 @@ export const DashboardRouter = () => {
                   <SideBarMenu items={items} card={card} />
                 )}
               </Route>
-              <Route path="/">
+              <Route path="/inscripción">
                 {rol === 1 ? (
                   <>
                     <SideBarMenu items={items} card={card} />
@@ -192,10 +192,8 @@ export const DashboardRouter = () => {
               <Route path="/personal">
                 {rol === 1 ? (
                   <>
-                    <div className="estructura">
-                      <SideBarMenu items={items} card={card} />
-                      <FichaPersonal />
-                    </div>
+                    <SideBarMenu items={items} card={card} />
+                    <FichaPersonal />
                     <Footer />
                   </>
                 ) : rol === 2 ? (
@@ -209,10 +207,8 @@ export const DashboardRouter = () => {
               <Route path="/familiar">
                 {rol === 1 ? (
                   <>
-                    <div className="estructura">
-                      <SideBarMenu items={items} card={card} />
-                      <FichaFamiliar />
-                    </div>
+                    <SideBarMenu items={items} card={card} />
+                    <FichaFamiliar />
                     <Footer />
                   </>
                 ) : rol === 2 ? (

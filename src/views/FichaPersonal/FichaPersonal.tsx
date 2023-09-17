@@ -543,13 +543,17 @@ function FichaPersonal() {
                                     onChange={(e) => {
                                         const selectedDate =
                                             e.value instanceof Date ? e.value : null;
-                                        const formattedDate = selectedDate
-                                            ? selectedDate.toISOString().split("T")[0] // Formatear a ISO 8601
-                                            : "";
-                                        setFormData({
-                                            ...formData,
-                                            fechaNacimiento: formattedDate,
-                                        });
+                                        if (selectedDate) {
+                                            selectedDate.setDate(selectedDate.getDate() + 1);
+                                            const formattedDate = selectedDate
+                                                ? selectedDate.toISOString().split("T")[0] // Formatear a ISO 8601
+                                                : "";
+                                            setFormData({
+                                                ...formData,
+                                                fechaNacimiento: formattedDate,
+                                            });
+                                        }
+
                                     }}
                                     value={
                                         formData.fechaNacimiento

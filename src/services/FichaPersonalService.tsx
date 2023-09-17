@@ -35,6 +35,13 @@ export class FichaPersonalService {
         return this.api.get(`busqueda/${ci}/${gen}/${est}`).then((res) => res.data);
     }
 
+    getBusquedaRelacion(est: boolean, busq: string,) {
+        //Método para listar todas los Usuarios
+        busq = busq || "NA";
+        console.log(`busquedaCiNombre/${est}/${busq}`)
+        return this.api.get(`busquedaCiNombre/${est}/${busq}`).then((res) => res.data);
+    }
+
     save(fichaPersonal: any) {
         console.log(fichaPersonal)
         return this.api.post("post", fichaPersonal).then((res) => res.data)
