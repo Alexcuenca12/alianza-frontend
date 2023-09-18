@@ -1,3 +1,6 @@
+import { ICurso } from "./ICurso";
+import { IFichaPersonal } from "./IFichaPersonal";
+
 export interface IFichaInscripcion {
     idFichaInscripcion?: number;
     fechaIngresoInscrip: string;
@@ -6,6 +9,6 @@ export interface IFichaInscripcion {
     situacionIngresoInscrip: string;
     asistenciaInscrip: string;
     jornadaAsistenciaInscrip: string;
-    fichaPersonal: object | null;
-    curso: object | null;
+    fichaPersonal: IFichaPersonal | null;
+    curso: ICurso | null;
 }

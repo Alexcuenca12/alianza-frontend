@@ -18,9 +18,8 @@ import swal from "sweetalert";
 function Curso() {
   const options: string[] = ["Si", "No"];
 
-  const [contra1, setcontra1] = useState<ICurso[]>([]);
+  const [contra1, setContra1] = useState<ICurso[]>([]);
   const [formData, setFormData] = useState<ICurso>({
-    idCurso: 0,
     nombreCurso: "",
     fechaInicio: "",
     fechaFin: "",
@@ -28,17 +27,18 @@ function Curso() {
     rangoEdad: null,
     docente: null,
   });
-  const [docentes, setDocente] = useState<IDocente[]>([]);
-  const [rangos, setRangoEdad] = useState<IRangoEdad[]>([]);
+
+  const [docentes, setDocentes] = useState<IDocente[]>([]);
+  const [rangos, setRangosEdad] = useState<IRangoEdad[]>([]);
 
   const opcionesRango = rangos.map((rango) => ({
     ...rango,
-    etiqueta: `${rango.limInferior} - ${rango.limSuperior}`,
+    etiquetaRango: `${rango.limInferior} - ${rango.limSuperior}`,
   }));
 
-  const opcionesDocente = docentes.map((docentes) => ({
-    ...docentes,
-    etiqueta: `${docentes.persona?.nombresPersona}  ${docentes.persona?.apellidosPersona}`,
+  const opcionesDocente = docentes.map((docente) => ({
+    ...docente,
+    etiqueta: `${docente.persona?.nombresPersona}  ${docente.persona?.apellidosPersona}`,
   }));
 
   const [dataLoaded, setDataLoaded] = useState(false);
@@ -49,15 +49,15 @@ function Curso() {
   const docenteService = new DocenteService();
   const rangoService = new RangoEdadService();
 
-  const [selectedDocente, setSelectedDocente] = useState<string | null>(null);
-  const [selectedRango, setSelectedRango] = useState<string | null>(null);
+  const [selectedDocente, setSelectedDocente] = useState<IDocente | null>(null);
+  const [selectedRango, setSelectedRango] = useState<IRangoEdad | null>(null);
 
   useEffect(() => {
     const loadDocentes = () => {
       docenteService
         .getAll()
         .then((data) => {
-          setDocente(data);
+          setDocentes(data);
           setDataLoaded(true);
           setSelectedDocente(null);
         })
@@ -73,7 +73,7 @@ function Curso() {
       rangoService
         .getAll()
         .then((data) => {
-          setRangoEdad(data);
+          setRangosEdad(data);
           setDataLoaded(true);
           setSelectedRango(null);
         })
@@ -88,7 +88,7 @@ function Curso() {
     cursoService
       .getAll()
       .then((data) => {
-        setcontra1(data);
+        setContra1(data);
         setDataLoaded(true); // Marcar los datos como cargados
       })
       .catch((error) => {
@@ -106,7 +106,9 @@ function Curso() {
       !formData.nombreCurso ||
       !formData.fechaInicio ||
       !formData.fechaFin ||
-      !formData.estadoCurso
+      !formData.estadoCurso ||
+      !formData.docente || // Asegúrate de que docente esté seleccionado
+      !formData.rangoEdad // Asegúrate de que rangoEdad esté seleccionado
     ) {
       swal("Advertencia", "Por favor, complete todos los campos", "warning");
       return;
@@ -118,15 +120,7 @@ function Curso() {
         resetForm();
         swal("Publicacion", "Datos Guardados Correctamente", "success");
 
-        cursoService
-          .getAll()
-          .then((data) => {
-            setcontra1(data);
-            resetForm();
-          })
-          .catch((error) => {
-            console.error("Error al obtener los datos:", error);
-          });
+        loadData();
       })
       .catch((error) => {
         console.error("Error al enviar el formulario:", error);
@@ -155,7 +149,7 @@ function Curso() {
           cursoService
             .delete(id)
             .then(() => {
-              setcontra1(contra1.filter((contra) => contra.idCurso !== id));
+              setContra1(contra1.filter((curso) => curso.idCurso !== id));
               swal(
                 "Eliminado",
                 "El registro ha sido eliminado correctamente",
@@ -177,7 +171,7 @@ function Curso() {
 
   const handleEdit = (id: number | undefined) => {
     if (id !== undefined) {
-      const editItem = contra1.find((contra) => contra.idCurso === id);
+      const editItem = contra1.find((curso) => curso.idCurso === id);
       if (editItem) {
         setFormData(editItem);
 
@@ -198,21 +192,8 @@ function Curso() {
             text: "Datos actualizados correctamente",
             icon: "success",
           });
-          setFormData({
-            nombreCurso: "",
-            fechaInicio: "",
-            fechaFin: "",
-            estadoCurso: false,
-            rangoEdad: null,
-            docente: null,
-          });
-          setcontra1(
-            contra1.map((contra) =>
-              contra.idCurso === editItemId ? response : contra
-            )
-          );
-          setEditMode(false);
-          setEditItemId(undefined);
+          resetForm();
+          loadData();
         })
         .catch((error) => {
           console.error("Error al actualizar el formulario:", error);
@@ -232,10 +213,10 @@ function Curso() {
     setEditMode(false);
     setEditItemId(undefined);
   };
+
   if (!dataLoaded) {
     return <div>Cargando datos...</div>;
   }
-
   return (
     <Fieldset className="fgrid col-fixed ">
       <Card
@@ -374,10 +355,22 @@ function Curso() {
                       id="docente"
                       name="docente"
                       options={opcionesDocente}
-                      onChange={(e) =>
-                        setFormData({ ...formData, docente: e.value })
-                      }
-                      value={formData.docente} // Make sure this is correctly bound
+                      onChange={(e) => {
+                        const selectedDocente = docentes.find(
+                          (docente) => docente.idDocente === e.value
+                        );
+                        if (selectedDocente) {
+                          setSelectedDocente(selectedDocente);
+                          setFormData({
+                            ...formData,
+                            docente: selectedDocente,
+                          });
+                        } else {
+                          setSelectedDocente(null);
+                          setFormData({ ...formData, docente: null });
+                        }
+                      }}
+                      value={selectedDocente}
                       optionLabel="etiqueta"
                       optionValue="idDocente"
                       placeholder="Seleccione al Docente"
@@ -396,11 +389,18 @@ function Curso() {
                       id="rangos"
                       name="rangos"
                       options={opcionesRango}
-                      onChange={(e) =>
-                        setFormData({ ...formData, rangoEdad: e.value })
-                      }
-                      value={formData.rangoEdad} // Make sure this is correctly bound
-                      optionLabel="etiqueta"
+                      onChange={(e) => {
+                        const selectedRango = rangos.find(
+                          (rango) => rango.idRangoEdad === e.value
+                        );
+                        setSelectedRango(selectedRango ?? null); // Actualiza selectedRango con el objeto de rango de edad o null
+                        setFormData({
+                          ...formData,
+                          rangoEdad: selectedRango ?? null,
+                        });
+                      }}
+                      value={selectedRango ?? null} // Utiliza selectedRango como valor seleccionado o null
+                      optionLabel="etiquetaRango"
                       optionValue="idRangoEdad"
                       placeholder="Seleccione el Rango"
                       style={{ width: "250px" }}

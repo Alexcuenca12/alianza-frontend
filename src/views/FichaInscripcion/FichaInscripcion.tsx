@@ -39,30 +39,52 @@ function FichaInscripcionContext() {
     coordenadaY: 0,
     estVinculacion: false,
   });
-
+  const forceUpdate = React.useReducer((state) => !state, false)[1];
   const buscarPorCedula = () => {
     if (cedula.trim() === "") {
       swal("Advertencia", "Ingrese una cédula válida para buscar", "warning");
       return;
     }
     personalService
-      .getByPersona(true, cedula)
+      .getByPersona(cedula)
       .then((data) => {
-        console.log("p1", data);
+        console.log("Datos obtenidos del servidor:", data); // Agrega esta línea para depurar
         setFormDataPersona(data);
+        console.log("formDataPersona después de la asignación:", formDataPersona);
         setIDPersona(data.idFichaPersonal);
         setBusquedaCedulaCompleta(true);
+        
         setFormData({
           ...formData,
           fichaPersonal: {
             idFichaPersonal: data.idFichaPersonal,
+            foto: "",
+            apellidos: "",
+            nombres: "",
+            ciIdentidad: "",
+            nacionalidad: "",
+            fechaNacimiento: "",
+            rangoEdad: null,
+            genero: "",
+            etnia: null,
+            parroquia: null,
+            zona: "",
+            barrioSector: "",
+            direccion: "",
+            referencia: "",
+            coordenadaX: 0,
+            coordenadaY: 0,
+            estVinculacion: false,
           },
         });
+        forceUpdate();
       })
       .catch((error) => {
         console.error("Error al buscar por cédula:", error);
+        // Puedes mostrar un mensaje de error aquí si lo deseas
       });
   };
+  
 
   const fileUploadRef = useRef<FileUpload>(null);
   const [dataLoaded, setDataLoaded] = useState(false);
@@ -87,12 +109,8 @@ function FichaInscripcionContext() {
     { label: "Vespertina", value: "Vespertina" },
   ];
   const diasOptions = [
-    { label: "Lunes", value: "Lunes" },
-    { label: "Martes", value: "Martes" },
-    { label: "Miércoles", value: "Miércoles" },
-    { label: "Jueves", value: "Jueves" },
-    { label: "Viernes", value: "Viernes" },
-    { label: "Sábado", value: "Sábado" },
+    { label: "Lunes a Viernes", value: "Lunes a Viernes" },
+    { label: "Lunes a Sábado", value: "Lunes a Sábado" },
   ];
 
   const [contra1, setcontra1] = useState<IFichaInscripcion[]>([]);
@@ -452,7 +470,7 @@ function FichaInscripcionContext() {
                 >
                   <div className="flex flex-wrap w-full h-full  justify-content-between">
                     <label
-                      htmlFor="doi"
+                      htmlFor="persona"
                       className="text-3xl font-medium w-auto min-w-min"
                       style={{ marginRight: "20px", marginLeft: "25px" }}
                     >
@@ -460,9 +478,9 @@ function FichaInscripcionContext() {
                     </label>
                     <InputText
                       className="text-2xl"
-                      id="doi"
+                      id="persona"
                       disabled
-                      name="doi"
+                      name="persona"
                       style={{ width: "221px" }}
                       onChange={(e) =>
                         setFormDataPersona({
@@ -470,7 +488,7 @@ function FichaInscripcionContext() {
                           nombres: e.currentTarget.value,
                         })
                       }
-                      value={`${formDataPersona.nombres} ${formDataPersona.apellidos}`}
+                      value={`${formDataPersona.nombres}`}
                     />
                   </div>
                   <div className="flex flex-wrap w-full h-full  justify-content-between">
@@ -498,29 +516,25 @@ function FichaInscripcionContext() {
                   </div>
                   <div className="flex flex-wrap w-full h-full  justify-content-between">
                     <label
-                      htmlFor="filiacion"
+                      htmlFor="asistencia"
                       className="text-3xl font-medium w-auto min-w-min"
                       style={{ marginRight: "20px", marginLeft: "25px" }}
                     >
                       Asistencia:
                     </label>
-                    <MultiSelect
+                    <Dropdown
                       className="text-2xl"
-                      placeholder="Ingrese la Asistencia"
-                      id="filiacion"
+                      id="asistencia"
+                      name="asistencia"
+                      style={{ width: "220px" }}
                       options={diasOptions}
-                      display="chip"
-                      optionLabel="value"
-                      name="filiacion"
-                      maxSelectedLabels={7}
-                      style={{ width: "221px" }}
                       onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          asistenciaInscrip: e.value,
-                        })
+                        setFormData({ ...formData, asistenciaInscrip: e.value })
                       }
                       value={formData.asistenciaInscrip}
+                      optionLabel="label"
+                      optionValue="value"
+                      placeholder="Seleccione la Asistencia"
                     />
                   </div>
                   <div className="flex flex-wrap w-full h-full justify-content-between">

@@ -1,9 +1,12 @@
+import { IDocente } from "./IDocente";
+import { IRangoEdad } from "./IRangoEdad";
+
 export interface ICurso {
     idCurso?: number;
     nombreCurso: string;
     fechaInicio: string;
     fechaFin: string;
     estadoCurso: boolean;
-    rangoEdad: object | null;
-    docente: object | null;
+    rangoEdad: IRangoEdad | null; // Cambiar 'object' a 'IRangoEdad'
+    docente: IDocente | null; // Cambiar 'object' a 'IDocente'
 }
