@@ -5,5 +5,7 @@ export interface IFichaDesvinculacion {
   fechaDesvinculacion: string;
   motivo: string;
   anexosExtras: string;
+  fichaInscripcion: object | null;
   fichaPersonal: IFichaPersonal | null;
+
 }

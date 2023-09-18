@@ -6,33 +6,25 @@ import { Calendar } from "primereact/calendar";
 import { Fieldset } from "primereact/fieldset";
 import { Card } from "primereact/card";
 import cardHeader from "../../shared/CardHeader";
+import { Divider } from "primereact/divider";
 import { IFichaDesvinculacion } from "../../interfaces/IFichaDesvinculacion";
 import { FichaDesvinculacionService } from "../../services/FichaDesvinculacionService";
 import swal from "sweetalert";
 import { IFichaPersonal } from "../../interfaces/IFichaPersonal";
 import { FichaPersonalService } from "../../services/FichaPersonalService";
 import { Dropdown } from "primereact/dropdown";
+import '../../styles/FiltroFichas.css'
+
 
 function FichaDesvinculacion() {
-  const [busqueda, setBusqueda] = useState<string>("");
-  const [listFpersonales, setListFpersonales] = useState<IFichaPersonal[]>([]);
+  //Session Storage
+  const userData = sessionStorage.getItem("user");
+  const userObj = JSON.parse(userData || "{}");
+  const idPersona = userObj.id;
 
-  const personalService = new FichaPersonalService();
+  const [listFperonales, setListFperonales] = useState<IFichaPersonal[]>([]);
 
-  const loadRelacion = () => {
-    personalService
-      .getBusquedaRelacion(true, busqueda)
-      .then((data: IFichaPersonal[]) => {
-        const dataWithLabel = data.map((object) => ({
-          ...object,
-          label: `${object.ciIdentidad} // ${object.apellidos} ${object.nombres}`,
-        }));
-        setListFpersonales(dataWithLabel);
-      })
-      .catch((error) => {
-        console.error("Error al obtener los datos:", error);
-      });
-  };
+  const [busqueda, setBusqueda] = useState<string>('');
 
   const [contra1, setcontra1] = useState<IFichaDesvinculacion[]>([]);
   const [formData, setFormData] = useState<IFichaDesvinculacion>({
@@ -40,7 +32,8 @@ function FichaDesvinculacion() {
     fechaDesvinculacion: "",
     motivo: "",
     anexosExtras: "",
-    fichaPersonal: null,
+    fichaInscripcion: null,
+    fichaPersonal: null
   });
 
   const fileUploadRef = useRef<FileUpload>(null);
@@ -48,6 +41,10 @@ function FichaDesvinculacion() {
   const [editMode, setEditMode] = useState(false);
   const [editItemId, setEditItemId] = useState<number | undefined>(undefined);
   const desvinService = new FichaDesvinculacionService();
+  const fichaPersonalService = new FichaPersonalService();
+  const [foto, setFoto] = useState<string>('https://cdn-icons-png.flaticon.com/128/666/666201.png');
+
+
 
   const loadData = () => {
     desvinService
@@ -228,7 +225,9 @@ function FichaDesvinculacion() {
             fechaDesvinculacion: "",
             motivo: "",
             anexosExtras: "",
-            fichaPersonal: null,
+            fichaInscripcion: null,
+            fichaPersonal: null
+
           });
           setcontra1(
             contra1.map((contra) =>
@@ -249,7 +248,9 @@ function FichaDesvinculacion() {
       fechaDesvinculacion: "",
       motivo: "",
       anexosExtras: "",
-      fichaPersonal: null,
+      fichaInscripcion: null,
+      fichaPersonal: null
+
     });
     setEditMode(false);
     setEditItemId(undefined);
@@ -261,12 +262,56 @@ function FichaDesvinculacion() {
     return <div>Cargando datos...</div>;
   }
 
+
+  const loadRelacion = () => {
+
+    // console.log("4 SIN EDAD")
+    fichaPersonalService
+      .getBusquedaRelacion(true, busqueda)
+      .then((data: IFichaPersonal[]) => {
+        const dataWithLabel = data.map((object) => ({
+          ...object,
+          label: `${object.ciIdentidad} || ${object.apellidos} ${object.nombres}`,
+        }));
+
+        setListFperonales(dataWithLabel); // Establecer los datos procesados en el estado
+        // setDataLoaded(true); // Puedes marcar los datos como cargados si es necesario
+      })
+      .catch((error) => {
+        console.error("Error al obtener los datos:", error);
+      });
+
+
+    console.log('Datos enviados:', { listFperonales });
+
+  };
+
+  const cargarFoto = (id: number) => {
+    const Foto = listFperonales.find((persona) => persona.idFichaPersonal === id);
+
+    if (Foto) {
+      // Actualiza formData con la foto correspondiente
+      setFoto(Foto.foto);
+      if (Foto) {
+        console.log("Foto cargada")
+      }
+
+    }
+
+  }
+
+  const resetFiltro = () => {
+    setBusqueda('')
+    setFoto('https://cdn-icons-png.flaticon.com/128/666/666201.png')
+
+  };
+
   return (
-    <Fieldset className="fgrid col-fixed ">
+    <Fieldset className="" style={{ display: 'flex', justifyContent: 'center' }}>
       <Card
         header={cardHeader}
         className="border-solid border-red-800 border-3 flex-1 flex-wrap"
-        style={{ width: "90%", marginLeft: "7%", height: "100%" }}
+        style={{ width: "1200px", marginBottom: "35px" }}
       >
         <div
           className="h1-rem"
@@ -277,91 +322,115 @@ function FichaDesvinculacion() {
           </h1>
         </div>
 
-        <div className="flex justify-content-center flex-wrap">
+        <section className="flex justify-content-center flex-wrap container">
+          <Fieldset legend="Filtros de busqueda" style={{ marginBottom: "35px" }}>
+            <div style={{ textAlign: 'right', marginRight: "", position: "absolute", top: "50px", right: "30px" }}>
+              <label className="font-medium w-auto min-w-min" htmlFor="rangoEdad" style={{ marginRight: "15px" }}>Limpiar filtros:</label>
+
+              <Button icon="pi pi-times" rounded severity="danger" aria-label="Cancel" onClick={() => resetFiltro()} />
+            </div>
+
+            <section className="layout">
+              <div className="grow1 marginLeft">
+                <div input-box>
+                  <label className="font-medium w-auto min-w-min" htmlFor='genero'>Cedula o Nombre:</label>
+
+                  <div className="flex-1">
+                    <InputText
+                      placeholder="Cedula de identidad"
+                      id="integer"
+                      // keyfilter="int"
+                      onChange={(e) => {
+                        // Actualizar el estado usando setFormData
+                        setListFperonales([]); // Asignar un arreglo vacío para vaciar el estado listFperonales
+
+                        setBusqueda(e.currentTarget.value);
+
+                        // Luego, llamar a loadRelacion después de que se actualice el estado
+                        loadRelacion();
+                      }}
+
+                      onKeyUp={(e) => {
+                        setListFperonales([]); // Asignar un arreglo vacío para vaciar el estado listFperonales
+
+                        setBusqueda(e.currentTarget.value);
+
+                        // Luego, llamar a loadRelacion después de que se actualice el estado
+                        loadRelacion();
+                        loadRelacion(); // Llama a tu método aquí o realiza las acciones necesarias.
+                      }}
+
+                      value={busqueda}
+                    />
+
+                    <Button icon="pi pi-search" className="p-button-warning" />
+                  </div>
+                </div>
+              </div>
+              <div className="grow1 shrink0">
+                <div>
+                  <label className="font-medium w-auto min-w-min" htmlFor="fichaPersonal">Resultados de la busqueda:</label>
+                  <Dropdown
+                    className="text-2xl"
+                    id="tiempo_dedicacion"
+                    name="tiempo_dedicacion"
+                    style={{ width: "100%" }}
+                    options={listFperonales}
+                    onChange={(e) => {
+                      setFormData({
+                        ...formData,
+                        fichaPersonal: {
+                          idFichaPersonal: parseInt(e.value), foto: '',
+                          apellidos: '',
+                          nombres: '',
+                          ciIdentidad: '',
+                          nacionalidad: '',
+                          fechaNacimiento: '',
+                          rangoEdad: null,
+                          genero: '',
+                          etnia: null,
+                          parroquia: null,
+                          zona: '',
+                          barrioSector: '',
+                          direccion: '',
+                          referencia: '',
+                          coordenadaX: 0,
+                          coordenadaY: 0,
+                          estVinculacion: true
+                        }
+                      });
+                      cargarFoto(parseInt(e.value))
+                      // loadData()
+                      console.log(formData)
+                    }}
+                    value={formData.fichaPersonal}
+                    optionLabel="label"
+                    optionValue="idFichaPersonal"
+                    placeholder="Seleccione una persona"
+                  />
+                </div>
+              </div>
+              <div>
+                <div style={{ display: "grid", placeItems: "center" }}>
+                  <img
+                    src={foto}
+                    alt="FotoNNA"
+                    style={{
+                      // width: "80px",
+                      height: "80px",
+                      borderRadius: "50%", // Borde redondeado
+                      border: "2px solid gray", // Borde gris
+                    }}
+                  />
+                </div>
+              </div>
+            </section>
+          </Fieldset>
+
           <form
             onSubmit={editMode ? handleUpdate : handleSubmit}
             encType="multipart/form-data"
           >
-                        <Fieldset
-              legend="Filtros de busqueda"
-              style={{ marginBottom: "20px", width: "83%"}}
-            >
-              <section className="layout">
-                <div className="grow1 marginLeft">
-                  <div input-box>
-                    <label
-                      className="font-medium w-auto min-w-min"
-                      htmlFor="genero"
-                    >
-                      Cedula o Nombre:
-                    </label>
-                    <div className="flex-1">
-                      <InputText
-                        placeholder="Cedula de identidad"
-                        id="integer"
-                        onChange={(e) => {
-                          setBusqueda(e.currentTarget.value);
-                          loadRelacion();
-                        }}
-                        value={busqueda}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="input-box">
-                  <div style={{ marginLeft: "-510px", marginTop: "20px" }}>
-                    <label
-                      className="text-3xl font-medium w-auto min-w-min"
-                      htmlFor="fichaPersonal"
-                      style={{ marginRight: "10px" }}
-                    >
-                      Resultados de la busqueda:
-                    </label>
-                    <Dropdown
-                      className="text-2xl"
-                      id="fichaPersonal"
-                      name="persona"
-                      style={{ width: "40%" }}
-                      options={listFpersonales}
-                      onChange={(e) => {
-                        setFormData({
-                          ...formData,
-                          fichaPersonal: {
-                            idFichaPersonal: parseInt(e.value),
-                            foto: "",
-                            apellidos: "",
-                            nombres: "",
-                            ciIdentidad: "",
-                            nacionalidad: "",
-                            fechaNacimiento: "",
-                            rangoEdad: null,
-                            genero: "",
-                            etnia: null,
-                            parroquia: null,
-                            zona: "",
-                            barrioSector: "",
-                            direccion: "",
-                            referencia: "",
-                            coordenadaX: 0,
-                            coordenadaY: 0,
-                            estVinculacion: true,
-                          },
-                        });
-                      }}
-                      value={
-                        formData.fichaPersonal
-                          ? formData.fichaPersonal.idFichaPersonal
-                          : null
-                      }
-                      optionLabel="label"
-                      optionValue="idFichaPersonal"
-                      placeholder="Seleccione una persona"
-                    />
-                  </div>
-                </div>
-              </section>
-            </Fieldset>
             <div className="flex flex-wrap flex-row">
               <div className="flex align-items-center justify-content-center">
                 <div
@@ -388,21 +457,13 @@ function FichaDesvinculacion() {
                       onChange={(e) => {
                         const selectedDate =
                           e.value instanceof Date ? e.value : null;
-                        if (selectedDate) {
-                          selectedDate.setDate(selectedDate.getDate() + 1);
-                          const formattedDate = selectedDate
-                            .toISOString()
-                            .split("T")[0];
-                          setFormData({
-                            ...formData,
-                            fechaDesvinculacion: formattedDate,
-                          });
-                        } else {
-                          setFormData({
-                            ...formData,
-                            fechaDesvinculacion: "", // Si no se selecciona ninguna fecha
-                          });
-                        }
+                        const formattedDate = selectedDate
+                          ? selectedDate.toISOString().split("T")[0]
+                          : "";
+                        setFormData({
+                          ...formData,
+                          fechaDesvinculacion: formattedDate,
+                        });
                       }}
                       value={
                         formData.fechaDesvinculacion
@@ -493,7 +554,7 @@ function FichaDesvinculacion() {
               </div>
             </div>
           </form>
-        </div>
+        </section>
         <table
           style={{ minWidth: "40rem" }}
           className="mt-4  w-full h-full text-3xl font-large"
@@ -517,13 +578,13 @@ function FichaDesvinculacion() {
                 <td>
                   {cargaF.fechaDesvinculacion
                     ? new Date(cargaF.fechaDesvinculacion).toLocaleDateString(
-                        "es-ES",
-                        {
-                          year: "numeric",
-                          month: "2-digit",
-                          day: "2-digit",
-                        }
-                      )
+                      "es-ES",
+                      {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                      }
+                    )
                     : ""}
                 </td>
                 <td>{cargaF.motivo}</td>
@@ -543,7 +604,7 @@ function FichaDesvinculacion() {
                     onClick={() =>
                       handleEdit(cargaF.idFichaDesvinculacion?.valueOf())
                     }
-                    // Agrega el evento onClick para la operación de editar
+                  // Agrega el evento onClick para la operación de editar
                   />
                   <Button
                     type="button"
@@ -560,7 +621,7 @@ function FichaDesvinculacion() {
                     onClick={() =>
                       handleDelete(cargaF.idFichaDesvinculacion?.valueOf())
                     }
-                    // Agrega el evento onClick para la operación de eliminar
+                  // Agrega el evento onClick para la operación de eliminar
                   />
                 </td>
                 <td>
