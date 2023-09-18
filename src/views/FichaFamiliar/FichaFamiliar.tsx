@@ -308,6 +308,8 @@ function FichaPersonal() {
     const resetFiltro = () => {
         setBusqueda('')
         setFoto('https://cdn-icons-png.flaticon.com/128/666/666201.png')
+        setListFperonales([])
+
 
     };
 
@@ -413,9 +415,8 @@ function FichaPersonal() {
                                             // loadData()
                                             console.log(formData)
                                         }}
-                                        value={formData.fichaPersonal
-                                            ? formData.fichaPersonal.idFichaPersonal : null
-                                        }
+                                        value={formData.fichaPersonal?.idFichaPersonal}
+
                                         optionLabel="label"
                                         optionValue="idFichaPersonal"
                                         placeholder="Seleccione una persona"
