@@ -1,7 +1,6 @@
 // src/components/RegistroForm.tsx
 import React, { useEffect, useState, useRef } from "react";
 
-import '../../styles/Fichas.css'
 import { IFichaFamiliar } from '../../interfaces/IFichaFamiliar';
 import { ITipoFamilia } from '../../interfaces/ITipoFamilia';
 import { FichaFamiliarService } from '../../services/FichaFamiliarService';
@@ -20,6 +19,9 @@ import { ICalcularEdad } from '../../interfaces/ICalcularEdad';
 import CalcularEdad from "../../common/CalcularEdad";
 import { FichaPersonalService } from "../../services/FichaPersonalService";
 import { IFichaPersonal } from "../../interfaces/IFichaPersonal";
+
+import '../../styles/Fichas.css'
+import '../../styles/FiltroFichas.css'
 
 
 function FichaPersonal() {
@@ -42,7 +44,7 @@ function FichaPersonal() {
     const [listFichaFamiliar, setFichaFamiliar] = useState<IFichaFamiliar[]>([]);
     const [formData, setFormData] = useState<IFichaFamiliar>({
         idFichaFamiliar: 0,
-        visitaDomiciliar: false,
+        visitaDomiciliaria: false,
         jefaturaFamiliar: '',
         numIntegrantes: 0,
         numAdultos: 0,
@@ -177,6 +179,23 @@ function FichaPersonal() {
                 setFormData(editItem);
                 setEditMode(true);
                 setEditItemId(id);
+                setBusqueda(editItem.fichaPersonal?.ciIdentidad ?? "");
+                setFoto(editItem.fichaPersonal?.foto ?? '')
+
+
+                if (editItem.fichaPersonal !== null) {
+
+                    const editItemWithLabel = {
+                        ...editItem,
+                        fichaPersonal: {
+                            ...editItem.fichaPersonal,
+                            label: `${editItem.fichaPersonal.ciIdentidad} || ${editItem.fichaPersonal.apellidos} ${editItem.fichaPersonal.nombres}`,
+                        },
+                    };
+                    setListFperonales([editItemWithLabel.fichaPersonal]);
+                }
+
+
             }
         }
     };
@@ -196,7 +215,7 @@ function FichaPersonal() {
                     });
                     setFormData({
                         idFichaFamiliar: 0,
-                        visitaDomiciliar: false,
+                        visitaDomiciliaria: false,
                         jefaturaFamiliar: '',
                         numIntegrantes: 0,
                         numAdultos: 0,
@@ -221,12 +240,14 @@ function FichaPersonal() {
                     console.error("Error al actualizar el formulario:", error);
                 });
         }
+        console.log('Datos enviados:', { formData });
+
     };
 
     const resetForm = () => {
         setFormData({
             idFichaFamiliar: 0,
-            visitaDomiciliar: false,
+            visitaDomiciliaria: false,
             jefaturaFamiliar: '',
             numIntegrantes: 0,
             numAdultos: 0,
@@ -244,7 +265,6 @@ function FichaPersonal() {
 
 
     const loadRelacion = () => {
-
 
         // console.log("4 SIN EDAD")
         fichaPersonalService
@@ -290,12 +310,11 @@ function FichaPersonal() {
 
     return (
 
-        <Fieldset className="fgrid col-fixed " style={{ display: 'flex', justifyContent: 'center' }}>
-
+        <Fieldset className="" style={{ display: 'flex', justifyContent: 'center' }}>
             <Card
                 header={cardHeader}
-                className="border-solid border-red-800 border-3 flex-1 flex-wrap"
-                style={{ width: "1200px", marginLeft: "90px", marginTop: "15px", marginBottom: "35px", height: "1125px" }}
+                className="border-solid border-red-800 border-3 "
+                style={{ width: "1200px", marginBottom: "35px" }}
             >
 
                 <div
@@ -306,104 +325,115 @@ function FichaPersonal() {
                         Ficha de Familiar
                     </h1>
                 </div>
-                <section className='container'>
+                <section className="flex justify-content-center flex-wrap container">
+
+                    <Fieldset legend="Filtros de busqueda" >
+                        <div style={{ textAlign: 'right', marginRight: "", position: "absolute", top: "50px", right: "30px" }}>
+                            <label className="font-medium w-auto min-w-min" htmlFor="rangoEdad" style={{ marginRight: "15px" }}>Limpiar filtros:</label>
+
+                            <Button icon="pi pi-times" rounded severity="danger" aria-label="Cancel" onClick={() => resetFiltro()} />
+                        </div>
+
+                        <section className="layout">
+                            <div className="grow1 marginLeft">
+                                <div input-box>
+                                    <label className="font-medium w-auto min-w-min" htmlFor='genero'>Cedula o Nombre:</label>
+
+                                    <div className="flex-1">
+                                        <InputText
+                                            placeholder="Cedula de identidad"
+                                            id="integer"
+                                            // keyfilter="int"
+                                            onChange={(e) => {
+                                                // Actualizar el estado usando setFormData
+                                                setListFperonales([]); // Asignar un arreglo vacío para vaciar el estado listFperonales
+
+                                                setBusqueda(e.currentTarget.value);
+
+                                                // Luego, llamar a loadRelacion después de que se actualice el estado
+                                                loadRelacion();
+                                            }}
+
+                                            onKeyUp={(e) => {
+                                                setListFperonales([]); // Asignar un arreglo vacío para vaciar el estado listFperonales
+
+                                                setBusqueda(e.currentTarget.value);
+
+                                                // Luego, llamar a loadRelacion después de que se actualice el estado
+                                                loadRelacion();
+                                                loadRelacion(); // Llama a tu método aquí o realiza las acciones necesarias.
+                                            }}
+
+                                            value={busqueda}
+                                        />
+
+                                        <Button icon="pi pi-search" className="p-button-warning" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="grow1 shrink0">
+                                <div>
+                                    <label className="font-medium w-auto min-w-min" htmlFor="fichaPersonal">Resultados de la busqueda:</label>
+                                    <Dropdown
+                                        className="text-2xl"
+                                        id="tiempo_dedicacion"
+                                        name="tiempo_dedicacion"
+                                        style={{ width: "100%" }}
+                                        options={listFperonales}
+                                        onChange={(e) => {
+                                            setFormData({
+                                                ...formData,
+                                                fichaPersonal: {
+                                                    idFichaPersonal: parseInt(e.value), foto: '',
+                                                    apellidos: '',
+                                                    nombres: '',
+                                                    ciIdentidad: '',
+                                                    nacionalidad: '',
+                                                    fechaNacimiento: '',
+                                                    rangoEdad: null,
+                                                    genero: '',
+                                                    etnia: null,
+                                                    parroquia: null,
+                                                    zona: '',
+                                                    barrioSector: '',
+                                                    direccion: '',
+                                                    referencia: '',
+                                                    coordenadaX: 0,
+                                                    coordenadaY: 0,
+                                                    estVinculacion: true
+                                                }
+                                            });
+                                            cargarFoto(parseInt(e.value))
+                                            // loadData()
+                                            console.log(formData)
+                                        }}
+                                        value={formData.fichaPersonal}
+                                        optionLabel="label"
+                                        optionValue="idFichaPersonal"
+                                        placeholder="Seleccione una persona"
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <div style={{ display: "grid", placeItems: "center" }}>
+                                    <img
+                                        src={foto}
+                                        alt="FotoNNA"
+                                        style={{
+                                            // width: "80px",
+                                            height: "80px",
+                                            borderRadius: "50%", // Borde redondeado
+                                            border: "2px solid gray", // Borde gris
+                                        }}
+                                    />
+                                </div>
+                            </div>
+                        </section>
+
+
+                    </Fieldset>
 
                     <form onSubmit={editMode ? handleUpdate : handleSubmit} className='form' encType="multipart/form-data">
-                        <Fieldset legend="Filtros de busqueda" >
-                            <div style={{ textAlign: 'right', marginRight: "", position: "absolute", top: "30px", right: "10px" }}>
-                                <label className="font-medium w-auto min-w-min" htmlFor="rangoEdad" style={{ marginRight: "15px" }}>Limpiar filtros:</label>
-
-                                <Button icon="pi pi-times" rounded severity="danger" aria-label="Cancel" onClick={() => resetFiltro()} />
-                            </div>
-
-                            <section className="layout">
-                                <div className="grow1 marginLeft">
-                                    <div input-box>
-                                        <label className="font-medium w-auto min-w-min" htmlFor='genero'>Cedula o Nombre:</label>
-
-                                        <div className="flex-1">
-                                            <InputText
-                                                placeholder="Cedula de identidad"
-                                                id="integer"
-                                                // keyfilter="int"
-                                                onChange={(e) => {
-                                                    // Actualizar el estado usando setFormData
-                                                    setBusqueda(e.currentTarget.value);
-
-                                                    // Luego, llamar a loadRelacion después de que se actualice el estado
-                                                    loadRelacion();
-                                                }}
-                                                value={busqueda}
-                                            />
-
-                                            <Button icon="pi pi-search" className="p-button-warning" />
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="grow1 shrink0">
-                                    <div>
-                                        <label className="font-medium w-auto min-w-min" htmlFor="fichaPersonal">Resultados de la busqueda:</label>
-                                        <Dropdown
-                                            className="text-2xl"
-                                            id="tiempo_dedicacion"
-                                            name="tiempo_dedicacion"
-                                            style={{ width: "100%" }}
-                                            options={listFperonales}
-                                            onChange={(e) => {
-                                                setFormData({
-                                                    ...formData,
-                                                    fichaPersonal: {
-                                                        idFichaPersonal: parseInt(e.value), foto: '',
-                                                        apellidos: '',
-                                                        nombres: '',
-                                                        ciIdentidad: '',
-                                                        nacionalidad: '',
-                                                        fechaNacimiento: '',
-                                                        rangoEdad: null,
-                                                        genero: '',
-                                                        etnia: null,
-                                                        parroquia: null,
-                                                        zona: '',
-                                                        barrioSector: '',
-                                                        direccion: '',
-                                                        referencia: '',
-                                                        coordenadaX: 0,
-                                                        coordenadaY: 0,
-                                                        estVinculacion: true
-                                                    }
-                                                });
-                                                cargarFoto(parseInt(e.value))
-                                                // loadData()
-                                                console.log(formData)
-                                            }}
-                                            value={formData.fichaPersonal}
-                                            optionLabel="label"
-                                            optionValue="idFichaPersonal"
-                                            placeholder="Seleccione una persona"
-                                        />
-                                    </div>
-                                </div>
-                                <div>
-                                    <div style={{ display: "grid", placeItems: "center" }}>
-                                        <img
-                                            src={foto}
-                                            alt="FotoNNA"
-                                            style={{
-                                                // width: "80px",
-                                                height: "80px",
-                                                borderRadius: "50%", // Borde redondeado
-                                                border: "2px solid gray", // Borde gris
-                                            }}
-                                        />
-                                    </div>
-                                </div>
-                            </section>
-
-
-                        </Fieldset>
-
-
-
 
                         <div className="column">
                             <div className='column' style={{ width: "50%" }}>
@@ -465,8 +495,8 @@ function FichaPersonal() {
                                                             id="genSI"
                                                             name="genSI"
                                                             value="true"
-                                                            checked={formData.visitaDomiciliar === true}
-                                                            onChange={(e) => setFormData({ ...formData, visitaDomiciliar: true })}
+                                                            checked={formData.visitaDomiciliaria === true}
+                                                            onChange={(e) => setFormData({ ...formData, visitaDomiciliaria: true })}
                                                         />
                                                         <span>SI</span>
                                                     </label>
@@ -477,8 +507,8 @@ function FichaPersonal() {
                                                             id="genNO"
                                                             name="genNO"
                                                             value="false"
-                                                            checked={formData.visitaDomiciliar === false}
-                                                            onChange={(e) => setFormData({ ...formData, visitaDomiciliar: false })}
+                                                            checked={formData.visitaDomiciliaria === false}
+                                                            onChange={(e) => setFormData({ ...formData, visitaDomiciliaria: false })}
 
                                                         />
                                                         <span>NO</span>
@@ -676,7 +706,36 @@ function FichaPersonal() {
 
                         </div>
 
-
+                        <div className='btnSend'>
+                            {/* <button type="submit"
+                                    className='btn' >Registrarse</button> */}
+                            <div className="flex align-items-center justify-content-center w-auto min-w-min"
+                                style={{ gap: "25px" }}>
+                                <Button
+                                    type="submit"
+                                    label={editMode ? "Actualizar" : "Guardar"}
+                                    className="btn"
+                                    rounded
+                                    style={{
+                                        width: "100px",
+                                    }}
+                                    onClick={editMode ? handleUpdate : handleSubmit}
+                                />
+                                <Button
+                                    type="button"
+                                    label="Cancelar"
+                                    className="btn"
+                                    style={{
+                                        width: "100px",
+                                    }}
+                                    rounded
+                                    onClick={() => {
+                                        resetForm();
+                                        resetFiltro();
+                                        setEditMode(false);
+                                    }} />
+                            </div>
+                        </div>
 
                     </form>
                     {/* </div> */}
@@ -711,8 +770,8 @@ function FichaPersonal() {
                                     className="text-center"
                                     key={ficha.idFichaFamiliar?.toString()}
                                 >
-
-                                    <td>{ficha.visitaDomiciliar}</td>
+                                    <td>{ficha.idFichaFamiliar}</td>
+                                    <td>{ficha.visitaDomiciliaria ? "SI" : "NO"}</td>
                                     <td>{ficha.jefaturaFamiliar}</td>
                                     <td>{ficha.tipoFamilia?.nombreTipo}</td>
                                     <td>{ficha.numIntegrantes}</td>

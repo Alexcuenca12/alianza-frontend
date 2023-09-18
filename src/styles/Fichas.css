@@ -1,11 +1,8 @@
 .container {
     position: relative;
-    /* max-width: 1000px; */
     width: 100%;
-    /* background: #ffffffae; */
     padding: 25px;
-    border-radius: 8px;
-    /* box-shadow: 0 0 15px rgba(0, 0, 0, 0.1); */
+    /* border-radius: 8px; */
 }
 
 
@@ -436,25 +433,4 @@ label:last-child span {
 
     justify-content: center;
     align-items: center;
-}
-
-
-/* layout filtros */
-.layout {
-    width: 100%;
-
-    display: flex;
-    gap: 16px;
-}
-
-.grow1 {
-    flex-grow: 1;
-}
-
-.shrink0 {
-    flex-shrink: 0;
-}
-
-.marginLeft {
-    margin-left: auto;
 }

@@ -3,7 +3,7 @@ import { ITipoFamilia } from "./ITipoFamilia";
 
 export interface IFichaFamiliar {
     idFichaFamiliar: number;
-    visitaDomiciliar: boolean;
+    visitaDomiciliaria: boolean;
     jefaturaFamiliar: string;
     numIntegrantes: number;
     numAdultos: number;
