@@ -19,6 +19,14 @@ export class FichaPersonalService {
         return this.api.get("get").then((res) => res.data);
     }
 
+    getByPersona(est: boolean, busqueda: string) {
+        busqueda = busqueda || "NA";
+        return this.api
+          .get(`busquedaCiNombre/${est}/${busqueda}`)
+          .then((res) => res.data);
+      }
+    
+
     getBusquedaRE(ci: string, gen: string, rang: number, est: boolean) {
         //Método para listar todas los Usuarios
         ci = ci || "NA";

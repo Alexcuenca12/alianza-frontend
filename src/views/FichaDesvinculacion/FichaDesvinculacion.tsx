@@ -311,7 +311,7 @@ function FichaDesvinculacion() {
       <Card
         header={cardHeader}
         className="border-solid border-red-800 border-3 flex-1 flex-wrap"
-        style={{ width: "1200px", marginBottom: "35px" }}
+        style={{ width: "90%", marginLeft: "7%", height: "100%" }}
       >
         <div
           className="h1-rem"
@@ -457,13 +457,21 @@ function FichaDesvinculacion() {
                       onChange={(e) => {
                         const selectedDate =
                           e.value instanceof Date ? e.value : null;
-                        const formattedDate = selectedDate
-                          ? selectedDate.toISOString().split("T")[0]
-                          : "";
-                        setFormData({
-                          ...formData,
-                          fechaDesvinculacion: formattedDate,
-                        });
+                        if (selectedDate) {
+                          selectedDate.setDate(selectedDate.getDate() + 1);
+                          const formattedDate = selectedDate
+                            .toISOString()
+                            .split("T")[0];
+                          setFormData({
+                            ...formData,
+                            fechaDesvinculacion: formattedDate,
+                          });
+                        } else {
+                          setFormData({
+                            ...formData,
+                            fechaDesvinculacion: "", // Si no se selecciona ninguna fecha
+                          });
+                        }
                       }}
                       value={
                         formData.fechaDesvinculacion

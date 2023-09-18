@@ -4,15 +4,38 @@ import { FileUpload } from "primereact/fileupload";
 import { Button } from "primereact/button";
 import { Fieldset } from "primereact/fieldset";
 import { Card } from "primereact/card";
-import { InputTextarea } from 'primereact/inputtextarea';
-  
+import { InputTextarea } from "primereact/inputtextarea";
+
 import cardHeader from "../../shared/CardHeader";
 import { IFichaSalud } from "../../interfaces/IFichaSalud";
+import { IFichaPersonal } from "../../interfaces/IFichaPersonal";
+import { FichaPersonalService } from "../../services/FichaPersonalService";
 import { FichaSaludService } from "../../services/FichaSaludService";
 import swal from "sweetalert";
 
-function FichaInscripcionContext() {
-  
+function FichaSaludContext() {
+  const [idPersona, setIDPersona] = useState<number>(0);
+
+  const [formDataPersona, setFormDataPersona] = useState<IFichaPersonal>({
+    idFichaPersonal: 0,
+    foto: "",
+    apellidos: "",
+    nombres: "",
+    ciIdentidad: "",
+    nacionalidad: "",
+    fechaNacimiento: "",
+    rangoEdad: null,
+    genero: "",
+    etnia: null,
+    parroquia: null,
+    zona: "",
+    barrioSector: "",
+    direccion: "",
+    referencia: "",
+    coordenadaX: 0,
+    coordenadaY: 0,
+    estVinculacion: true,
+  });
   const [contra1, setcontra1] = useState<IFichaSalud[]>([]);
   const [formData, setFormData] = useState<IFichaSalud>({
     idFichaSalud: 0,
@@ -23,8 +46,34 @@ function FichaInscripcionContext() {
     tipoDiscapacidadFichaSalud: "",
     porcentajeDiscapacidadFichaSalud: 0,
     enfermedadesPrevalentesFichaSalud: "",
-    fichaInscripcion: null,
+    fichaPersonal: null,
   });
+
+  const personalService = new FichaPersonalService();
+  const [cedula, setCedula] = useState<string>("");
+
+  const buscarPorCedula = () => {
+    if (cedula.trim() === "") {
+      swal("Advertencia", "Ingrese una cédula válida para buscar", "warning");
+      return;
+    }
+    const estBoolean = formDataPersona.estVinculacion;
+    personalService
+      .getByPersona(estBoolean, cedula)
+      .then((data) => {
+        setFormDataPersona(data);
+        setIDPersona(data.idFichaPersonal);
+        setFormData({
+          ...formData,
+          fichaPersonal: {
+            idFichaPersonal: data.idFichaPersonal,
+          },
+        });
+      })
+      .catch((error) => {
+        console.error("Error al buscar por cédula:", error);
+      });
+  };
 
   const fileUploadRef = useRef<FileUpload>(null);
   const [dataLoaded, setDataLoaded] = useState(false);
@@ -54,10 +103,8 @@ function FichaInscripcionContext() {
       !formData.condicionesMedicas ||
       !formData.pesoFichaSalud ||
       !formData.tallaFichaSalud ||
-      !formData.discapacidadNNAFichaSalud ||
       !formData.tipoDiscapacidadFichaSalud ||
-      !formData.enfermedadesPrevalentesFichaSalud ||
-      !formData.porcentajeDiscapacidadFichaSalud
+      !formData.enfermedadesPrevalentesFichaSalud
     ) {
       swal("Advertencia", "Por favor, complete todos los campos", "warning");
       return;
@@ -162,7 +209,7 @@ function FichaInscripcionContext() {
             tipoDiscapacidadFichaSalud: "",
             porcentajeDiscapacidadFichaSalud: 0,
             enfermedadesPrevalentesFichaSalud: "",
-            fichaInscripcion: null,
+            fichaPersonal: null,
           });
           setcontra1(
             contra1.map((contra) =>
@@ -187,7 +234,7 @@ function FichaInscripcionContext() {
       tipoDiscapacidadFichaSalud: "",
       porcentajeDiscapacidadFichaSalud: 0,
       enfermedadesPrevalentesFichaSalud: "",
-      fichaInscripcion: null,
+      fichaPersonal: null,
     });
     setEditMode(false);
     setEditItemId(undefined);
@@ -204,11 +251,11 @@ function FichaInscripcionContext() {
       <Card
         header={cardHeader}
         className="border-solid border-red-800 border-3 flex-1 flex-wrap"
-        style={{ width: "1350px", marginLeft: "90px", height: "688px" }}
+        style={{ width: "90%", marginLeft: "7%", height: "100%" }}
       >
         <div
           className="h1-rem"
-          style={{ marginLeft: "42%", marginBottom: "20px" }}
+          style={{ marginLeft: "40%", marginBottom: "20px" }}
         >
           <h1 className="text-5xl font-smibold lg:md-2  w-full h-full max-w-full max-h-full min-w-min">
             Ficha Médica
@@ -223,6 +270,28 @@ function FichaInscripcionContext() {
             <div className="flex flex-wrap flex-row">
               <div className="flex align-items-center justify-content-center">
                 <div className="flex flex-column flex-wrap gap-4">
+                  <div className="flex flex-wrap w-full h-full  justify-content-between">
+                    <div className="flex align-items-center justify-content-center w-auto min-w-min">
+                      <InputText
+                        className="text-2xl"
+                        placeholder="Ingrese la cédula"
+                        id="cedula"
+                        name="cedula"
+                        style={{ width: "221px" }}
+                        onChange={(e) => setCedula(e.currentTarget.value)}
+                        value={cedula}
+                      />
+                    </div>
+                    <div className="flex align-items-center justify-content-center w-auto min-w-min">
+                      <Button
+                        type="button"
+                        label="Buscar por Cédula"
+                        className="w-full text-3xl min-w-min"
+                        rounded
+                        onClick={buscarPorCedula}
+                      />
+                    </div>
+                  </div>
                   <div className="flex flex-wrap w-full h-full  justify-content-between">
                     <label
                       htmlFor="condiciones"
@@ -338,6 +407,30 @@ function FichaInscripcionContext() {
                   className="flex flex-column flex-wrap gap-4"
                   style={{ marginTop: "-25px", marginLeft: "25px" }}
                 >
+                  {" "}
+                  <div className="flex flex-wrap w-full h-full  justify-content-between">
+                    <label
+                      htmlFor="doi"
+                      className="text-3xl font-medium w-auto min-w-min"
+                      style={{ marginRight: "20px", marginLeft: "25px" }}
+                    >
+                      Persona:
+                    </label>
+                    <InputText
+                      className="text-2xl"
+                      id="doi"
+                      disabled
+                      name="doi"
+                      style={{ width: "221px" }}
+                      onChange={(e) =>
+                        setFormDataPersona({
+                          ...formDataPersona,
+                          nombres: e.currentTarget.value,
+                        })
+                      }
+                      value={`${formDataPersona.nombres} ${formDataPersona.apellidos}`}
+                    />
+                  </div>
                   <div className="flex flex-wrap w-full h-full  justify-content-between">
                     <label
                       htmlFor="tipoDiscapacidad"
@@ -464,11 +557,11 @@ function FichaInscripcionContext() {
                 >
                   <td>{contrato.idFichaSalud}</td>
                   <td>{contrato.condicionesMedicas}</td>
-                  <td>{contrato.pesoFichaSalud}</td>
-                  <td>{contrato.tallaFichaSalud}</td>
-                  <td>{contrato.discapacidadNNAFichaSalud ? 'Si' : 'No'}</td>
+                  <td>{contrato.pesoFichaSalud + "kg"}</td>
+                  <td>{contrato.tallaFichaSalud + "cm"}</td>
+                  <td>{contrato.discapacidadNNAFichaSalud ? "Si" : "No"}</td>
                   <td>{contrato.tipoDiscapacidadFichaSalud}</td>
-                  <td>{contrato.porcentajeDiscapacidadFichaSalud +"%"}</td>
+                  <td>{contrato.porcentajeDiscapacidadFichaSalud + "%"}</td>
                   <td>{contrato.enfermedadesPrevalentesFichaSalud}</td>
                   <td>
                     <Button
@@ -515,4 +608,4 @@ function FichaInscripcionContext() {
   );
 }
 
-export default FichaInscripcionContext;
+export default FichaSaludContext;

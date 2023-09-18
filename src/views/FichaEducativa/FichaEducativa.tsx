@@ -1,23 +1,66 @@
 import React, { useEffect, useState, useRef } from "react";
 import { InputText } from "primereact/inputtext";
-import { FileUpload, FileUploadSelectEvent } from "primereact/fileupload";
+import { FileUpload } from "primereact/fileupload";
 import { Button } from "primereact/button";
-import { Calendar } from "primereact/calendar";
 import { Fieldset } from "primereact/fieldset";
 import { Card } from "primereact/card";
-import { Dropdown } from "primereact/dropdown";
 import cardHeader from "../../shared/CardHeader";
-import { Divider } from "primereact/divider";
 import { IFichaEducativa } from "../../interfaces/IFichaEducativa";
+import { IFichaPersonal } from "../../interfaces/IFichaPersonal";
 import { FichaEducativaService } from "../../services/FichaEducativaService";
+import { FichaPersonalService } from "../../services/FichaPersonalService";
 import swal from "sweetalert";
 import { InputTextarea } from "primereact/inputtextarea";
 
 function FichaInscripcionContext() {
-  //Session Storage
-  /*const userData = sessionStorage.getItem("user");
-  const userObj = JSON.parse(userData || "{}");
-  const idPersona = userObj.id;*/
+  const [idPersona, setIDPersona] = useState<number>(0);
+  const personalService = new FichaPersonalService();
+
+  const [cedula, setCedula] = useState<string>("");
+  const [formDataPersona, setFormDataPersona] = useState<IFichaPersonal>({
+    idFichaPersonal: 0,
+    foto: "",
+    apellidos: "",
+    nombres: "",
+    ciIdentidad: "",
+    nacionalidad: "",
+    fechaNacimiento: "",
+    rangoEdad: null,
+    genero: "",
+    etnia: null,
+    parroquia: null,
+    zona: "",
+    barrioSector: "",
+    direccion: "",
+    referencia: "",
+    coordenadaX: 0,
+    coordenadaY: 0,
+    estVinculacion: false,
+  });
+  const buscarPorCedula = () => {
+    if (cedula.trim() === "") {
+      swal("Advertencia", "Ingrese una cédula válida para buscar", "warning");
+      return;
+    }
+    personalService
+      .getByPersona(true,cedula)
+      .then((data) => {
+        console.log("p1", data);
+        setFormDataPersona(data);
+        console.log("p2", data);
+        setIDPersona(data.idFichaPersonal);
+        console.log("p3", data);
+        setFormData({
+          ...formData,
+          fichaPersonal: {
+            idFichaPersonal: data.idFichaPersonal,
+          },
+        });
+      })
+      .catch((error) => {
+        console.error("Error al buscar por cédula:", error);
+      });
+  };
 
   const [contra1, setcontra1] = useState<IFichaEducativa[]>([]);
   const [formData, setFormData] = useState<IFichaEducativa>({
@@ -28,7 +71,7 @@ function FichaInscripcionContext() {
     jornadaEducativa: "",
     observacionesEducativa: "",
     gradoEducativo: "",
-    fichaInscripcion: null,
+    fichaPersonal: null,
   });
 
   const fileUploadRef = useRef<FileUpload>(null);
@@ -166,7 +209,7 @@ function FichaInscripcionContext() {
             jornadaEducativa: "",
             observacionesEducativa: "",
             gradoEducativo: "",
-            fichaInscripcion: null,
+            fichaPersonal: null,
           });
           setcontra1(
             contra1.map((contra) =>
@@ -190,7 +233,7 @@ function FichaInscripcionContext() {
       jornadaEducativa: "",
       observacionesEducativa: "",
       gradoEducativo: "",
-      fichaInscripcion: null,
+      fichaPersonal: null,
     });
     setEditMode(false);
     setEditItemId(undefined);
@@ -207,7 +250,7 @@ function FichaInscripcionContext() {
       <Card
         header={cardHeader}
         className="border-solid border-red-800 border-3 flex-1 flex-wrap"
-        style={{ marginLeft: "90px", height: "100%" }}
+        style={{ width: "90%", marginLeft: "7%", height: "100%" }}
       >
         <div
           className="h1-rem"
@@ -444,7 +487,7 @@ function FichaInscripcionContext() {
                       onClick={() =>
                         handleEdit(contrato.idFichaEducativa?.valueOf())
                       }
-                    // Agrega el evento onClick para la operación de editar
+                      // Agrega el evento onClick para la operación de editar
                     />
                     <Button
                       type="button"
