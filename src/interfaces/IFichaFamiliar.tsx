@@ -1,3 +1,4 @@
+import { IFichaPersonal } from "./IFichaPersonal";
 import { ITipoFamilia } from "./ITipoFamilia";
 
 export interface IFichaFamiliar {
@@ -13,6 +14,7 @@ export interface IFichaFamiliar {
     discapacidadIntegrantes: boolean;
     otrasSituaciones: string;
     tipoFamilia: ITipoFamilia | null;
- 
+    fichaPersonal: IFichaPersonal | null;
+
 }
 

@@ -13,19 +13,32 @@ import cardHeader from "../../shared/CardHeader";
 import { Calendar } from "primereact/calendar";
 import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
+import { InputText } from 'primereact/inputtext';
+
+
 import { ICalcularEdad } from '../../interfaces/ICalcularEdad';
 import CalcularEdad from "../../common/CalcularEdad";
+import { FichaPersonalService } from "../../services/FichaPersonalService";
+import { IFichaPersonal } from "../../interfaces/IFichaPersonal";
 
 
 function FichaPersonal() {
 
     const service = new FichaFamiliarService();
+    const fichaPersonalService = new FichaPersonalService();
+
 
 
     const fileUploadRef = useRef<FileUpload>(null);
     const [dataLoaded, setDataLoaded] = useState(false);
+    const [busqueda, setBusqueda] = useState<string>('');
+    const [foto, setFoto] = useState<string>('https://cdn-icons-png.flaticon.com/128/666/666201.png');
+
+
     const [editItemId, setEditItemId] = useState<number | undefined>(undefined);
     const [editMode, setEditMode] = useState(false);
+
+    const [listFperonales, setListFperonales] = useState<IFichaPersonal[]>([]);
     const [listFichaFamiliar, setFichaFamiliar] = useState<IFichaFamiliar[]>([]);
     const [formData, setFormData] = useState<IFichaFamiliar>({
         idFichaFamiliar: 0,
@@ -39,7 +52,8 @@ function FichaPersonal() {
         organizacionBeneficio: '',
         discapacidadIntegrantes: false,
         otrasSituaciones: '',
-        tipoFamilia: null
+        tipoFamilia: null,
+        fichaPersonal: null
     });
 
     //LISTA DE PARA CARGAR LOS OBJETOS TRAIDOS DEL BACK PARA LOS COMBOS
@@ -192,7 +206,8 @@ function FichaPersonal() {
                         organizacionBeneficio: '',
                         discapacidadIntegrantes: false,
                         otrasSituaciones: '',
-                        tipoFamilia: null
+                        tipoFamilia: null,
+                        fichaPersonal: null
                     });
                     setFichaFamiliar(
                         listFichaFamiliar.map((contra) =>
@@ -221,11 +236,51 @@ function FichaPersonal() {
             organizacionBeneficio: '',
             discapacidadIntegrantes: false,
             otrasSituaciones: '',
-            tipoFamilia: null
+            tipoFamilia: null,
+            fichaPersonal: null
         });
 
     };
 
+
+    const loadRelacion = () => {
+
+
+        // console.log("4 SIN EDAD")
+        fichaPersonalService
+            .getBusquedaRelacion(true, busqueda)
+            .then((data: IFichaPersonal[]) => {
+                const dataWithLabel = data.map((object) => ({
+                    ...object,
+                    label: `${object.ciIdentidad} || ${object.apellidos} ${object.nombres}`,
+                }));
+
+                setListFperonales(dataWithLabel); // Establecer los datos procesados en el estado
+                // setDataLoaded(true); // Puedes marcar los datos como cargados si es necesario
+            })
+            .catch((error) => {
+                console.error("Error al obtener los datos:", error);
+            });
+
+
+        console.log('Datos enviados:', { listFperonales });
+
+    };
+
+    const cargarFoto = () => {
+        const Foto = listFperonales.find((persona) => persona.idFichaPersonal === formData.fichaPersonal?.idFichaPersonal);
+
+        if (Foto) {
+            // Actualiza formData con la foto correspondiente
+            setFoto(Foto.foto);
+        }
+    }
+
+    const resetFiltro = () => {
+        setBusqueda('')
+        setFoto('https://cdn-icons-png.flaticon.com/128/666/666201.png')
+
+    };
 
 
     return (
@@ -249,6 +304,102 @@ function FichaPersonal() {
                 <section className='container'>
 
                     <form onSubmit={editMode ? handleUpdate : handleSubmit} className='form' encType="multipart/form-data">
+                        <Fieldset legend="Filtros de busqueda" >
+                            <div style={{ textAlign: 'right', marginRight: "", position: "absolute", top: "30px", right: "10px" }}>
+                                <label className="font-medium w-auto min-w-min" htmlFor="rangoEdad" style={{ marginRight: "15px" }}>Limpiar filtros:</label>
+
+                                <Button icon="pi pi-times" rounded severity="danger" aria-label="Cancel" onClick={() => resetFiltro()} />
+                            </div>
+
+                            <section className="layout">
+                                <div className="grow1 marginLeft">
+                                    <div input-box>
+                                        <label className="font-medium w-auto min-w-min" htmlFor='genero'>Cedula o Nombre:</label>
+
+                                        <div className="flex-1">
+                                            <InputText
+                                                placeholder="Cedula de identidad"
+                                                id="integer"
+                                                // keyfilter="int"
+                                                onChange={(e) => {
+                                                    // Actualizar el estado usando setFormData
+                                                    setBusqueda(e.currentTarget.value);
+
+                                                    // Luego, llamar a loadData después de que se actualice el estado
+                                                    loadRelacion();
+                                                }}
+                                                value={busqueda}
+                                            />
+
+                                            <Button icon="pi pi-search" className="p-button-warning" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="grow1 shrink0">
+                                    <div>
+                                        <label className="font-medium w-auto min-w-min" htmlFor="fichaPersonal">Resultados de la busqueda:</label>
+                                        <Dropdown
+                                            className="text-2xl"
+                                            id="tiempo_dedicacion"
+                                            name="tiempo_dedicacion"
+                                            style={{ width: "100%" }}
+                                            options={listFperonales}
+                                            onChange={(e) => {
+                                                setFormData({
+                                                    ...formData,
+                                                    fichaPersonal: {
+                                                        idFichaPersonal: parseInt(e.value), foto: '',
+                                                        apellidos: '',
+                                                        nombres: '',
+                                                        ciIdentidad: '',
+                                                        nacionalidad: '',
+                                                        fechaNacimiento: '',
+                                                        rangoEdad: null,
+                                                        genero: '',
+                                                        etnia: null,
+                                                        parroquia: null,
+                                                        zona: '',
+                                                        barrioSector: '',
+                                                        direccion: '',
+                                                        referencia: '',
+                                                        coordenadaX: 0,
+                                                        coordenadaY: 0,
+                                                        estVinculacion: true
+                                                    }
+                                                });
+                                                cargarFoto()
+                                                // loadData()
+                                                console.log(formData)
+                                            }}
+                                            value={formData.fichaPersonal}
+                                            optionLabel="label"
+                                            optionValue="idFichaPersonal"
+                                            placeholder="Seleccione una persona"
+                                        />
+                                    </div>
+                                </div>
+                                <div>
+                                    <div style={{ display: "grid", placeItems: "center" }}>
+                                        <img
+                                            src={foto}
+                                            alt="FotoNNA"
+                                            style={{
+                                                // width: "80px",
+                                                height: "80px",
+                                                borderRadius: "50%", // Borde redondeado
+                                                border: "2px solid gray", // Borde gris
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            </section>
+
+
+                        </Fieldset>
+
+
+
+
                         <div className="column">
                             <div className='column' style={{ width: "50%" }}>
                                 <div className='input-box'>
