@@ -12,30 +12,13 @@ import { IFichaPersonal } from "../../interfaces/IFichaPersonal";
 import { FichaPersonalService } from "../../services/FichaPersonalService";
 import { FichaSaludService } from "../../services/FichaSaludService";
 import swal from "sweetalert";
+import { Dropdown } from "primereact/dropdown";
 
 function FichaSaludContext() {
-  const [idPersona, setIDPersona] = useState<number>(0);
+  const [busqueda, setBusqueda] = useState<string>("");
+  const [listFpersonales, setListFpersonales] = useState<IFichaPersonal[]>([]);
 
-  const [formDataPersona, setFormDataPersona] = useState<IFichaPersonal>({
-    idFichaPersonal: 0,
-    foto: "",
-    apellidos: "",
-    nombres: "",
-    ciIdentidad: "",
-    nacionalidad: "",
-    fechaNacimiento: "",
-    rangoEdad: null,
-    genero: "",
-    etnia: null,
-    parroquia: null,
-    zona: "",
-    barrioSector: "",
-    direccion: "",
-    referencia: "",
-    coordenadaX: 0,
-    coordenadaY: 0,
-    estVinculacion: true,
-  });
+
   const [contra1, setcontra1] = useState<IFichaSalud[]>([]);
   const [formData, setFormData] = useState<IFichaSalud>({
     idFichaSalud: 0,
@@ -50,28 +33,20 @@ function FichaSaludContext() {
   });
 
   const personalService = new FichaPersonalService();
-  const [cedula, setCedula] = useState<string>("");
 
-  const buscarPorCedula = () => {
-    if (cedula.trim() === "") {
-      swal("Advertencia", "Ingrese una cédula válida para buscar", "warning");
-      return;
-    }
-    const estBoolean = formDataPersona.estVinculacion;
+
+  const loadRelacion = () => {
     personalService
-      .getByPersona(estBoolean, cedula)
-      .then((data) => {
-        setFormDataPersona(data);
-        setIDPersona(data.idFichaPersonal);
-        setFormData({
-          ...formData,
-          fichaPersonal: {
-            idFichaPersonal: data.idFichaPersonal,
-          },
-        });
+      .getBusquedaRelacion(true, busqueda)
+      .then((data: IFichaPersonal[]) => {
+        const dataWithLabel = data.map((object) => ({
+          ...object,
+          label: `${object.ciIdentidad} // ${object.apellidos} ${object.nombres}`,
+        }));
+        setListFpersonales(dataWithLabel);
       })
       .catch((error) => {
-        console.error("Error al buscar por cédula:", error);
+        console.error("Error al obtener los datos:", error);
       });
   };
 
@@ -267,31 +242,86 @@ function FichaSaludContext() {
             onSubmit={editMode ? handleUpdate : handleSubmit}
             encType="multipart/form-data"
           >
-            <div className="flex flex-wrap flex-row">
-              <div className="flex align-items-center justify-content-center">
-                <div className="flex flex-column flex-wrap gap-4">
-                  <div className="flex flex-wrap w-full h-full  justify-content-between">
-                    <div className="flex align-items-center justify-content-center w-auto min-w-min">
+            <Fieldset legend="Filtros de busqueda" style={{marginBottom:"20px"}}>
+              <section className="layout">
+                <div className="grow1 marginLeft">
+                  <div input-box>
+                    <label
+                      className="font-medium w-auto min-w-min"
+                      htmlFor="genero"
+                    >
+                      Cedula o Nombre:
+                    </label>
+                    <div className="flex-1">
                       <InputText
-                        className="text-2xl"
-                        placeholder="Ingrese la cédula"
-                        id="cedula"
-                        name="cedula"
-                        style={{ width: "221px" }}
-                        onChange={(e) => setCedula(e.currentTarget.value)}
-                        value={cedula}
-                      />
-                    </div>
-                    <div className="flex align-items-center justify-content-center w-auto min-w-min">
-                      <Button
-                        type="button"
-                        label="Buscar por Cédula"
-                        className="w-full text-3xl min-w-min"
-                        rounded
-                        onClick={buscarPorCedula}
+                        placeholder="Cedula de identidad"
+                        id="integer"
+                        onChange={(e) => {
+                          setBusqueda(e.currentTarget.value);
+                          loadRelacion();
+                        }}
+                        value={busqueda}
                       />
                     </div>
                   </div>
+                </div>
+
+                <div className="input-box">
+                  <div style={{ marginLeft: "-850px", marginTop: "10px" }}>
+                    <label
+                      className="text-3xl font-medium w-auto min-w-min"
+                      htmlFor="fichaPersonal"
+                      style={{ marginRight: "10px" }}
+                    >
+                      Resultados de la busqueda:
+                    </label>
+                    <Dropdown
+                      className="text-2xl"
+                      id="fichaPersonal"
+                      name="persona"
+                      style={{ width: "40%" }}
+                      options={listFpersonales}
+                      onChange={(e) => {
+                        setFormData({
+                          ...formData,
+                          fichaPersonal: {
+                            idFichaPersonal: parseInt(e.value),
+                            foto: "",
+                            apellidos: "",
+                            nombres: "",
+                            ciIdentidad: "",
+                            nacionalidad: "",
+                            fechaNacimiento: "",
+                            rangoEdad: null,
+                            genero: "",
+                            etnia: null,
+                            parroquia: null,
+                            zona: "",
+                            barrioSector: "",
+                            direccion: "",
+                            referencia: "",
+                            coordenadaX: 0,
+                            coordenadaY: 0,
+                            estVinculacion: true,
+                          },
+                        });
+                      }}
+                      value={
+                        formData.fichaPersonal
+                          ? formData.fichaPersonal.idFichaPersonal
+                          : null
+                      }
+                      optionLabel="label"
+                      optionValue="idFichaPersonal"
+                      placeholder="Seleccione una persona"
+                    />
+                  </div>
+                </div>
+              </section>
+            </Fieldset>
+            <div className="flex flex-wrap flex-row">
+              <div className="flex align-items-center justify-content-center">
+                <div className="flex flex-column flex-wrap gap-4">
                   <div className="flex flex-wrap w-full h-full  justify-content-between">
                     <label
                       htmlFor="condiciones"
@@ -407,30 +437,6 @@ function FichaSaludContext() {
                   className="flex flex-column flex-wrap gap-4"
                   style={{ marginTop: "-25px", marginLeft: "25px" }}
                 >
-                  {" "}
-                  <div className="flex flex-wrap w-full h-full  justify-content-between">
-                    <label
-                      htmlFor="doi"
-                      className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginRight: "20px", marginLeft: "25px" }}
-                    >
-                      Persona:
-                    </label>
-                    <InputText
-                      className="text-2xl"
-                      id="doi"
-                      disabled
-                      name="doi"
-                      style={{ width: "221px" }}
-                      onChange={(e) =>
-                        setFormDataPersona({
-                          ...formDataPersona,
-                          nombres: e.currentTarget.value,
-                        })
-                      }
-                      value={`${formDataPersona.nombres} ${formDataPersona.apellidos}`}
-                    />
-                  </div>
                   <div className="flex flex-wrap w-full h-full  justify-content-between">
                     <label
                       htmlFor="tipoDiscapacidad"

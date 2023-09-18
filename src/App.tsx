@@ -1,12 +1,11 @@
-
-import './App.css';
+import "./App.css";
 import { useReducer } from "react";
 import { AppRouter } from "./router/AppRouter";
 
 import { authReducer } from "./reducers/authReducer";
 import { AuthContext } from "./reducers/AuthContext";
-import "primereact/resources/themes/lara-light-indigo/theme.css"; 
-import "primereact/resources/primereact.min.css"; 
+import "primereact/resources/themes/lara-light-indigo/theme.css";
+import "primereact/resources/primereact.min.css";
 const init = () => {
   let sessionUser: any = sessionStorage.getItem("user");
   let user: any;
@@ -18,7 +17,6 @@ const init = () => {
   return user;
 };
 
-
 function App() {
   const [user, dispatchUser] = useReducer(authReducer, {}, init);
 
@@ -26,7 +24,6 @@ function App() {
     <AuthContext.Provider value={{ user, dispatchUser }}>
       <AppRouter />
     </AuthContext.Provider>
-
   );
 }
 

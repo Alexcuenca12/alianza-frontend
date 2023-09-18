@@ -12,12 +12,14 @@ import { IFichaRepresentante } from "../../interfaces/IFichaRepresentante";
 import { FichaRepresentanteService } from "../../services/FichaRepresentanteService";
 import swal from "sweetalert";
 import { InputTextarea } from "primereact/inputtextarea";
+import { IFichaPersonal } from "../../interfaces/IFichaPersonal";
+import { FichaPersonalService } from "../../services/FichaPersonalService";
 
 function FichaInscripcionContext() {
-  //Session Storage
-  /*const userData = sessionStorage.getItem("user");
-  const userObj = JSON.parse(userData || "{}");
-  const idPersona = userObj.id;*/
+  const [busqueda, setBusqueda] = useState<string>("");
+  const [listFpersonales, setListFpersonales] = useState<IFichaPersonal[]>([]);
+
+  const personalService = new FichaPersonalService();
 
   const [contra1, setcontra1] = useState<IFichaRepresentante[]>([]);
   const [formData, setFormData] = useState<IFichaRepresentante>({
@@ -34,7 +36,7 @@ function FichaInscripcionContext() {
     observacionesRepre: "",
     nivelInstruccionRepre: "",
     parentescoRepre: "",
-    fichaInscripcion: null,
+    fichaPersonal: null,
   });
 
   const fileUploadRef = useRef<FileUpload>(null);
@@ -42,6 +44,21 @@ function FichaInscripcionContext() {
   const [editMode, setEditMode] = useState(false);
   const [editItemId, setEditItemId] = useState<number | undefined>(undefined);
   const repreService = new FichaRepresentanteService();
+
+  const loadRelacion = () => {
+    personalService
+      .getBusquedaRelacion(true, busqueda)
+      .then((data: IFichaPersonal[]) => {
+        const dataWithLabel = data.map((object) => ({
+          ...object,
+          label: `${object.ciIdentidad} // ${object.apellidos} ${object.nombres}`,
+        }));
+        setListFpersonales(dataWithLabel);
+      })
+      .catch((error) => {
+        console.error("Error al obtener los datos:", error);
+      });
+  };
 
   const loadData = () => {
     repreService
@@ -186,7 +203,7 @@ function FichaInscripcionContext() {
             observacionesRepre: "",
             nivelInstruccionRepre: "",
             parentescoRepre: "",
-            fichaInscripcion: null,
+            fichaPersonal: null,
           });
           setcontra1(
             contra1.map((contra) =>
@@ -216,7 +233,7 @@ function FichaInscripcionContext() {
       observacionesRepre: "",
       nivelInstruccionRepre: "",
       parentescoRepre: "",
-      fichaInscripcion: null,
+      fichaPersonal: null,
     });
     setEditMode(false);
     setEditItemId(undefined);
@@ -249,6 +266,86 @@ function FichaInscripcionContext() {
             onSubmit={editMode ? handleUpdate : handleSubmit}
             encType="multipart/form-data"
           >
+                    <Fieldset
+              legend="Filtros de busqueda"
+              style={{ marginBottom: "20px", width: "83%"}}
+            >
+              <section className="layout">
+                <div className="grow1 marginLeft">
+                  <div input-box>
+                    <label
+                      className="font-medium w-auto min-w-min"
+                      htmlFor="genero"
+                    >
+                      Cedula o Nombre:
+                    </label>
+                    <div className="flex-1">
+                      <InputText
+                        placeholder="Cedula de identidad"
+                        id="integer"
+                        onChange={(e) => {
+                          setBusqueda(e.currentTarget.value);
+                          loadRelacion();
+                        }}
+                        value={busqueda}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="input-box">
+                  <div style={{ marginLeft: "-510px", marginTop: "20px" }}>
+                    <label
+                      className="text-3xl font-medium w-auto min-w-min"
+                      htmlFor="fichaPersonal"
+                      style={{ marginRight: "10px" }}
+                    >
+                      Resultados de la busqueda:
+                    </label>
+                    <Dropdown
+                      className="text-2xl"
+                      id="fichaPersonal"
+                      name="persona"
+                      style={{ width: "40%" }}
+                      options={listFpersonales}
+                      onChange={(e) => {
+                        setFormData({
+                          ...formData,
+                          fichaPersonal: {
+                            idFichaPersonal: parseInt(e.value),
+                            foto: "",
+                            apellidos: "",
+                            nombres: "",
+                            ciIdentidad: "",
+                            nacionalidad: "",
+                            fechaNacimiento: "",
+                            rangoEdad: null,
+                            genero: "",
+                            etnia: null,
+                            parroquia: null,
+                            zona: "",
+                            barrioSector: "",
+                            direccion: "",
+                            referencia: "",
+                            coordenadaX: 0,
+                            coordenadaY: 0,
+                            estVinculacion: true,
+                          },
+                        });
+                      }}
+                      value={
+                        formData.fichaPersonal
+                          ? formData.fichaPersonal.idFichaPersonal
+                          : null
+                      }
+                      optionLabel="label"
+                      optionValue="idFichaPersonal"
+                      placeholder="Seleccione una persona"
+                    />
+                  </div>
+                </div>
+              </section>
+            </Fieldset>
             <div className="flex flex-wrap flex-row">
               <div className="flex align-items-center justify-content-center">
                 <div className="flex flex-column flex-wrap gap-4">

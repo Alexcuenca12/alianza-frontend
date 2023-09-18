@@ -1,3 +1,5 @@
+import { IFichaPersonal } from "./IFichaPersonal";
+
 export interface IFichaSalud {
   idFichaSalud?: number;
   condicionesMedicas: string;
@@ -7,5 +9,5 @@ export interface IFichaSalud {
   tipoDiscapacidadFichaSalud: string;
   porcentajeDiscapacidadFichaSalud: number;
   enfermedadesPrevalentesFichaSalud: string;
-  fichaPersonal: object | null;
+  fichaPersonal: IFichaPersonal | null;
 }

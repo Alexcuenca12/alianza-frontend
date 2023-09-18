@@ -11,54 +11,26 @@ import { FichaEducativaService } from "../../services/FichaEducativaService";
 import { FichaPersonalService } from "../../services/FichaPersonalService";
 import swal from "sweetalert";
 import { InputTextarea } from "primereact/inputtextarea";
+import { Dropdown } from "primereact/dropdown";
 
 function FichaInscripcionContext() {
-  const [idPersona, setIDPersona] = useState<number>(0);
+  const [busqueda, setBusqueda] = useState<string>("");
+  const [listFpersonales, setListFpersonales] = useState<IFichaPersonal[]>([]);
+
   const personalService = new FichaPersonalService();
 
-  const [cedula, setCedula] = useState<string>("");
-  const [formDataPersona, setFormDataPersona] = useState<IFichaPersonal>({
-    idFichaPersonal: 0,
-    foto: "",
-    apellidos: "",
-    nombres: "",
-    ciIdentidad: "",
-    nacionalidad: "",
-    fechaNacimiento: "",
-    rangoEdad: null,
-    genero: "",
-    etnia: null,
-    parroquia: null,
-    zona: "",
-    barrioSector: "",
-    direccion: "",
-    referencia: "",
-    coordenadaX: 0,
-    coordenadaY: 0,
-    estVinculacion: false,
-  });
-  const buscarPorCedula = () => {
-    if (cedula.trim() === "") {
-      swal("Advertencia", "Ingrese una cédula válida para buscar", "warning");
-      return;
-    }
+  const loadRelacion = () => {
     personalService
-      .getByPersona(true,cedula)
-      .then((data) => {
-        console.log("p1", data);
-        setFormDataPersona(data);
-        console.log("p2", data);
-        setIDPersona(data.idFichaPersonal);
-        console.log("p3", data);
-        setFormData({
-          ...formData,
-          fichaPersonal: {
-            idFichaPersonal: data.idFichaPersonal,
-          },
-        });
+      .getBusquedaRelacion(true, busqueda)
+      .then((data: IFichaPersonal[]) => {
+        const dataWithLabel = data.map((object) => ({
+          ...object,
+          label: `${object.ciIdentidad} // ${object.apellidos} ${object.nombres}`,
+        }));
+        setListFpersonales(dataWithLabel);
       })
       .catch((error) => {
-        console.error("Error al buscar por cédula:", error);
+        console.error("Error al obtener los datos:", error);
       });
   };
 
@@ -266,6 +238,86 @@ function FichaInscripcionContext() {
             onSubmit={editMode ? handleUpdate : handleSubmit}
             encType="multipart/form-data"
           >
+            <Fieldset
+              legend="Filtros de busqueda"
+              style={{ marginBottom: "20px", width: "83%"}}
+            >
+              <section className="layout">
+                <div className="grow1 marginLeft">
+                  <div input-box>
+                    <label
+                      className="font-medium w-auto min-w-min"
+                      htmlFor="genero"
+                    >
+                      Cedula o Nombre:
+                    </label>
+                    <div className="flex-1">
+                      <InputText
+                        placeholder="Cedula de identidad"
+                        id="integer"
+                        onChange={(e) => {
+                          setBusqueda(e.currentTarget.value);
+                          loadRelacion();
+                        }}
+                        value={busqueda}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="input-box">
+                  <div style={{ marginLeft: "-510px", marginTop: "20px" }}>
+                    <label
+                      className="text-3xl font-medium w-auto min-w-min"
+                      htmlFor="fichaPersonal"
+                      style={{ marginRight: "10px" }}
+                    >
+                      Resultados de la busqueda:
+                    </label>
+                    <Dropdown
+                      className="text-2xl"
+                      id="fichaPersonal"
+                      name="persona"
+                      style={{ width: "40%" }}
+                      options={listFpersonales}
+                      onChange={(e) => {
+                        setFormData({
+                          ...formData,
+                          fichaPersonal: {
+                            idFichaPersonal: parseInt(e.value),
+                            foto: "",
+                            apellidos: "",
+                            nombres: "",
+                            ciIdentidad: "",
+                            nacionalidad: "",
+                            fechaNacimiento: "",
+                            rangoEdad: null,
+                            genero: "",
+                            etnia: null,
+                            parroquia: null,
+                            zona: "",
+                            barrioSector: "",
+                            direccion: "",
+                            referencia: "",
+                            coordenadaX: 0,
+                            coordenadaY: 0,
+                            estVinculacion: true,
+                          },
+                        });
+                      }}
+                      value={
+                        formData.fichaPersonal
+                          ? formData.fichaPersonal.idFichaPersonal
+                          : null
+                      }
+                      optionLabel="label"
+                      optionValue="idFichaPersonal"
+                      placeholder="Seleccione una persona"
+                    />
+                  </div>
+                </div>
+              </section>
+            </Fieldset>
             <div className="flex flex-wrap flex-row">
               <div className="flex align-items-center justify-content-center">
                 <div className="flex flex-column flex-wrap gap-4">
@@ -319,6 +371,7 @@ function FichaInscripcionContext() {
                     <label
                       htmlFor="tiempo_dedicacion"
                       className="text-3xl font-medium w-auto min-w-min"
+                      style={{ marginRight: "10px" }}
                     >
                       Referencia de la Ubicación:
                     </label>
@@ -340,7 +393,7 @@ function FichaInscripcionContext() {
                 </div>
                 <div
                   className="flex flex-column flex-wrap gap-4"
-                  style={{ marginTop: "5px", marginLeft: "25px" }}
+                  style={{ marginTop: "15px", marginLeft: "25px" }}
                 >
                   <div className="flex flex-wrap w-full h-full  justify-content-between">
                     <label

@@ -1,3 +1,5 @@
+import { IFichaPersonal } from "./IFichaPersonal";
+
 export interface IFichaEducativa {
   idFichaEducativa?: number;
   centroEducativo: string;
@@ -6,5 +8,5 @@ export interface IFichaEducativa {
   jornadaEducativa: string;
   observacionesEducativa: string;
   gradoEducativo: string;
-  fichaPersonal: object | null;
+  fichaPersonal: IFichaPersonal | null;
 }

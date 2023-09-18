@@ -1,3 +1,5 @@
+import { IFichaPersonal } from "./IFichaPersonal";
+
 export interface IFichaRepresentante {
   idFichaRepresentante?: number;
   nombresRepre: string;
@@ -12,5 +14,5 @@ export interface IFichaRepresentante {
   observacionesRepre: string;
   nivelInstruccionRepre: string;
   parentescoRepre: string;
-  fichaInscripcion: object | null;
+  fichaPersonal: IFichaPersonal | null;
 }
