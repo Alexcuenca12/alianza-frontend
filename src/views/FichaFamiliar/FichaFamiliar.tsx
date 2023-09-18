@@ -267,13 +267,18 @@ function FichaPersonal() {
 
     };
 
-    const cargarFoto = () => {
-        const Foto = listFperonales.find((persona) => persona.idFichaPersonal === formData.fichaPersonal?.idFichaPersonal);
+    const cargarFoto = (id: number) => {
+        const Foto = listFperonales.find((persona) => persona.idFichaPersonal === id);
 
         if (Foto) {
             // Actualiza formData con la foto correspondiente
             setFoto(Foto.foto);
+            if (Foto) {
+                console.log("Foto cargada")
+            }
+
         }
+
     }
 
     const resetFiltro = () => {
@@ -325,7 +330,7 @@ function FichaPersonal() {
                                                     // Actualizar el estado usando setFormData
                                                     setBusqueda(e.currentTarget.value);
 
-                                                    // Luego, llamar a loadData después de que se actualice el estado
+                                                    // Luego, llamar a loadRelacion después de que se actualice el estado
                                                     loadRelacion();
                                                 }}
                                                 value={busqueda}
@@ -367,7 +372,7 @@ function FichaPersonal() {
                                                         estVinculacion: true
                                                     }
                                                 });
-                                                cargarFoto()
+                                                cargarFoto(parseInt(e.value))
                                                 // loadData()
                                                 console.log(formData)
                                             }}
