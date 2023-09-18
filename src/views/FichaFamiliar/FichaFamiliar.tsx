@@ -325,10 +325,10 @@ function FichaPersonal() {
                         Ficha de Familiar
                     </h1>
                 </div>
-                <section className="flex justify-content-center flex-wrap container">
+                <section className=" justify-content-center flex-wrap container">
 
                     <Fieldset legend="Filtros de busqueda" >
-                        <div style={{ textAlign: 'right', marginRight: "", position: "absolute", top: "50px", right: "30px" }}>
+                        <div style={{ textAlign: 'right', marginRight: "", position: "absolute", top: "52px", right: "32px" }}>
                             <label className="font-medium w-auto min-w-min" htmlFor="rangoEdad" style={{ marginRight: "15px" }}>Limpiar filtros:</label>
 
                             <Button icon="pi pi-times" rounded severity="danger" aria-label="Cancel" onClick={() => resetFiltro()} />
@@ -407,7 +407,9 @@ function FichaPersonal() {
                                             // loadData()
                                             console.log(formData)
                                         }}
-                                        value={formData.fichaPersonal}
+                                        value={formData.fichaPersonal
+                                            ? formData.fichaPersonal.idFichaPersonal : null
+                                        }
                                         optionLabel="label"
                                         optionValue="idFichaPersonal"
                                         placeholder="Seleccione una persona"
