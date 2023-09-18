@@ -17,6 +17,7 @@ import '../../styles/FiltroFichas.css'
 
 
 function FichaDesvinculacion() {
+
   //Session Storage
   const userData = sessionStorage.getItem("user");
   const userObj = JSON.parse(userData || "{}");
@@ -206,6 +207,22 @@ function FichaDesvinculacion() {
 
         setEditMode(true);
         setEditItemId(id);
+
+        setBusqueda(editItem.fichaPersonal?.ciIdentidad ?? "");
+        setFoto(editItem.fichaPersonal?.foto ?? '')
+
+
+        if (editItem.fichaPersonal !== null) {
+
+          const editItemWithLabel = {
+            ...editItem,
+            fichaPersonal: {
+              ...editItem.fichaPersonal,
+              label: `${editItem.fichaPersonal.ciIdentidad} || ${editItem.fichaPersonal.apellidos} ${editItem.fichaPersonal.nombres}`,
+            },
+          };
+          setListFperonales([editItemWithLabel.fichaPersonal]);
+        }
       }
     }
   };
@@ -311,7 +328,7 @@ function FichaDesvinculacion() {
       <Card
         header={cardHeader}
         className="border-solid border-red-800 border-3 flex-1 flex-wrap"
-        style={{ width: "1200px", marginBottom: "35px" }}
+        style={{ width: "90%", marginLeft: "7%", height: "100%" }}
       >
         <div
           className="h1-rem"
@@ -323,12 +340,13 @@ function FichaDesvinculacion() {
         </div>
 
         <section className="flex justify-content-center flex-wrap container">
-          <Fieldset legend="Filtros de busqueda" style={{ marginBottom: "35px" }}>
-            <div style={{ textAlign: 'right', marginRight: "", position: "absolute", top: "50px", right: "30px" }}>
-              <label className="font-medium w-auto min-w-min" htmlFor="rangoEdad" style={{ marginRight: "15px" }}>Limpiar filtros:</label>
+          <Fieldset legend="Filtros de busqueda" style={{ width: "1000px", marginBottom: "35px", position: "relative" }}>
+            <div style={{ position: "absolute", top: "0", right: "5px", marginTop: "-15px" }}>
+              <label className="font-medium w-auto min-w-min" htmlFor="rangoEdad" style={{ marginRight: "10px" }}>Limpiar filtros:</label>
 
               <Button icon="pi pi-times" rounded severity="danger" aria-label="Cancel" onClick={() => resetFiltro()} />
             </div>
+
 
             <section className="layout">
               <div className="grow1 marginLeft">
@@ -339,6 +357,7 @@ function FichaDesvinculacion() {
                     <InputText
                       placeholder="Cedula de identidad"
                       id="integer"
+                      style={{ width: "75%" }}
                       // keyfilter="int"
                       onChange={(e) => {
                         // Actualizar el estado usando setFormData
@@ -457,13 +476,21 @@ function FichaDesvinculacion() {
                       onChange={(e) => {
                         const selectedDate =
                           e.value instanceof Date ? e.value : null;
-                        const formattedDate = selectedDate
-                          ? selectedDate.toISOString().split("T")[0]
-                          : "";
-                        setFormData({
-                          ...formData,
-                          fechaDesvinculacion: formattedDate,
-                        });
+                        if (selectedDate) {
+                          selectedDate.setDate(selectedDate.getDate() + 1);
+                          const formattedDate = selectedDate
+                            .toISOString()
+                            .split("T")[0];
+                          setFormData({
+                            ...formData,
+                            fechaDesvinculacion: formattedDate,
+                          });
+                        } else {
+                          setFormData({
+                            ...formData,
+                            fechaDesvinculacion: "", // Si no se selecciona ninguna fecha
+                          });
+                        }
                       }}
                       value={
                         formData.fechaDesvinculacion
@@ -518,8 +545,11 @@ function FichaDesvinculacion() {
                     style={{ marginTop: "25px" }}
                     className="w-full text-3xl min-w-min"
                     rounded
-                    onClick={resetForm}
-                  />
+                    onClick={() => {
+                      resetForm();
+                      resetFiltro();
+                      setEditMode(false);
+                    }} />
                 </div>
               </div>
               <div style={{ marginLeft: "600px", marginTop: "-185px" }}>

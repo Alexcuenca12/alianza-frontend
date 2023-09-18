@@ -33,14 +33,15 @@ function FichaPersonal() {
 
     const fileUploadRef = useRef<FileUpload>(null);
     const [dataLoaded, setDataLoaded] = useState(false);
+
     const [busqueda, setBusqueda] = useState<string>('');
     const [foto, setFoto] = useState<string>('https://cdn-icons-png.flaticon.com/128/666/666201.png');
+    const [listFperonales, setListFperonales] = useState<IFichaPersonal[]>([]);
 
 
     const [editItemId, setEditItemId] = useState<number | undefined>(undefined);
     const [editMode, setEditMode] = useState(false);
 
-    const [listFperonales, setListFperonales] = useState<IFichaPersonal[]>([]);
     const [listFichaFamiliar, setFichaFamiliar] = useState<IFichaFamiliar[]>([]);
     const [formData, setFormData] = useState<IFichaFamiliar>({
         idFichaFamiliar: 0,
@@ -171,6 +172,8 @@ function FichaPersonal() {
     };
 
     const handleEdit = (id: number | undefined) => {
+
+        console.log("ID = " + id)
         if (id !== undefined) {
             const editItem = listFichaFamiliar.find(
                 (contra) => contra.idFichaFamiliar === id
@@ -179,6 +182,7 @@ function FichaPersonal() {
                 setFormData(editItem);
                 setEditMode(true);
                 setEditItemId(id);
+
                 setBusqueda(editItem.fichaPersonal?.ciIdentidad ?? "");
                 setFoto(editItem.fichaPersonal?.foto ?? '')
 
@@ -327,15 +331,15 @@ function FichaPersonal() {
                 </div>
                 <section className="flex justify-content-center flex-wrap container">
 
-                    <Fieldset legend="Filtros de busqueda" >
-                        <div style={{ textAlign: 'right', marginRight: "", position: "absolute", top: "50px", right: "30px" }}>
-                            <label className="font-medium w-auto min-w-min" htmlFor="rangoEdad" style={{ marginRight: "15px" }}>Limpiar filtros:</label>
+                    <Fieldset legend="Filtros de busqueda" style={{ width: "1000px", marginBottom: "35px", position: "relative" }}>
+                        <div style={{ position: "absolute", top: "0", right: "5px", marginTop: "-15px" }}>
+                            <label className="font-medium w-auto min-w-min" htmlFor="rangoEdad" style={{ marginRight: "10px" }}>Limpiar filtros:</label>
 
                             <Button icon="pi pi-times" rounded severity="danger" aria-label="Cancel" onClick={() => resetFiltro()} />
                         </div>
 
                         <section className="layout">
-                            <div className="grow1 marginLeft">
+                            <div className="">
                                 <div input-box>
                                     <label className="font-medium w-auto min-w-min" htmlFor='genero'>Cedula o Nombre:</label>
 
@@ -344,6 +348,8 @@ function FichaPersonal() {
                                             placeholder="Cedula de identidad"
                                             id="integer"
                                             // keyfilter="int"
+                                            style={{ width: "75%" }}
+
                                             onChange={(e) => {
                                                 // Actualizar el estado usando setFormData
                                                 setListFperonales([]); // Asignar un arreglo vacío para vaciar el estado listFperonales
@@ -371,7 +377,7 @@ function FichaPersonal() {
                                     </div>
                                 </div>
                             </div>
-                            <div className="grow1 shrink0">
+                            <div className="">
                                 <div>
                                     <label className="font-medium w-auto min-w-min" htmlFor="fichaPersonal">Resultados de la busqueda:</label>
                                     <Dropdown
@@ -407,7 +413,9 @@ function FichaPersonal() {
                                             // loadData()
                                             console.log(formData)
                                         }}
-                                        value={formData.fichaPersonal}
+                                        value={formData.fichaPersonal
+                                            ? formData.fichaPersonal.idFichaPersonal : null
+                                        }
                                         optionLabel="label"
                                         optionValue="idFichaPersonal"
                                         placeholder="Seleccione una persona"
@@ -733,7 +741,8 @@ function FichaPersonal() {
                                         resetForm();
                                         resetFiltro();
                                         setEditMode(false);
-                                    }} />
+                                    }}
+                                />
                             </div>
                         </div>
 
