@@ -13,6 +13,7 @@ import { Calendar } from "primereact/calendar";
 import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
 import { InputText } from 'primereact/inputtext';
+import { PiFileXlsFill } from "react-icons/pi";
 
 
 import { ICalcularEdad } from '../../interfaces/ICalcularEdad';
@@ -22,6 +23,8 @@ import { IFichaPersonal } from "../../interfaces/IFichaPersonal";
 
 import '../../styles/Fichas.css'
 import '../../styles/FiltroFichas.css'
+import { TipoFamiliaService } from "../../services/TipoFamiliaService";
+import * as XLSX from 'xlsx';
 
 
 function FichaPersonal() {
@@ -34,9 +37,11 @@ function FichaPersonal() {
     const fileUploadRef = useRef<FileUpload>(null);
     const [dataLoaded, setDataLoaded] = useState(false);
 
+    const tipoFamiliaService = new TipoFamiliaService();
     const [busqueda, setBusqueda] = useState<string>('');
     const [foto, setFoto] = useState<string>('https://cdn-icons-png.flaticon.com/128/666/666201.png');
     const [listFperonales, setListFperonales] = useState<IFichaPersonal[]>([]);
+    const [listTipoFamilia, setListTipoFamilia] = useState<ITipoFamilia[]>([]);
 
 
     const [editItemId, setEditItemId] = useState<number | undefined>(undefined);
@@ -59,27 +64,9 @@ function FichaPersonal() {
         fichaPersonal: null
     });
 
-    //LISTA DE PARA CARGAR LOS OBJETOS TRAIDOS DEL BACK PARA LOS COMBOS
-    const tiposFamilias: ITipoFamilia[] = [{ idTipoFamilia: 1, nombreTipo: 'Grande' }, { idTipoFamilia: 2, nombreTipo: 'Mediana' }];
-
-
-
-    // const rangosEdadOpc: { label: string, value: number }[] = [];
-    const [tiposFamiliasOpc, setTiposFamiliasOpc] = useState<{ label: string, value: number }[]>([]);
-
-
     useEffect(() => {
 
-        //METODOS PARA CARGAR LOS COMBOS DEL FORMILARIO
-        const cargarComboFamilias = () => {
-            const opciones = tiposFamilias.map((dato) => ({
-                label: `${dato.nombreTipo}`,
-                value: dato.idTipoFamilia,
-            }));
-            setTiposFamiliasOpc(opciones);
-        };
-
-        cargarComboFamilias();
+        loadTipoFamilias();
 
         loadData();
     }, []);
@@ -89,6 +76,18 @@ function FichaPersonal() {
             .getAll()
             .then((data) => {
                 setFichaFamiliar(data);
+                setDataLoaded(true); // Marcar los datos como cargados
+            })
+            .catch((error) => {
+                console.error("Error al obtener los datos:", error);
+            });
+    };
+
+    const loadTipoFamilias = () => {
+        tipoFamiliaService
+            .getAll()
+            .then((data) => {
+                setListTipoFamilia(data);
                 setDataLoaded(true); // Marcar los datos como cargados
             })
             .catch((error) => {
@@ -305,12 +304,41 @@ function FichaPersonal() {
 
     }
 
+    const loadDataID = (id: number) => {
+        setFichaFamiliar([]);
+        service
+            .getBusquedaID(id)
+            .then((data) => {
+                setFichaFamiliar(data);
+                setDataLoaded(true); // Marcar los datos como cargados
+            })
+            .catch((error) => {
+                console.error("Error al obtener los datos:", error);
+            });
+    };
+
     const resetFiltro = () => {
         setBusqueda('')
         setFoto('https://cdn-icons-png.flaticon.com/128/666/666201.png')
         setListFperonales([])
 
 
+    };
+
+    const generarExcel = () => {
+        const wb = XLSX.utils.book_new();
+
+        // Crear una copia de la lista excluyendo el campo 'foto'
+        // const listSinFoto = listFichaFamiliar.map(({ foto, ...rest }) => rest);
+
+        const ws = XLSX.utils.json_to_sheet(listFichaFamiliar);
+
+        // Resto del código para aplicar estilos y encabezados (como se mostró en tu código original) ...
+
+        XLSX.utils.book_append_sheet(wb, ws, 'FichaFamiliar');
+
+        // Descargar el archivo Excel
+        XLSX.writeFile(wb, 'FichaFamiliar.xlsx');
     };
 
 
@@ -333,12 +361,16 @@ function FichaPersonal() {
                 </div>
                 <section className="flex justify-content-center flex-wrap container">
 
-                    <Fieldset legend="Filtros de busqueda" style={{ width: "1000px", marginBottom: "35px", position: "relative" }}>
-                        <div style={{ position: "absolute", top: "0", right: "5px", marginTop: "-15px" }}>
+
+                    <Fieldset legend="Filtros de busqueda" className="filtro">
+
+                        <div className="btnLimpiar" style={{}}>
                             <label className="font-medium w-auto min-w-min" htmlFor="rangoEdad" style={{ marginRight: "10px" }}>Limpiar filtros:</label>
 
-                            <Button icon="pi pi-times" rounded severity="danger" aria-label="Cancel" onClick={() => resetFiltro()} />
+                            <Button icon="pi pi-times" rounded severity="danger" aria-label="Cancel" onClick={() => { resetFiltro(); loadData() }} />
                         </div>
+
+
 
                         <section className="layout">
                             <div className="">
@@ -368,7 +400,6 @@ function FichaPersonal() {
                                                 setBusqueda(e.currentTarget.value);
 
                                                 // Luego, llamar a loadRelacion después de que se actualice el estado
-                                                loadRelacion();
                                                 loadRelacion(); // Llama a tu método aquí o realiza las acciones necesarias.
                                             }}
 
@@ -412,7 +443,7 @@ function FichaPersonal() {
                                                 }
                                             });
                                             cargarFoto(parseInt(e.value))
-                                            // loadData()
+                                            loadDataID(parseInt(e.value))
                                             console.log(formData)
                                         }}
                                         value={formData.fichaPersonal?.idFichaPersonal}
@@ -465,14 +496,14 @@ function FichaPersonal() {
 
                             <div className='column' style={{ width: "50%" }}>
                                 <div className='input-box'>
-                                    <label className="font-medium w-auto min-w-min" htmlFor="etnia">Tipo de familia::</label>
+                                    <label className="font-medium w-auto min-w-min" htmlFor="etnia">Tipo de familia:</label>
                                     <div className="select-box" style={{ width: "100%" }}>
                                         <Dropdown
                                             className="text-2xl"
                                             id="parroquia"
                                             name="parroquia"
                                             style={{ width: "100%" }}
-                                            options={tiposFamiliasOpc}
+                                            options={listTipoFamilia}
                                             onChange={(e) =>
                                                 setFormData({
                                                     ...formData,
@@ -480,8 +511,8 @@ function FichaPersonal() {
                                                 })
                                             }
                                             value={formData.tipoFamilia?.idTipoFamilia}
-                                            optionLabel="label"
-                                            optionValue="value"
+                                            optionLabel="nombreTipo"
+                                            optionValue="idTipoFamilia"
                                             placeholder="Seleccione el tipo de familia"
                                         />
 
@@ -538,45 +569,6 @@ function FichaPersonal() {
                         <div className='column'>
                             <div className='column' style={{ width: "50%" }}>
                                 <div className='input-box'>
-                                    <label className="font-medium w-auto min-w-min" htmlFor="numNNA">Numero de NNA:</label>
-                                    <input
-                                        className="input"
-                                        type="number"
-                                        min="1"
-                                        id="numNNA"
-                                        value={formData.numNNA}
-                                        placeholder='Ingrese el numero de adultos del hogar'
-                                        onChange={(e) => setFormData({ ...formData, numNNA: parseInt(e.target.value) })}
-                                        required
-                                    />
-                                    <span className="input-border"></span>
-
-                                </div>
-
-                                <div className='input-box'>
-                                    <label className="font-medium w-auto min-w-min" htmlFor="numAdultosMayores">Numero adultos mayores:</label>
-                                    <input
-                                        className="input"
-                                        type="number"
-                                        min="1"
-                                        id="numAdultosMayores"
-                                        value={formData.numAdultosMayores}
-                                        placeholder='Ingrese el numero de adultos del hogar'
-                                        onChange={(e) => setFormData({ ...formData, numAdultosMayores: parseInt(e.target.value) })}
-                                        required
-                                    />
-                                    <span className="input-border"></span>
-
-                                </div>
-
-
-
-
-
-
-                            </div>
-                            <div className='column' style={{ width: "50%" }}>
-                                <div className='input-box'>
                                     <label className="font-medium w-auto min-w-min" htmlFor="numIntegrantes">Numero de integrantes:</label>
                                     <input
                                         className="input"
@@ -592,6 +584,25 @@ function FichaPersonal() {
 
                                 </div>
                                 <div className='input-box'>
+                                    <label className="font-medium w-auto min-w-min" htmlFor="numNNA">Numero de NNA:</label>
+                                    <input
+                                        className="input"
+                                        type="number"
+                                        min="1"
+                                        id="numNNA"
+                                        value={formData.numNNA}
+                                        placeholder='Ingrese el numero de adultos del hogar'
+                                        onChange={(e) => setFormData({ ...formData, numNNA: parseInt(e.target.value) })}
+                                        required
+                                    />
+                                    <span className="input-border"></span>
+
+                                </div>
+
+                            </div>
+                            <div className='column' style={{ width: "50%" }}>
+
+                                <div className='input-box'>
                                     <label className="font-medium w-auto min-w-min" htmlFor="numAdultos">Numero de adultos:</label>
                                     <input
                                         className="input"
@@ -601,6 +612,23 @@ function FichaPersonal() {
                                         value={formData.numAdultos}
                                         placeholder='Ingrese el numero de adultos del hogar'
                                         onChange={(e) => setFormData({ ...formData, numAdultos: parseInt(e.target.value) })}
+                                        required
+                                    />
+                                    <span className="input-border"></span>
+
+                                </div>
+
+
+                                <div className='input-box'>
+                                    <label className="font-medium w-auto min-w-min" htmlFor="numAdultosMayores">Numero adultos mayores:</label>
+                                    <input
+                                        className="input"
+                                        type="number"
+                                        min="1"
+                                        id="numAdultosMayores"
+                                        value={formData.numAdultosMayores}
+                                        placeholder='Ingrese el numero de adultos del hogar'
+                                        onChange={(e) => setFormData({ ...formData, numAdultosMayores: parseInt(e.target.value) })}
                                         required
                                     />
                                     <span className="input-border"></span>
@@ -758,6 +786,21 @@ function FichaPersonal() {
                         className="mt-4  w-full h-full text-3xl font-large"
                     >
                         <thead>
+                            <tr >
+                                <td colSpan={12} className="tdBtn">
+                                    <div className="divEnd">
+                                        <button className="btnPrint" onClick={generarExcel}>
+                                            <div className="svg-wrapper-1">
+                                                <div className="svg-wrapper">
+                                                    <PiFileXlsFill className="icono"></PiFileXlsFill>
+                                                </div>
+                                            </div>
+                                            <span>Generar Exel</span>
+                                        </button>
+                                    </div>
+                                </td>
+
+                            </tr>
                             <tr style={{ backgroundColor: "#871b1b", color: "white" }}>
                                 <th>Nº Ficha</th>
                                 <th>Visita Domi.</th>
@@ -770,7 +813,7 @@ function FichaPersonal() {
                                 <th>Beneficio Ad.</th>
                                 <th>Org. Benefica</th>
                                 <th>Discapacidad Fam.</th>
-                                {/* <th>Otras Situaciones</th> */}
+                                <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>

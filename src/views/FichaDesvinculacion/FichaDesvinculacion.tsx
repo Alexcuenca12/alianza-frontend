@@ -13,6 +13,7 @@ import swal from "sweetalert";
 import { IFichaPersonal } from "../../interfaces/IFichaPersonal";
 import { FichaPersonalService } from "../../services/FichaPersonalService";
 import { Dropdown } from "primereact/dropdown";
+import { PiFileXlsFill } from "react-icons/pi";
 import '../../styles/FiltroFichas.css'
 
 

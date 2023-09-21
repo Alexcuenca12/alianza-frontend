@@ -9,9 +9,9 @@ import { string } from "yup";
 import { Dropdown, DropdownChangeEvent } from 'primereact/dropdown';
 import { RangoEdadService } from "../../services/RangoEdadService";
 import { IRangoEdad } from "../../interfaces/IRangoEdad";
+import { AiFillPrinter } from "react-icons/ai";
 
-
-
+import { PiFileXlsFill } from "react-icons/pi";
 import { IFichaPersonal } from "../../interfaces/IFichaPersonal";
 import { FichaPersonalService } from "../../services/FichaPersonalService";
 import { IBusquedaReporte } from "../../interfaces/IBusquedaReporte";
@@ -153,11 +153,19 @@ function Reporte() {
 
                         <div></div>
                         <div></div>
-                        <div>
-                            <button onClick={generarExcel}>Generar Excel</button>
+                        <div className="divEnd">
+                            <button className="btnPrint" onClick={generarExcel}>
+                                <div className="svg-wrapper-1">
+                                    <div className="svg-wrapper">
+                                        <PiFileXlsFill className="icono"></PiFileXlsFill>
+                                    </div>
+                                </div>
+                                <span>Generar Exel</span>
+                            </button>
+                            {/* <button >Generar Excel</button> */}
 
                         </div>
-                        <div style={{ textAlign: 'right', marginRight: "" }}>
+                        <div className="divEnd">
                             <label className="font-medium w-auto min-w-min" htmlFor="rangoEdad" style={{ marginRight: "15px" }}>Limpiar filtros:</label>
 
                             <Button icon="pi pi-times" rounded severity="danger" aria-label="Cancel" onClick={() => resetForm()} />
