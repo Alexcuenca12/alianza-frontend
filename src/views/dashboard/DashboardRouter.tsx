@@ -7,6 +7,7 @@ import {
   FcBusinessContact,
   FcBusinessman,
   FcBusinesswoman,
+  FcPodiumWithAudience,
 } from "react-icons/fc";
 import { FcHome } from "react-icons/fc";
 import { FcExport } from "react-icons/fc";
@@ -30,6 +31,7 @@ import Docente from "../Docente/Docente";
 import Encargado from "../Encargado/Encargado";
 import SecretariaContext from "../Secretaria/Secretaria";
 import Curso from "../Curso/Curso";
+import Asistencia from "../Asistencia/Asistencia";
 
 export const DashboardRouter = () => {
   //Datos del sessionStorage
@@ -64,6 +66,12 @@ export const DashboardRouter = () => {
       label: "Ficha Salud",
       icon: FcLike,
       url: "/salud",
+    },
+    {
+      id: "13",
+      label: "Asistencia",
+      icon: FcPodiumWithAudience,
+      url: "/asistencia",
     },
     {
       id: "5",
@@ -315,6 +323,21 @@ export const DashboardRouter = () => {
                   <>
                     <SideBarMenu items={items} card={card} />
                     <Curso />
+                    <Footer />
+                  </>
+                ) : rol === 2 ? (
+                  <>
+                    <SideBarMenu items={items} card={card} />
+                  </>
+                ) : (
+                  <SideBarMenu items={items} card={card} />
+                )}
+              </Route>
+              <Route path="/asistencia">
+                {rol === 1 ? (
+                  <>
+                    <SideBarMenu items={items} card={card} />
+                    <Asistencia />
                     <Footer />
                   </>
                 ) : rol === 2 ? (

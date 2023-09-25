@@ -7,6 +7,11 @@ export class CursoService {
         return axios.get(this.baseUrl + "get").then((res) => res.data);
     }
 
+    getAllDocente(id:number) {
+        return axios.get(this.baseUrl + `getCurso/${id}`).then((res) => res.data);
+    }
+
+
     save(curso: any) {
         return axios.post(this.baseUrl + "post", curso).then((res) => res.data);
     }

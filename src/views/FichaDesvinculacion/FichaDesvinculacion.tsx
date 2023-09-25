@@ -13,11 +13,9 @@ import swal from "sweetalert";
 import { IFichaPersonal } from "../../interfaces/IFichaPersonal";
 import { FichaPersonalService } from "../../services/FichaPersonalService";
 import { Dropdown } from "primereact/dropdown";
-import '../../styles/FiltroFichas.css'
-
+import "../../styles/FiltroFichas.css";
 
 function FichaDesvinculacion() {
-
   //Session Storage
   const userData = sessionStorage.getItem("user");
   const userObj = JSON.parse(userData || "{}");
@@ -25,7 +23,7 @@ function FichaDesvinculacion() {
 
   const [listFperonales, setListFperonales] = useState<IFichaPersonal[]>([]);
 
-  const [busqueda, setBusqueda] = useState<string>('');
+  const [busqueda, setBusqueda] = useState<string>("");
 
   const [contra1, setcontra1] = useState<IFichaDesvinculacion[]>([]);
   const [formData, setFormData] = useState<IFichaDesvinculacion>({
@@ -34,7 +32,7 @@ function FichaDesvinculacion() {
     motivo: "",
     anexosExtras: "",
     fichaInscripcion: null,
-    fichaPersonal: null
+    fichaPersonal: null,
   });
 
   const fileUploadRef = useRef<FileUpload>(null);
@@ -43,9 +41,9 @@ function FichaDesvinculacion() {
   const [editItemId, setEditItemId] = useState<number | undefined>(undefined);
   const desvinService = new FichaDesvinculacionService();
   const fichaPersonalService = new FichaPersonalService();
-  const [foto, setFoto] = useState<string>('https://cdn-icons-png.flaticon.com/128/666/666201.png');
-
-
+  const [foto, setFoto] = useState<string>(
+    "https://cdn-icons-png.flaticon.com/128/666/666201.png"
+  );
 
   const loadData = () => {
     desvinService
@@ -209,11 +207,9 @@ function FichaDesvinculacion() {
         setEditItemId(id);
 
         setBusqueda(editItem.fichaPersonal?.ciIdentidad ?? "");
-        setFoto(editItem.fichaPersonal?.foto ?? '')
-
+        setFoto(editItem.fichaPersonal?.foto ?? "");
 
         if (editItem.fichaPersonal !== null) {
-
           const editItemWithLabel = {
             ...editItem,
             fichaPersonal: {
@@ -243,8 +239,7 @@ function FichaDesvinculacion() {
             motivo: "",
             anexosExtras: "",
             fichaInscripcion: null,
-            fichaPersonal: null
-
+            fichaPersonal: null,
           });
           setcontra1(
             contra1.map((contra) =>
@@ -266,8 +261,7 @@ function FichaDesvinculacion() {
       motivo: "",
       anexosExtras: "",
       fichaInscripcion: null,
-      fichaPersonal: null
-
+      fichaPersonal: null,
     });
     setEditMode(false);
     setEditItemId(undefined);
@@ -279,9 +273,7 @@ function FichaDesvinculacion() {
     return <div>Cargando datos...</div>;
   }
 
-
   const loadRelacion = () => {
-
     // console.log("4 SIN EDAD")
     fichaPersonalService
       .getBusquedaRelacion(true, busqueda)
@@ -298,33 +290,33 @@ function FichaDesvinculacion() {
         console.error("Error al obtener los datos:", error);
       });
 
-
-    console.log('Datos enviados:', { listFperonales });
-
+    console.log("Datos enviados:", { listFperonales });
   };
 
   const cargarFoto = (id: number) => {
-    const Foto = listFperonales.find((persona) => persona.idFichaPersonal === id);
+    const Foto = listFperonales.find(
+      (persona) => persona.idFichaPersonal === id
+    );
 
     if (Foto) {
       // Actualiza formData con la foto correspondiente
       setFoto(Foto.foto);
       if (Foto) {
-        console.log("Foto cargada")
+        console.log("Foto cargada");
       }
-
     }
-
-  }
+  };
 
   const resetFiltro = () => {
-    setBusqueda('')
-    setFoto('https://cdn-icons-png.flaticon.com/128/666/666201.png')
-
+    setBusqueda("");
+    setFoto("https://cdn-icons-png.flaticon.com/128/666/666201.png");
   };
 
   return (
-    <Fieldset className="" style={{ display: 'flex', justifyContent: 'center' }}>
+    <Fieldset
+      className=""
+      style={{ display: "flex", justifyContent: "center" }}
+    >
       <Card
         header={cardHeader}
         className="border-solid border-red-800 border-3 flex-1 flex-wrap"
@@ -340,19 +332,48 @@ function FichaDesvinculacion() {
         </div>
 
         <section className="flex justify-content-center flex-wrap container">
-          <Fieldset legend="Filtros de busqueda" style={{ width: "1000px", marginBottom: "35px", position: "relative" }}>
-            <div style={{ position: "absolute", top: "0", right: "5px", marginTop: "-15px" }}>
-              <label className="font-medium w-auto min-w-min" htmlFor="rangoEdad" style={{ marginRight: "10px" }}>Limpiar filtros:</label>
+          <Fieldset
+            legend="Filtros de busqueda"
+            style={{
+              width: "1000px",
+              marginBottom: "35px",
+              position: "relative",
+            }}
+          >
+            <div
+              style={{
+                position: "absolute",
+                top: "0",
+                right: "5px",
+                marginTop: "-15px",
+              }}
+            >
+              <label
+                className="font-medium w-auto min-w-min"
+                htmlFor="rangoEdad"
+                style={{ marginRight: "10px" }}
+              >
+                Limpiar filtros:
+              </label>
 
-              <Button icon="pi pi-times" rounded severity="danger" aria-label="Cancel" onClick={() => resetFiltro()} />
+              <Button
+                icon="pi pi-times"
+                rounded
+                severity="danger"
+                aria-label="Cancel"
+                onClick={() => resetFiltro()}
+              />
             </div>
-
 
             <section className="layout">
               <div className="grow1 marginLeft">
                 <div input-box>
-                  <label className="font-medium w-auto min-w-min" htmlFor='genero'>Cedula o Nombre:</label>
-
+                  <label
+                    className="font-medium w-auto min-w-min"
+                    htmlFor="genero"
+                  >
+                    Cedula o Nombre:
+                  </label>
                   <div className="flex-1">
                     <InputText
                       placeholder="Cedula de identidad"
@@ -368,7 +389,6 @@ function FichaDesvinculacion() {
                         // Luego, llamar a loadRelacion después de que se actualice el estado
                         loadRelacion();
                       }}
-
                       onKeyUp={(e) => {
                         setListFperonales([]); // Asignar un arreglo vacío para vaciar el estado listFperonales
 
@@ -378,7 +398,6 @@ function FichaDesvinculacion() {
                         loadRelacion();
                         loadRelacion(); // Llama a tu método aquí o realiza las acciones necesarias.
                       }}
-
                       value={busqueda}
                     />
 
@@ -388,7 +407,12 @@ function FichaDesvinculacion() {
               </div>
               <div className="grow1 shrink0">
                 <div>
-                  <label className="font-medium w-auto min-w-min" htmlFor="fichaPersonal">Resultados de la busqueda:</label>
+                  <label
+                    className="font-medium w-auto min-w-min"
+                    htmlFor="fichaPersonal"
+                  >
+                    Resultados de la busqueda:
+                  </label>
                   <Dropdown
                     className="text-2xl"
                     id="tiempo_dedicacion"
@@ -399,28 +423,29 @@ function FichaDesvinculacion() {
                       setFormData({
                         ...formData,
                         fichaPersonal: {
-                          idFichaPersonal: parseInt(e.value), foto: '',
-                          apellidos: '',
-                          nombres: '',
-                          ciIdentidad: '',
-                          nacionalidad: '',
-                          fechaNacimiento: '',
+                          idFichaPersonal: parseInt(e.value),
+                          foto: "",
+                          apellidos: "",
+                          nombres: "",
+                          ciIdentidad: "",
+                          nacionalidad: "",
+                          fechaNacimiento: "",
                           rangoEdad: null,
-                          genero: '',
+                          genero: "",
                           etnia: null,
                           parroquia: null,
-                          zona: '',
-                          barrioSector: '',
-                          direccion: '',
-                          referencia: '',
+                          zona: "",
+                          barrioSector: "",
+                          direccion: "",
+                          referencia: "",
                           coordenadaX: 0,
                           coordenadaY: 0,
-                          estVinculacion: true
-                        }
+                          estVinculacion: true,
+                        },
                       });
-                      cargarFoto(parseInt(e.value))
+                      cargarFoto(parseInt(e.value));
                       // loadData()
-                      console.log(formData)
+                      console.log(formData);
                     }}
                     value={formData.fichaPersonal}
                     optionLabel="label"
@@ -549,7 +574,8 @@ function FichaDesvinculacion() {
                       resetForm();
                       resetFiltro();
                       setEditMode(false);
-                    }} />
+                    }}
+                  />
                 </div>
               </div>
               <div style={{ marginLeft: "600px", marginTop: "-185px" }}>
@@ -608,13 +634,13 @@ function FichaDesvinculacion() {
                 <td>
                   {cargaF.fechaDesvinculacion
                     ? new Date(cargaF.fechaDesvinculacion).toLocaleDateString(
-                      "es-ES",
-                      {
-                        year: "numeric",
-                        month: "2-digit",
-                        day: "2-digit",
-                      }
-                    )
+                        "es-ES",
+                        {
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
+                        }
+                      )
                     : ""}
                 </td>
                 <td>{cargaF.motivo}</td>
@@ -634,7 +660,7 @@ function FichaDesvinculacion() {
                     onClick={() =>
                       handleEdit(cargaF.idFichaDesvinculacion?.valueOf())
                     }
-                  // Agrega el evento onClick para la operación de editar
+                    // Agrega el evento onClick para la operación de editar
                   />
                   <Button
                     type="button"
@@ -651,7 +677,7 @@ function FichaDesvinculacion() {
                     onClick={() =>
                       handleDelete(cargaF.idFichaDesvinculacion?.valueOf())
                     }
-                  // Agrega el evento onClick para la operación de eliminar
+                    // Agrega el evento onClick para la operación de eliminar
                   />
                 </td>
                 <td>
