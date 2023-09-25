@@ -370,7 +370,7 @@ function Curso() {
                           setFormData({ ...formData, docente: null });
                         }
                       }}
-                      value={selectedDocente}
+                      value={selectedDocente?.idDocente}
                       optionLabel="etiqueta"
                       optionValue="idDocente"
                       placeholder="Seleccione al Docente"
@@ -399,7 +399,7 @@ function Curso() {
                           rangoEdad: selectedRango ?? null,
                         });
                       }}
-                      value={selectedRango ?? null} // Utiliza selectedRango como valor seleccionado o null
+                      value={selectedRango?.idRangoEdad} // Utiliza selectedRango como valor seleccionado o null
                       optionLabel="etiquetaRango"
                       optionValue="idRangoEdad"
                       placeholder="Seleccione el Rango"

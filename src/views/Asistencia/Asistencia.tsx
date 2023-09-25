@@ -4,34 +4,41 @@ import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
 import { Fieldset } from "primereact/fieldset";
 import { Card } from "primereact/card";
-import cardHeader from "../../shared/CardHeader";
+import { InputTextarea } from "primereact/inputtextarea";
+import swal from "sweetalert";
 import { CursoService } from "../../services/CursoService";
 import { DocenteService } from "../../services/DocenteService";
 import { FichaInscripcionService } from "../../services/FichaInscripcionService";
+import { AsistenciaService } from "../../services/AsistenciaService";
 import { IDocente } from "../../interfaces/IDocente";
 import { ICurso } from "../../interfaces/ICurso";
 import { IFichaInscripcion } from "../../interfaces/IFichaInscripcion";
 import { IAsistencia } from "../../interfaces/IAsistencia";
-import { InputTextarea } from "primereact/inputtextarea";
+import CardHeader from "../../shared/CardHeader";
 
 function Asistencia() {
   const [docentes, setDocentes] = useState<IDocente[]>([]);
   const [selectedDocente, setSelectedDocente] = useState<IDocente | null>(null);
+  const [selectedDocenteId, setSelectedDocenteId] = useState<
+    number | undefined
+  >(undefined);
 
-  const [cursos, setCursos] = useState<ICurso[]>([]);
   const [selectedCurso, setSelectedCurso] = useState<ICurso | null>(null);
   const [selectedCursoId, setSelectedCursoId] = useState<number | undefined>(
     undefined
   );
 
-    // Obtén la fecha actual
-    const fechaActual = new Date();
-
-    // Establece la fecha actual como estado inicial
-    const [fechaSeleccionada, setFechaSeleccionada] = useState(fechaActual);
+  const [fechaActual] = useState(new Date());
+  const [fechaSeleccionada, setFechaSeleccionada] = useState(fechaActual);
 
   const [fichas, setFichas] = useState<IFichaInscripcion[]>([]);
+  const [selectedFichasId, setSelectedFichasId] = useState<number | undefined>(
+    undefined
+  );
 
+  const [editMode, setEditMode] = useState(false);
+
+  const [asistencia, setAsistencia] = useState<IAsistencia[]>([]);
   const [formData, setFormData] = useState<IAsistencia>({
     idAsistencia: 0,
     fechaAsistencia: "",
@@ -41,21 +48,25 @@ function Asistencia() {
     curso: null,
   });
 
-  const [isDataLoaded, setIsDataLoaded] = useState(false); // Nuevo estado para indicar si se han cargado los datos
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
+  const [editItemId, setEditItemId] = useState<number | undefined>(undefined);
+
+  const [cursosPorDocente, setCursosPorDocente] = useState<ICurso[]>([]);
 
   const opcionesDocente = docentes.map((docente) => ({
-    ...docente,
-    etiqueta: `${docente.persona?.nombresPersona}  ${docente.persona?.apellidosPersona}`,
+    label: `${docente.persona?.nombresPersona}  ${docente.persona?.apellidosPersona}`,
+    value: docente.idDocente,
   }));
 
-  const opcionesCurso = cursos.map((curso) => ({
-    ...curso,
-    etiqueta: `${curso.nombreCurso}`,
+  const opcionesCurso = cursosPorDocente.map((curso) => ({
+    label: `${curso.nombreCurso}`,
+    value: curso.idCurso,
   }));
 
   const docenteService = new DocenteService();
   const cursoService = new CursoService();
   const fichaService = new FichaInscripcionService();
+  const asistenciaService = new AsistenciaService();
 
   useEffect(() => {
     const loadDocentes = () => {
@@ -73,27 +84,37 @@ function Asistencia() {
   }, []);
 
   useEffect(() => {
-    const loadCursos = () => {
-      cursoService
-        .getAll()
-        .then((data) => {
-          setCursos(data);
-          setSelectedCurso(null);
-        })
-        .catch((error) => {
-          console.error("Error al obtener los datos:", error);
-        });
+    const loadCursosPorDocente = () => {
+      if (selectedDocenteId !== undefined) {
+        cursoService
+          .getAllDocente(selectedDocenteId)
+          .then((data) => {
+            setCursosPorDocente(data);
+            setSelectedCurso(null);
+          })
+          .catch((error) => {
+            console.error("Error al obtener los datos:", error);
+          });
+      }
     };
-    loadCursos();
-  }, []);
+
+    loadCursosPorDocente();
+  }, [selectedDocenteId]);
 
   const loadData = () => {
     if (selectedCursoId !== undefined) {
       fichaService
-        .getByID(selectedCursoId) // Asegúrate de pasar el ID del docente
+        .getByID(selectedCursoId)
         .then((data) => {
           setFichas(data);
-          setIsDataLoaded(true); // Marcar que los datos se han cargado
+
+          if (data.length > 0) {
+            setSelectedFichasId(data[0].idFichaInscripcion);
+          } else {
+            setSelectedFichasId(undefined);
+          }
+
+          setIsDataLoaded(true);
         })
         .catch((error) => {
           console.error("Error al obtener los datos:", error);
@@ -101,10 +122,85 @@ function Asistencia() {
     }
   };
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const fichaInscripcionPersistente = fichas.find(
+      (ficha) => ficha.idFichaInscripcion === selectedFichasId
+    );
+
+    if (!fichaInscripcionPersistente) {
+      console.error(
+        "No se encontró la FichaInscripcion persistente correspondiente a selectedFichasId"
+      );
+      return;
+    }
+
+    const updatedFormData = {
+      ...formData,
+      fichaInscripcion: fichaInscripcionPersistente,
+    };
+
+    asistenciaService
+      .save(updatedFormData)
+      .then((response) => {
+        resetForm();
+        swal("Publicacion", "Datos Guardados Correctamente", "success");
+
+        asistenciaService
+          .getAll()
+          .then((data) => {
+            setAsistencia(data);
+            resetForm();
+          })
+          .catch((error) => {
+            console.error("Error al obtener los datos:", error);
+          });
+      })
+      .catch((error) => {
+        console.error("Error al enviar el formulario:", error);
+      });
+  };
+
+  const handleUpdate = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editItemId !== undefined) {
+      asistenciaService
+        .update(Number(editItemId), formData as IAsistencia)
+        .then((response) => {
+          swal({
+            title: "Asistencia",
+            text: "Datos actualizados correctamente",
+            icon: "success",
+          });
+          setFormData({ ...formData });
+          setAsistencia(
+            asistencia.map((asiste) =>
+              asiste.idAsistencia === editItemId ? response : asiste
+            )
+          );
+          setEditMode(false);
+          setEditItemId(undefined);
+        })
+        .catch((error) => {
+          console.error("Error al actualizar el formulario:", error);
+        });
+    }
+  };
+  const resetForm = () => {
+    setFormData({
+      fechaAsistencia: "",
+      observacionesAsistencia: "",
+      estadoAsistencia: false,
+      fichaInscripcion: null,
+      curso: null,
+    });
+  };
+
   return (
     <Fieldset className="fgrid col-fixed">
       <Card
-        header={cardHeader}
+        header={CardHeader}
         className="border-solid border-red-800 border-3 flex-1 flex-wrap"
         style={{ width: "90%", marginLeft: "7%", height: "100%" }}
       >
@@ -118,57 +214,19 @@ function Asistencia() {
         </div>
 
         <div className="flex justify-content-center flex-wrap">
-          <form encType="multipart/form-data">
+          <form onSubmit={editMode ? handleUpdate : handleSubmit}>
             <div className="flex flex-wrap flex-row">
               <div className="flex align-items-center justify-content-center">
                 <Fieldset
-                  legend="Filtros"
+                  legend="Cursos"
                   style={{
-                    width: "1150px",
+                    width: "1250px",
                     marginBottom: "35px",
                     position: "relative",
-                    marginLeft: "15%",
+                    marginLeft: "2%",
                   }}
                 >
                   <div className="flex flex-wrap w-full h-full  justify-content-between">
-                    <label
-                      htmlFor="curso"
-                      className="text-3xl font-medium w-auto min-w-min"
-                    >
-                      Curso:
-                    </label>
-                    <Dropdown
-                      id="curso"
-                      name="curso"
-                      optionLabel="etiqueta"
-                      optionValue="idCurso"
-                      options={opcionesCurso}
-                      placeholder="Seleccione el Curso"
-                      style={{ width: "250px" }}
-                      onChange={(e) => {
-                        const selectedCurso = cursos.find(
-                          (curso) => curso.idCurso === e.value
-                        );
-
-                        if (selectedCurso) {
-                          setSelectedCurso(selectedCurso);
-                          setSelectedCursoId(selectedCurso.idCurso); // Aquí guardamos el ID del curso seleccionado
-                          setFormData({
-                            ...formData,
-                            curso: selectedCurso,
-                          });
-                        } else {
-                          setSelectedCurso(null);
-                          setSelectedCursoId(undefined); // Si no se selecciona ningún curso, establecemos el ID en null
-                          setFormData({
-                            ...formData,
-                            curso: null,
-                          });
-                        }
-                      }}
-                      value={selectedCurso?.idCurso}
-                    />
-
                     <label
                       htmlFor="docente"
                       className="text-3xl font-medium w-auto min-w-min"
@@ -183,17 +241,55 @@ function Asistencia() {
                         const selectedDocente = docentes.find(
                           (docente) => docente.idDocente === e.value
                         );
+
                         if (selectedDocente) {
                           setSelectedDocente(selectedDocente);
+                          setSelectedDocenteId(selectedDocente.idDocente);
                         } else {
                           setSelectedDocente(null);
+                          setSelectedDocenteId(undefined);
                         }
                       }}
                       value={selectedDocente?.idDocente}
-                      optionLabel="etiqueta"
-                      optionValue="idDocente"
                       placeholder="Seleccione al Docente"
                       style={{ width: "250px" }}
+                    />
+                    <label
+                      htmlFor="curso"
+                      className="text-3xl font-medium w-auto min-w-min"
+                    >
+                      Curso:
+                    </label>
+                    <Dropdown
+                      id="curso"
+                      name="curso"
+                      optionLabel="label"
+                      optionValue="value"
+                      options={opcionesCurso}
+                      placeholder="Seleccione el Curso"
+                      style={{ width: "250px" }}
+                      onChange={(e) => {
+                        const selectedCurso = cursosPorDocente.find(
+                          (curso) => curso.idCurso === e.value
+                        );
+
+                        if (selectedCurso) {
+                          setSelectedCurso(selectedCurso);
+                          setSelectedCursoId(selectedCurso.idCurso);
+                          setFormData({
+                            ...formData,
+                            curso: selectedCurso,
+                          });
+                        } else {
+                          setSelectedCurso(null);
+                          setSelectedCursoId(undefined);
+                          setFormData({
+                            ...formData,
+                            curso: null,
+                          });
+                        }
+                      }}
+                      value={selectedCurso?.idCurso}
                     />
 
                     <label
@@ -211,9 +307,42 @@ function Asistencia() {
                       dateFormat="yy-mm-dd"
                       showIcon
                       maxDate={fechaActual}
+                      onChange={(e) => {
+                        const selectedDate =
+                          e.value instanceof Date ? e.value : null;
+                        if (selectedDate) {
+                          selectedDate.setDate(selectedDate.getDate() + 1);
+                          const formattedDate = selectedDate
+                            .toISOString()
+                            .split("T")[0];
+                          setFormData({
+                            ...formData,
+                            fechaAsistencia: formattedDate,
+                          });
+                        } else {
+                          setFormData({
+                            ...formData,
+                            fechaAsistencia: "",
+                          });
+                        }
+                      }}
                       value={fechaSeleccionada}
                       style={{ width: "250px", height: "40px" }}
                     />
+                    <div
+                      className="flex align-items-c
+
+
+enter justify-content-center w-auto min-w-min"
+                    >
+                      <Button
+                        type="button"
+                        label="Cargar Datos"
+                        className="w-full text-3xl min-w-min"
+                        rounded
+                        onClick={loadData}
+                      />
+                    </div>
                   </div>
                 </Fieldset>
               </div>
@@ -225,7 +354,8 @@ function Asistencia() {
                   <Button
                     type="submit"
                     style={{ marginTop: "25px" }}
-                    label={"Guardar"}
+                    label={editMode ? "Actualizar" : "Guardar"}
+                    onClick={editMode ? handleUpdate : handleSubmit}
                     className="w-full text-3xl min-w-min "
                     rounded
                   />
@@ -237,16 +367,6 @@ function Asistencia() {
                     style={{ marginTop: "25px" }}
                     className="w-full text-3xl min-w-min"
                     rounded
-                  />
-                </div>
-                <div className="flex align-items-center justify-content-center w-auto min-w-min">
-                  <Button
-                    type="button"
-                    label="Cargar Datos"
-                    style={{ marginTop: "25px" }}
-                    className="w-full text-3xl min-w-min"
-                    rounded
-                    onClick={loadData} // Llamar a la función loadData en el clic del botón
                   />
                 </div>
               </div>
@@ -278,26 +398,53 @@ function Asistencia() {
                     {ficha.fichaPersonal?.apellidos}
                   </td>
                   <td>
-                  <InputTextarea
-                      className="text-2xl"
-                      autoResize 
-                      placeholder="Ingrese alguna observación en caso de ser necesaria"
-                      id="tipoDiscapacidad"
-                      name="tipoDiscapacidad"
-                      style={{ width: "221px" }}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          observacionesAsistencia: e.currentTarget.value,
-                        })
-                      }
-                      value={formData.observacionesAsistencia}
-                    />
+                    <div className="gender-option">
+                      <div className="gender">
+                        <div className="mydict">
+                          <div>
+                            <label style={{ marginLeft: "30%" }}>
+                              <input
+                                className="input"
+                                type="radio"
+                                id="genSi"
+                                name="si"
+                                value="si"
+                                checked={formData.estadoAsistencia}
+                                onChange={(e) =>
+                                  setFormData({
+                                    ...formData,
+                                    estadoAsistencia: e.target.value === "si",
+                                  })
+                                }
+                              />
+                              <span>Si</span>
+                            </label>
+                            <label>
+                              <input
+                                className="input"
+                                type="radio"
+                                id="genNo"
+                                name="no"
+                                value="no"
+                                checked={!formData.estadoAsistencia}
+                                onChange={(e) =>
+                                  setFormData({
+                                    ...formData,
+                                    estadoAsistencia: e.target.value === "si",
+                                  })
+                                }
+                              />
+                              <span>No</span>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </td>
                   <td>
-                  <InputTextarea
+                    <InputTextarea
                       className="text-2xl"
-                      autoResize 
+                      autoResize
                       placeholder="Ingrese alguna observación en caso de ser necesaria"
                       id="tipoDiscapacidad"
                       name="tipoDiscapacidad"
