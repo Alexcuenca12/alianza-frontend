@@ -27,35 +27,21 @@ body {
 
 
 .p-calendar .p-inputtext {
-  font-size: 15px; 
+  font-size: 15px;
 }
 
 .p-dropdown .p-dropdown-label {
-  font-size: 15px; 
+  font-size: 15px;
 }
 
-.p-component, .p-component * {
-  font-size: 15px; 
+.p-component,
+.p-component * {
+  font-size: 15px;
 }
-.p-datepicker-year{
+
+.p-datepicker-year {
   color: #c74747;
   transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
   font-weight: 600;
   padding: 0.5rem;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

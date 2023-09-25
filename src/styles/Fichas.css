@@ -41,9 +41,6 @@ select {
 }
 
 
-.input-box label {
-    color: #000;
-}
 
 .form :where(.input-box input, .select-box) {
     position: relative;

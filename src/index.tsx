@@ -12,7 +12,7 @@ import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 
 // layout
-import "/node_modules/primeflex/primeflex.css"
+import "/node_modules/primeflex/primeflex.css";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
