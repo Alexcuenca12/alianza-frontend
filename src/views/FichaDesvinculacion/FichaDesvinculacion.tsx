@@ -15,6 +15,9 @@ import { FichaPersonalService } from "../../services/FichaPersonalService";
 import { Dropdown } from "primereact/dropdown";
 import { PiFileXlsFill } from "react-icons/pi";
 import '../../styles/FiltroFichas.css'
+import { IExcelReportParams, IHeaderItem } from "../../interfaces/IExcelReportParams";
+import { ReportBar } from "../../common/ReportBar";
+
 
 
 function FichaDesvinculacion() {
@@ -45,6 +48,7 @@ function FichaDesvinculacion() {
   const desvinService = new FichaDesvinculacionService();
   const fichaPersonalService = new FichaPersonalService();
   const [foto, setFoto] = useState<string>('https://cdn-icons-png.flaticon.com/128/666/666201.png');
+  const [excelReportData, setExcelReportData] = useState<IExcelReportParams | null>(null);
 
 
 
@@ -53,6 +57,7 @@ function FichaDesvinculacion() {
       .getAll()
       .then((data) => {
         setcontra1(data);
+        loadExcelReportData(data);
         setDataLoaded(true); // Marcar los datos como cargados
       })
       .catch((error) => {
@@ -318,6 +323,62 @@ function FichaDesvinculacion() {
 
   }
 
+  function loadExcelReportData(data: IFichaDesvinculacion[]) {
+    const reportName = "Ficha de Desvinculación"
+    const logo = 'G1:K1'
+    const rowData = data.map((item) => (
+      {
+        idFicha: item.idFichaDesvinculacion,
+        cedula: item.fichaPersonal?.ciIdentidad,
+        nombres: item.fichaPersonal?.nombres,
+        apellidos: item.fichaPersonal?.apellidos,
+        fechaDesvinculacion: new Date(item.fechaDesvinculacion!).toLocaleDateString("es-ES", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        }),
+        motivo: item.motivo,
+      }
+    ));
+    const headerItems: IHeaderItem[] = [
+      { header: "№ FICHA" },
+      { header: "CEDULA" },
+      { header: "NOMBRES" },
+      { header: "APELLIDOS" },
+      { header: "FECHA DE DESVINCULACIÓN" },
+      { header: "MOTIVO" },
+
+
+    ]
+    console.log(reportName, '  //  ',
+      headerItems, '  //  ',
+      rowData)
+
+    setExcelReportData({
+      reportName,
+      headerItems,
+      rowData,
+      logo
+    }
+    )
+  }
+
+  const loadDataID = (id: number) => {
+    setcontra1([]);
+    desvinService
+      .getBusquedaID(id)
+      .then((data) => {
+        setcontra1(data);
+        loadExcelReportData(data);
+        setDataLoaded(true); // Marcar los datos como cargados
+      })
+      .catch((error) => {
+        console.error("Error al obtener los datos:", error);
+      });
+  };
+
+
+
   const resetFiltro = () => {
     setBusqueda('')
     setFoto('https://cdn-icons-png.flaticon.com/128/666/666201.png')
@@ -346,7 +407,7 @@ function FichaDesvinculacion() {
             <div style={{ position: "absolute", top: "0", right: "5px", marginTop: "-15px" }}>
               <label className="font-medium w-auto min-w-min" htmlFor="rangoEdad" style={{ marginRight: "10px" }}>Limpiar filtros:</label>
 
-              <Button icon="pi pi-times" rounded severity="danger" aria-label="Cancel" onClick={() => resetFiltro()} />
+              <Button icon="pi pi-times" rounded severity="danger" aria-label="Cancel" onClick={() => { resetFiltro(); loadData() }} />
             </div>
 
 
@@ -421,7 +482,9 @@ function FichaDesvinculacion() {
                         }
                       });
                       cargarFoto(parseInt(e.value))
-                      // loadData()
+                      // loadData()                                            loadDataID(parseInt(e.value))
+                      loadDataID(parseInt(e.value))
+
                       console.log(formData)
                     }}
                     value={formData.fichaPersonal?.idFichaPersonal}
@@ -592,6 +655,19 @@ function FichaDesvinculacion() {
           className="mt-4  w-full h-full text-3xl font-large"
         >
           <thead>
+            <tr >
+
+              <td colSpan={12} className="tdBtn">
+                <ReportBar
+                  reportName={excelReportData?.reportName!}
+                  headerItems={excelReportData?.headerItems!}
+                  rowData={excelReportData?.rowData!}
+                  logo={excelReportData?.logo!}
+
+                />
+              </td>
+
+            </tr>
             <tr style={{ backgroundColor: "#871b1b", color: "white" }}>
               <th>Nº de Registro </th>
               <th>Fecha de Desvinculación </th>

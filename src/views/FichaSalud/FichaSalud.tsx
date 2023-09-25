@@ -5,6 +5,7 @@ import { Button } from "primereact/button";
 import { Fieldset } from "primereact/fieldset";
 import { Card } from "primereact/card";
 import { InputTextarea } from "primereact/inputtextarea";
+import { PiFileXlsFill } from "react-icons/pi";
 
 import cardHeader from "../../shared/CardHeader";
 import { IFichaSalud } from "../../interfaces/IFichaSalud";
@@ -14,6 +15,7 @@ import { FichaSaludService } from "../../services/FichaSaludService";
 import swal from "sweetalert";
 import { Dropdown } from "primereact/dropdown";
 import '../../styles/FiltroFichas.css'
+import * as XLSX from 'xlsx';
 
 
 function FichaSaludContext() {
@@ -276,6 +278,21 @@ function FichaSaludContext() {
   };
 
 
+  const generarExcel = () => {
+    // const wb = XLSX.utils.book_new();
+
+    // // Crear una copia de la lista excluyendo el campo 'foto'
+    // // const listSinFoto = listFichaFamiliar.map(({ foto, ...rest }) => rest);
+
+    // const ws = XLSX.utils.json_to_sheet(listFicha);
+
+    // // Resto del código para aplicar estilos y encabezados (como se mostró en tu código original) ...
+
+    // XLSX.utils.book_append_sheet(wb, ws, 'FichaFamiliar');
+
+    // // Descargar el archivo Excel
+    // XLSX.writeFile(wb, 'FichaFamiliar.xlsx');
+  };
 
   return (
     <Fieldset className="fgrid col-fixed ">
@@ -636,6 +653,21 @@ function FichaSaludContext() {
             className="mt-4  w-full h-full text-3xl font-large"
           >
             <thead>
+              <tr >
+                <td colSpan={12} className="tdBtn">
+                  <div className="divEnd">
+                    <button className="btnPrint" onClick={generarExcel}>
+                      <div className="svg-wrapper-1">
+                        <div className="svg-wrapper">
+                          <PiFileXlsFill className="icono"></PiFileXlsFill>
+                        </div>
+                      </div>
+                      <span>Generar Excel</span>
+                    </button>
+                  </div>
+                </td>
+
+              </tr>
               <tr style={{ backgroundColor: "#871b1b", color: "white" }}>
                 <th>Nº de Ficha</th>
                 <th>Condiciones Médicas</th>

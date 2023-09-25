@@ -13,7 +13,6 @@ import { Calendar } from "primereact/calendar";
 import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
 import { InputText } from 'primereact/inputtext';
-import { PiFileXlsFill } from "react-icons/pi";
 
 
 import { ICalcularEdad } from '../../interfaces/ICalcularEdad';
@@ -25,6 +24,8 @@ import '../../styles/Fichas.css'
 import '../../styles/FiltroFichas.css'
 import { TipoFamiliaService } from "../../services/TipoFamiliaService";
 import * as XLSX from 'xlsx';
+import { IExcelReportParams, IHeaderItem } from "../../interfaces/IExcelReportParams";
+import { ReportBar } from "../../common/ReportBar";
 
 
 function FichaPersonal() {
@@ -32,6 +33,7 @@ function FichaPersonal() {
     const service = new FichaFamiliarService();
     const fichaPersonalService = new FichaPersonalService();
 
+    const [excelReportData, setExcelReportData] = useState<IExcelReportParams | null>(null);
 
 
     const fileUploadRef = useRef<FileUpload>(null);
@@ -76,6 +78,7 @@ function FichaPersonal() {
             .getAll()
             .then((data) => {
                 setFichaFamiliar(data);
+                loadExcelReportData(data);
                 setDataLoaded(true); // Marcar los datos como cargados
             })
             .catch((error) => {
@@ -108,9 +111,6 @@ function FichaPersonal() {
                     .then((data) => {
                         setFichaFamiliar(data);
                         resetForm();
-                        // if (fileUploadRef.current) {
-                        //     fileUploadRef.current.clear();
-                        // }
                     })
                     .catch((error) => {
                         console.error("Error al obtener los datos:", error);
@@ -269,7 +269,6 @@ function FichaPersonal() {
 
     const loadRelacion = () => {
 
-        // console.log("4 SIN EDAD")
         fichaPersonalService
             .getBusquedaRelacion(true, busqueda)
             .then((data: IFichaPersonal[]) => {
@@ -310,6 +309,7 @@ function FichaPersonal() {
             .getBusquedaID(id)
             .then((data) => {
                 setFichaFamiliar(data);
+                loadExcelReportData(data);
                 setDataLoaded(true); // Marcar los datos como cargados
             })
             .catch((error) => {
@@ -342,6 +342,55 @@ function FichaPersonal() {
     };
 
 
+    function loadExcelReportData(data: IFichaFamiliar[]) {
+        const reportName = "Ficha Familiar"
+        const logo = 'G1:I1'
+
+        const rowData = data.map((item) => (
+            {
+                idFicha: item.idFichaFamiliar,
+                cedula: item.fichaPersonal?.ciIdentidad,
+                nombres: item.fichaPersonal?.nombres,
+                apellidos: item.fichaPersonal?.apellidos,
+                jefaturaFamiliar: item.jefaturaFamiliar,
+                tipoFamilia: item.tipoFamilia?.nombreTipo,
+                numIntegrantes: item.numIntegrantes,
+                numNNA: item.numNNA,
+                numAdultos: item.numAdultos,
+                numAdultosMayores: item.numAdultosMayores,
+                beneficio: item.beneficioAdicional || 'N/A', // Establecer 'N/A' si es una cadena vacía
+                organizacionBenefica: item.organizacionBeneficio || 'N/A',
+                personasDiscapacidad: item.discapacidadIntegrantes ? 'SI' : 'NO', // Corrección aquí
+                otrasSituaciones: item.otrasSituaciones || 'N/A',
+            }
+        ));
+        const headerItems: IHeaderItem[] = [
+            { header: "№ FICHA" },
+            { header: "CEDULA" },
+            { header: "NOMBRES" },
+            { header: "APELLIDOS" },
+            { header: "JEFATURA FAMILIAR" },
+            { header: "TIPO DE FAMILIA" },
+            { header: "№ INTEGRANTES" },
+            { header: "№ NNA" },
+            { header: "№ ADULTOS" },
+            { header: "№ ADULTOS MAYORES" },
+            { header: "BENEFICIO ADICIONAL" },
+            { header: "ORGANIZACION BENEFICA" },
+            { header: "RESIDEN PERSONAS CON DICAPACIDAD" },
+            { header: "OTRAS SITUACIONES" },
+
+        ]
+        setExcelReportData({
+            reportName,
+            headerItems,
+            rowData,
+            logo
+        }
+        )
+    }
+
+
     return (
 
         <Fieldset className="" style={{ display: 'flex', justifyContent: 'center' }}>
@@ -356,7 +405,7 @@ function FichaPersonal() {
                     style={{ display: 'flex', justifyContent: 'center' }}
                 >
                     <h1 className="text-5xl font-smibold lg:md-2 h-full max-w-full max-h-full min-w-min">
-                        Ficha de Familiar
+                        Ficha Familiar
                     </h1>
                 </div>
                 <section className="flex justify-content-center flex-wrap container">
@@ -787,17 +836,14 @@ function FichaPersonal() {
                     >
                         <thead>
                             <tr >
+
                                 <td colSpan={12} className="tdBtn">
-                                    <div className="divEnd">
-                                        <button className="btnPrint" onClick={generarExcel}>
-                                            <div className="svg-wrapper-1">
-                                                <div className="svg-wrapper">
-                                                    <PiFileXlsFill className="icono"></PiFileXlsFill>
-                                                </div>
-                                            </div>
-                                            <span>Generar Exel</span>
-                                        </button>
-                                    </div>
+                                    <ReportBar
+                                        reportName={excelReportData?.reportName!}
+                                        headerItems={excelReportData?.headerItems!}
+                                        rowData={excelReportData?.rowData!}
+                                        logo={excelReportData?.logo!}
+                                    />
                                 </td>
 
                             </tr>
@@ -831,9 +877,9 @@ function FichaPersonal() {
                                     <td>{ficha.numAdultos}</td>
                                     <td>{ficha.numNNA}</td>
                                     <td>{ficha.numAdultosMayores}</td>
-                                    <td>{ficha.beneficioAdicional}</td>
-                                    <td>{ficha.organizacionBeneficio}</td>
-                                    <td>{ficha.otrasSituaciones}</td>
+                                    <td>{ficha.beneficioAdicional || 'N/A'}</td>
+                                    <td>{ficha.organizacionBeneficio || 'N/A'}</td>
+                                    <td>{ficha.otrasSituaciones || 'N/A'}</td>
                                     {/* <td>{ficha.organizacionBeneficio}</td> */}
 
                                     <td style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
