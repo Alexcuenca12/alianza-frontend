@@ -3,12 +3,7 @@ import Home from "./home/Home";
 import { Toast } from "primereact/toast";
 import React, { useRef } from "react";
 import Footer from "../../common/Footer";
-import {
-  FcBusinessContact,
-  FcBusinessman,
-  FcBusinesswoman,
-  FcPodiumWithAudience,
-} from "react-icons/fc";
+import { FcBusinessContact, FcBusinessman, FcBusinesswoman } from "react-icons/fc";
 import { FcHome } from "react-icons/fc";
 import { FcExport } from "react-icons/fc";
 import { FcGraduationCap } from "react-icons/fc";
@@ -17,6 +12,7 @@ import { FcPodiumWithSpeaker } from "react-icons/fc";
 import { FcReadingEbook } from "react-icons/fc";
 import { FcConferenceCall } from "react-icons/fc";
 import { FcLike } from "react-icons/fc";
+import { FcElectricalThreshold } from "react-icons/fc";
 import { MdFamilyRestroom } from "react-icons/md";
 import { SideBarMenuCard, SideBarMenuItem } from "../../interfaces/types";
 import { SideBarMenu } from "../../common/SideBar/SideBarMenu";
@@ -31,7 +27,7 @@ import Docente from "../Docente/Docente";
 import Encargado from "../Encargado/Encargado";
 import SecretariaContext from "../Secretaria/Secretaria";
 import Curso from "../Curso/Curso";
-import Asistencia from "../Asistencia/Asistencia";
+import Reporte from "../Reportes/Reporte";
 
 export const DashboardRouter = () => {
   //Datos del sessionStorage
@@ -68,12 +64,6 @@ export const DashboardRouter = () => {
       url: "/salud",
     },
     {
-      id: "13",
-      label: "Asistencia",
-      icon: FcPodiumWithAudience,
-      url: "/asistencia",
-    },
-    {
       id: "5",
       label: "Ficha Educativa",
       icon: FcGraduationCap,
@@ -97,12 +87,7 @@ export const DashboardRouter = () => {
       icon: FcExport,
       url: "/desvinculacion",
     },
-    {
-      id: "12",
-      label: "Curso",
-      icon: FcBusinessContact,
-      url: "/curso",
-    },
+
     {
       id: "9",
       label: "Docente",
@@ -121,6 +106,20 @@ export const DashboardRouter = () => {
       icon: FcPodiumWithSpeaker,
       url: "/encargado",
     },
+    {
+      id: "12",
+      label: "Curso",
+      icon: FcBusinessContact,
+      url: "/curso",
+    },
+    {
+      id: "13",
+      label: "Reportes",
+      icon: FcElectricalThreshold,
+      url: "/reporte",
+    },
+
+
   ];
 
   const card: SideBarMenuCard = {
@@ -333,11 +332,11 @@ export const DashboardRouter = () => {
                   <SideBarMenu items={items} card={card} />
                 )}
               </Route>
-              <Route path="/asistencia">
+              <Route path="/reporte">
                 {rol === 1 ? (
                   <>
                     <SideBarMenu items={items} card={card} />
-                    <Asistencia />
+                    <Reporte />
                     <Footer />
                   </>
                 ) : rol === 2 ? (
@@ -359,6 +358,7 @@ export const DashboardRouter = () => {
                 <Redirect to="/dashboard/home" />
               </Route>
             </Switch>
+
           </div>
         </div>
       </main>

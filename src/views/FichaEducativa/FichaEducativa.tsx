@@ -13,18 +13,19 @@ import swal from "sweetalert";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Dropdown } from "primereact/dropdown";
 
-import "../../styles/FiltroFichas.css";
+
+import '../../styles/FiltroFichas.css'
 
 function FichaInscripcionContext() {
   const [idPersona, setIDPersona] = useState<number>(0);
   const personalService = new FichaPersonalService();
   const fichaPersonalService = new FichaPersonalService();
 
-  const [busqueda, setBusqueda] = useState<string>("");
-  const [foto, setFoto] = useState<string>(
-    "https://cdn-icons-png.flaticon.com/128/666/666201.png"
-  );
+
+  const [busqueda, setBusqueda] = useState<string>('');
+  const [foto, setFoto] = useState<string>('https://cdn-icons-png.flaticon.com/128/666/666201.png');
   const [listFperonales, setListFperonales] = useState<IFichaPersonal[]>([]);
+
 
   const [cedula, setCedula] = useState<string>("");
   const [formDataPersona, setFormDataPersona] = useState<IFichaPersonal>({
@@ -199,9 +200,11 @@ function FichaInscripcionContext() {
         setEditItemId(id);
 
         setBusqueda(editItem.fichaPersonal?.ciIdentidad ?? "");
-        setFoto(editItem.fichaPersonal?.foto ?? "");
+        setFoto(editItem.fichaPersonal?.foto ?? '')
+
 
         if (editItem.fichaPersonal !== null) {
+
           const editItemWithLabel = {
             ...editItem,
             fichaPersonal: {
@@ -270,7 +273,9 @@ function FichaInscripcionContext() {
     return <div style={{ marginLeft: "50%" }}>Cargando datos...</div>;
   }
 
+
   const loadRelacion = () => {
+
     // console.log("4 SIN EDAD")
     fichaPersonalService
       .getBusquedaRelacion(true, busqueda)
@@ -287,27 +292,32 @@ function FichaInscripcionContext() {
         console.error("Error al obtener los datos:", error);
       });
 
-    console.log("Datos enviados:", { listFperonales });
+
+    console.log('Datos enviados:', { listFperonales });
+
   };
 
   const cargarFoto = (id: number) => {
-    const Foto = listFperonales.find(
-      (persona) => persona.idFichaPersonal === id
-    );
+    const Foto = listFperonales.find((persona) => persona.idFichaPersonal === id);
 
     if (Foto) {
       // Actualiza formData con la foto correspondiente
       setFoto(Foto.foto);
       if (Foto) {
-        console.log("Foto cargada");
+        console.log("Foto cargada")
       }
+
     }
-  };
+
+  }
 
   const resetFiltro = () => {
-    setBusqueda("");
-    setFoto("https://cdn-icons-png.flaticon.com/128/666/666201.png");
+    setBusqueda('')
+    setFoto('https://cdn-icons-png.flaticon.com/128/666/666201.png')
+    setListFperonales([])
+
   };
+
 
   return (
     <Fieldset className="fgrid col-fixed ">
@@ -326,48 +336,17 @@ function FichaInscripcionContext() {
         </div>
 
         <section className="flex justify-content-center flex-wrap container">
-          <Fieldset
-            legend="Filtros de busqueda"
-            style={{
-              width: "1000px",
-              marginBottom: "45px",
-              position: "relative",
-            }}
-          >
-            <div
-              style={{
-                position: "absolute",
-                top: "0",
-                right: "5px",
-                marginTop: "-15px",
-              }}
-            >
-              <label
-                className="font-medium w-auto min-w-min"
-                htmlFor="rangoEdad"
-                style={{ marginRight: "10px" }}
-              >
-                Limpiar filtros:
-              </label>
+          <Fieldset legend="Filtros de busqueda" style={{ width: "1000px", marginBottom: "45px", position: "relative" }}>
+            <div style={{ position: "absolute", top: "0", right: "5px", marginTop: "-15px" }}>
+              <label className="font-medium w-auto min-w-min" htmlFor="rangoEdad" style={{ marginRight: "10px" }}>Limpiar filtros:</label>
 
-              <Button
-                icon="pi pi-times"
-                rounded
-                severity="danger"
-                aria-label="Cancel"
-                onClick={() => resetFiltro()}
-              />
+              <Button icon="pi pi-times" rounded severity="danger" aria-label="Cancel" onClick={() => resetFiltro()} />
             </div>
 
             <section className="layout">
               <div className="">
                 <div input-box>
-                  <label
-                    className="font-medium w-auto min-w-min"
-                    htmlFor="genero"
-                  >
-                    Cedula o Nombre:
-                  </label>
+                  <label className="font-medium w-auto min-w-min" htmlFor='genero'>Cedula o Nombre:</label>
 
                   <div className="flex-1">
                     <InputText
@@ -375,6 +354,7 @@ function FichaInscripcionContext() {
                       id="integer"
                       // keyfilter="int"
                       style={{ width: "75%" }}
+
                       onChange={(e) => {
                         // Actualizar el estado usando setFormData
                         setListFperonales([]); // Asignar un arreglo vacío para vaciar el estado listFperonales
@@ -384,6 +364,7 @@ function FichaInscripcionContext() {
                         // Luego, llamar a loadRelacion después de que se actualice el estado
                         loadRelacion();
                       }}
+
                       onKeyUp={(e) => {
                         setListFperonales([]); // Asignar un arreglo vacío para vaciar el estado listFperonales
 
@@ -393,6 +374,7 @@ function FichaInscripcionContext() {
                         loadRelacion();
                         loadRelacion(); // Llama a tu método aquí o realiza las acciones necesarias.
                       }}
+
                       value={busqueda}
                     />
 
@@ -402,12 +384,7 @@ function FichaInscripcionContext() {
               </div>
               <div className="">
                 <div>
-                  <label
-                    className="font-medium w-auto min-w-min"
-                    htmlFor="fichaPersonal"
-                  >
-                    Resultados de la busqueda:
-                  </label>
+                  <label className="font-medium w-auto min-w-min" htmlFor="fichaPersonal">Resultados de la busqueda:</label>
                   <Dropdown
                     className="text-2xl"
                     id="tiempo_dedicacion"
@@ -418,35 +395,31 @@ function FichaInscripcionContext() {
                       setFormData({
                         ...formData,
                         fichaPersonal: {
-                          idFichaPersonal: parseInt(e.value),
-                          foto: "",
-                          apellidos: "",
-                          nombres: "",
-                          ciIdentidad: "",
-                          nacionalidad: "",
-                          fechaNacimiento: "",
+                          idFichaPersonal: parseInt(e.value), foto: '',
+                          apellidos: '',
+                          nombres: '',
+                          ciIdentidad: '',
+                          nacionalidad: '',
+                          fechaNacimiento: '',
                           rangoEdad: null,
-                          genero: "",
+                          genero: '',
                           etnia: null,
                           parroquia: null,
-                          zona: "",
-                          barrioSector: "",
-                          direccion: "",
-                          referencia: "",
+                          zona: '',
+                          barrioSector: '',
+                          direccion: '',
+                          referencia: '',
                           coordenadaX: 0,
                           coordenadaY: 0,
-                          estVinculacion: true,
-                        },
+                          estVinculacion: true
+                        }
                       });
-                      cargarFoto(parseInt(e.value));
+                      cargarFoto(parseInt(e.value))
                       // loadData()
-                      console.log(formData);
+                      console.log(formData)
                     }}
-                    value={
-                      formData.fichaPersonal
-                        ? formData.fichaPersonal.idFichaPersonal
-                        : null
-                    }
+                    value={formData.fichaPersonal?.idFichaPersonal}
+
                     optionLabel="label"
                     optionValue="idFichaPersonal"
                     placeholder="Seleccione una persona"
@@ -468,6 +441,8 @@ function FichaInscripcionContext() {
                 </div>
               </div>
             </section>
+
+
           </Fieldset>
           <form
             onSubmit={editMode ? handleUpdate : handleSubmit}
@@ -645,8 +620,7 @@ function FichaInscripcionContext() {
                       resetForm();
                       resetFiltro();
                       setEditMode(false);
-                    }}
-                  />
+                    }} />
                 </div>
               </div>
             </div>
@@ -698,7 +672,7 @@ function FichaInscripcionContext() {
                       onClick={() =>
                         handleEdit(contrato.idFichaEducativa?.valueOf())
                       }
-                      // Agrega el evento onClick para la operación de editar
+                    // Agrega el evento onClick para la operación de editar
                     />
                     <Button
                       type="button"

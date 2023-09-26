@@ -7,15 +7,12 @@ export class FichaInscripcionService {
   getAll() {
     return axios.get(this.baseUrl + "get").then((res) => res.data);
   }
+  getBusquedaID(id: number) {
+    return axios.get(`${this.baseUrl}busquedaID/${id}`).then((res) => res.data);
+  }
   //Crear
   save(publicacion: any) {
-    return axios
-      .post(this.baseUrl + "post", publicacion)
-      .then((res) => res.data);
-  }
-
-  getByID(id: number) {
-    return axios.get(`${this.baseUrl}getID/${id}`).then((res) => res.data);
+    return axios.post(this.baseUrl + "post", publicacion).then((res) => res.data);
   }
 
   //(Eliminado lógico)

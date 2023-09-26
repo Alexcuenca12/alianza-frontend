@@ -14,3 +14,82 @@
     padding: 25px;
     /* border-radius: 8px; */
 }
+
+.filtro {
+    width: 1000px;
+    margin-bottom: 35px;
+    position: relative
+}
+
+.tdBtn {}
+
+.divEnd {
+    width: 100%;
+    /* display: flex;
+    justify-content: flex-end; */
+    padding-right: 15px;
+    padding-bottom: 5px;
+
+}
+
+.btnLimpiar {
+    position: absolute;
+    top: 0;
+    right: 5px;
+    margin-top: -15px;
+}
+
+.btnPrint {
+    font-family: inherit;
+    /* font-size: 20px; */
+    height: 80%;
+    background: #28A66B;
+    color: white;
+    fill: rgb(155, 153, 153);
+    padding: 0.7em 1em;
+    padding-left: 0.9em;
+    display: flex;
+    align-items: center;
+    border: none;
+    border-radius: 15px;
+    font-weight: 600;
+}
+
+.btnPrint span {
+    display: block;
+    margin-left: 0.3em;
+    transition: all 0.3s ease-in-out;
+}
+
+.icono {
+    transform: scale(1.4);
+}
+
+.btnPrint .icono {
+    display: block;
+    transform-origin: center center;
+    transition: transform 0.3s ease-in-out;
+}
+
+.btnPrint:hover {
+    background: #178047;
+}
+
+.btnPrint:hover .svg-wrapper {
+    transform: scale(1.25);
+    transition: .5s linear;
+}
+
+.btnPrint:hover .icono {
+    transform: translateX(2.4em) scale(1.5);
+    fill: #fff;
+}
+
+.btnPrint:hover span {
+    opacity: 0;
+    transition: .5s linear;
+}
+
+.btnPrint:active {
+    transform: scale(0.95);
+}
