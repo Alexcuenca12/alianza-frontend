@@ -104,7 +104,7 @@ function Asistencia() {
   const loadData = () => {
     if (selectedCursoId !== undefined) {
       fichaService
-        .getByID(selectedCursoId)
+        .getBusquedaID(selectedCursoId)
         .then((data) => {
           setFichas(data);
 
