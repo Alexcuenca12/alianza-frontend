@@ -13,6 +13,8 @@ import swal from "sweetalert";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Dropdown } from "primereact/dropdown";
 
+import { IExcelReportParams, IHeaderItem } from "../../interfaces/IExcelReportParams";
+import { ReportBar } from "../../common/ReportBar";
 
 import '../../styles/FiltroFichas.css'
 
@@ -20,6 +22,8 @@ function FichaInscripcionContext() {
   const [idPersona, setIDPersona] = useState<number>(0);
   const personalService = new FichaPersonalService();
   const fichaPersonalService = new FichaPersonalService();
+
+  const [excelReportData, setExcelReportData] = useState<IExcelReportParams | null>(null);
 
 
   const [busqueda, setBusqueda] = useState<string>('');
@@ -49,31 +53,6 @@ function FichaInscripcionContext() {
     estVinculacion: false,
   });
 
-  // const buscarPorCedula = () => {
-  //   if (cedula.trim() === "") {
-  //     swal("Advertencia", "Ingrese una cédula válida para buscar", "warning");
-  //     return;
-  //   }
-  //   personalService
-  //     .getByPersona(true, cedula)
-  //     .then((data) => {
-  //       console.log("p1", data);
-  //       setFormDataPersona(data);
-  //       console.log("p2", data);
-  //       setIDPersona(data.idFichaPersonal);
-  //       console.log("p3", data);
-  //       setFormData({
-  //         ...formData,
-  //         fichaPersonal: {
-  //           idFichaPersonal: data.idFichaPersonal,
-  //         },
-  //       });
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error al buscar por cédula:", error);
-  //     });
-  // };
-
   const [contra1, setcontra1] = useState<IFichaEducativa[]>([]);
   const [formData, setFormData] = useState<IFichaEducativa>({
     idFichaEducativa: 0,
@@ -97,6 +76,7 @@ function FichaInscripcionContext() {
       .getAll()
       .then((data) => {
         setcontra1(data);
+        loadExcelReportData(data);
         setDataLoaded(true); // Marcar los datos como cargados
       })
       .catch((error) => {
@@ -246,10 +226,13 @@ function FichaInscripcionContext() {
           );
           setEditMode(false);
           setEditItemId(undefined);
+          loadData();
+
         })
         .catch((error) => {
           console.error("Error al actualizar el formulario:", error);
         });
+
     }
   };
 
@@ -310,6 +293,62 @@ function FichaInscripcionContext() {
     }
 
   }
+
+  function loadExcelReportData(data: IFichaEducativa[]) {
+    const reportName = "Ficha de Desvinculación"
+    const logo = 'G1:I1'
+    const rowData = data.map((item) => (
+      {
+        idFicha: item.idFichaEducativa,
+        cedula: item.fichaPersonal?.ciIdentidad,
+        nombres: item.fichaPersonal?.nombres,
+        apellidos: item.fichaPersonal?.apellidos,
+        grado: item.gradoEducativo,
+        jornada: item.jornadaEducativa,
+        centro: item.centroEducativo,
+        direccion: item.direccionEducativa,
+        referencia: item.referenciaEducativa,
+        observacion: item.observacionesEducativa,
+      }
+    ));
+    const headerItems: IHeaderItem[] = [
+      { header: "№ FICHA" },
+      { header: "CEDULA" },
+      { header: "NOMBRES" },
+      { header: "APELLIDOS" },
+      { header: "GRADO" },
+      { header: "JORNADA" },
+      { header: "CENTRO EDUCATIVO" },
+      { header: "DIRECCION" },
+      { header: "REFERENCIA" },
+      { header: "OBSERVACION" },
+    ]
+    console.log(reportName, '  //  ',
+      headerItems, '  //  ',
+      rowData)
+
+    setExcelReportData({
+      reportName,
+      headerItems,
+      rowData,
+      logo
+    }
+    )
+  }
+
+  const loadDataID = (id: number) => {
+    setcontra1([]);
+    educaService
+      .getBusquedaID(id)
+      .then((data) => {
+        setcontra1(data);
+        loadExcelReportData(data);
+        setDataLoaded(true); // Marcar los datos como cargados
+      })
+      .catch((error) => {
+        console.error("Error al obtener los datos:", error);
+      });
+  };
 
   const resetFiltro = () => {
     setBusqueda('')
@@ -415,7 +454,7 @@ function FichaInscripcionContext() {
                         }
                       });
                       cargarFoto(parseInt(e.value))
-                      // loadData()
+                      loadDataID(parseInt(e.value))
                       console.log(formData)
                     }}
                     value={formData.fichaPersonal?.idFichaPersonal}
@@ -632,6 +671,17 @@ function FichaInscripcionContext() {
             className="mt-4  w-full h-full text-3xl font-large"
           >
             <thead>
+              <tr >
+                <td colSpan={12} className="tdBtn">
+                  <ReportBar
+                    reportName={excelReportData?.reportName!}
+                    headerItems={excelReportData?.headerItems!}
+                    rowData={excelReportData?.rowData!}
+                    logo={excelReportData?.logo!}
+
+                  />
+                </td>
+              </tr>
               <tr style={{ backgroundColor: "#871b1b", color: "white" }}>
                 <th>Nº de Registro</th>
                 <th>Centro Educativo</th>

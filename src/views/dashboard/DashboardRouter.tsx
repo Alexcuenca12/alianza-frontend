@@ -13,6 +13,7 @@ import { FcReadingEbook } from "react-icons/fc";
 import { FcConferenceCall } from "react-icons/fc";
 import { FcLike } from "react-icons/fc";
 import { FcElectricalThreshold } from "react-icons/fc";
+import { FcInspection } from "react-icons/fc";
 import { MdFamilyRestroom } from "react-icons/md";
 import { SideBarMenuCard, SideBarMenuItem } from "../../interfaces/types";
 import { SideBarMenu } from "../../common/SideBar/SideBarMenu";
@@ -47,13 +48,13 @@ export const DashboardRouter = () => {
     {
       id: "2",
       label: "Ficha Personal",
-      icon: FcViewDetails,
+      icon: FcBusinessman,
       url: "/personal",
     },
     {
       id: "3",
       label: "Ficha de Inscripción",
-      icon: FcBusinessman,
+      icon: FcViewDetails,
       url: "/inscripción",
     },
 
@@ -118,7 +119,12 @@ export const DashboardRouter = () => {
       icon: FcElectricalThreshold,
       url: "/reporte",
     },
-
+    {
+      id: "14",
+      label: "Anexos",
+      icon: FcInspection,
+      url: "/anexo",
+    },
 
   ];
 

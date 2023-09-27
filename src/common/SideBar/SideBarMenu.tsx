@@ -1,5 +1,5 @@
 import { SideBarMenuCard, SideBarMenuItem } from "../../interfaces/types";
-import { useState } from "react";
+import React, { useState, useEffect, useRef } from 'react';
 import { classNames } from "../../util/classes";
 import { VscMenu } from "react-icons/vsc";
 import SideBarMenuItemView from "./SideBarMenuItemView";
@@ -15,13 +15,32 @@ interface SideBarProps {
 export function SideBarMenu({ items, card }: SideBarProps) {
   const [isOpen, setIsOpen] = useState<boolean>(true);
 
+  const menuRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    // Función para manejar clics fuera del menú
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+
+    // Agregar un event listener para escuchar clics en todo el documento
+    document.addEventListener('click', handleClickOutside);
+
+    return () => {
+      // Eliminar el event listener cuando el componente se desmonta
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, []);
+
   function handleClick() {
     setIsOpen(!isOpen);
   }
 
   return (
     <>
-      <div
+      <div ref={menuRef}
         className={classNames("SideBarMenu", isOpen ? "expanded" : "collapsed")}
       >
         <div className="menuButton">
@@ -30,10 +49,14 @@ export function SideBarMenu({ items, card }: SideBarProps) {
           </button>
         </div>
         <SideBarMenuCardView card={card} isOpen={isOpen} />
-        {items.map((item) => (
-          <SideBarMenuItemView key={item.id} item={item} isOpen={isOpen} />
-        ))}
-        <div className="exit">
+        <div className={classNames("menuScroll", isOpen ? "expanded" : "collapsed")}>
+
+          {items.map((item) => (
+            <SideBarMenuItemView key={item.id} item={item} isOpen={isOpen} />
+          ))}
+        </div>
+
+        <div className={classNames("exit", isOpen ? "expanded" : "collapsed")}>
           <button className="Btn">
             <div className="sign">
               <svg viewBox="0 0 512 512">
@@ -41,7 +64,7 @@ export function SideBarMenu({ items, card }: SideBarProps) {
               </svg>
             </div>
 
-            <div className="text">Logout</div>
+            <div className="text">Salir</div>
           </button>
         </div>
       </div>

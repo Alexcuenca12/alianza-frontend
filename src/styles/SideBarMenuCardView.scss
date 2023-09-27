@@ -4,10 +4,10 @@
 .SideBarMenuCardView {
     background-color: #3d3c3b;
     text-align: center;
-    
+
 
     .profile {
-        border-radius: 50%;
+        border-radius: 5%;
 
         padding: 5px;
         box-sizing: border-box;
@@ -16,11 +16,11 @@
 
     .profileInfo {
         overflow: hidden;
-        height: 80px;
+        height: 50px;
         @include transition(height);
 
         .name {
-            font-size: 20px;
+            font-size: 15px;
             font-family: 'Raleway', sans-serif;
             font-weight: 500;
         }

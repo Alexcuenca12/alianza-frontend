@@ -272,8 +272,8 @@ input:focus~.input-border {
 /* //estilos de radiobuttons */
 :focus {
     outline: 0;
-    border-color: #2260ff;
-    box-shadow: 0 0 0 4px #b5c9fc;
+    /* border-color: #00ff0d; */
+    /* box-shadow: 0 0 0 4px #b5c9fc; */
 }
 
 .mydict div {
