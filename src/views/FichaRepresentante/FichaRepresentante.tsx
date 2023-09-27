@@ -302,7 +302,7 @@ function FichaInscripcionContext() {
   };
 
   function loadExcelReportData(data: IFichaRepresentante[]) {
-    const reportName = "Ficha de Desvinculación"
+    const reportName = "Ficha del Representante"
     const logo = 'G1:K1'
     const rowData = data.map((item) => (
       {

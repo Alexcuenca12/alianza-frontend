@@ -17,6 +17,8 @@ import { Dropdown } from "primereact/dropdown";
 import '../../styles/FiltroFichas.css'
 import * as XLSX from 'xlsx';
 
+import { InputNumber, InputNumberValueChangeEvent } from 'primereact/inputnumber';
+
 
 function FichaSaludContext() {
   const fichaPersonalService = new FichaPersonalService();
@@ -40,10 +42,9 @@ function FichaSaludContext() {
     fichaPersonal: null,
   });
 
-  const personalService = new FichaPersonalService();
-  const [cedula, setCedula] = useState<string>("");
 
-
+  const [tempTalla, setTempTalla] = useState<string>();
+  const [tempPeso, setTempPeso] = useState<string>();
 
   const fileUploadRef = useRef<FileUpload>(null);
   const [dataLoaded, setDataLoaded] = useState(false);
@@ -159,7 +160,8 @@ function FichaSaludContext() {
         setBusqueda(editItem.fichaPersonal?.ciIdentidad ?? "");
         setFoto(editItem.fichaPersonal?.foto ?? '')
 
-
+        setTempPeso(editItem.pesoFichaSalud.toString() as string)
+        setTempTalla(editItem.tallaFichaSalud.toString() as string)
         if (editItem.fichaPersonal !== null) {
 
           const editItemWithLabel = {
@@ -197,11 +199,9 @@ function FichaSaludContext() {
             enfermedadesPrevalentesFichaSalud: "",
             fichaPersonal: null,
           });
-          setcontra1(
-            contra1.map((contra) =>
-              contra.idFichaSalud === editItemId ? response : contra
-            )
-          );
+          setTempPeso('')
+          setTempTalla('')
+          loadData();
           setEditMode(false);
           setEditItemId(undefined);
         })
@@ -224,10 +224,14 @@ function FichaSaludContext() {
     });
     setEditMode(false);
     setEditItemId(undefined);
+    setTempPeso('')
+    setTempTalla('')
     if (fileUploadRef.current) {
       fileUploadRef.current.clear(); // Limpiar el campo FileUpload
     }
   };
+
+
   if (!dataLoaded) {
     return <div style={{ marginLeft: "50%" }}>Cargando datos...</div>;
   }
@@ -303,9 +307,9 @@ function FichaSaludContext() {
       >
         <div
           className="h1-rem"
-          style={{ marginLeft: "40%", marginBottom: "20px" }}
+          style={{ display: 'flex', justifyContent: 'center' }}
         >
-          <h1 className="text-5xl font-smibold lg:md-2  w-full h-full max-w-full max-h-full min-w-min">
+          <h1 className="text-5xl font-smibold lg:md-2 h-full max-w-full max-h-full min-w-min">
             Ficha Médica
           </h1>
         </div>
@@ -423,11 +427,13 @@ function FichaSaludContext() {
             onSubmit={editMode ? handleUpdate : handleSubmit}
             encType="multipart/form-data"
           >
-            <div className="flex flex-wrap flex-row">
-              <div className="flex align-items-center justify-content-center">
-                <div className="flex flex-column flex-wrap gap-4">
-
-                  <div className="flex flex-wrap w-full h-full  justify-content-between">
+            <div className="flex flex-wrap flex-row" style={{ justifyContent: "center", alignItems: "center" }}>
+              <div className="flex align-items-center justify-content-center" style={{ margin: "20px" }}>
+                <div
+                  className="flex flex-column flex-wrap gap-4"
+                  style={{ paddingRight: "25px" }}
+                >
+                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
                     <label
                       htmlFor="condiciones"
                       className="text-3xl font-medium w-auto min-w-min"
@@ -440,7 +446,7 @@ function FichaSaludContext() {
                       placeholder="Ingrese las Condiciones Médicas"
                       id="condiciones"
                       name="condiciones"
-                      style={{ width: "221px" }}
+                      style={{ width: "220px" }}
                       onChange={(e) =>
                         setFormData({
                           ...formData,
@@ -450,7 +456,7 @@ function FichaSaludContext() {
                       value={formData.condicionesMedicas}
                     />
                   </div>
-                  <div className="flex flex-wrap w-full h-full  justify-content-between">
+                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
                     <label
                       htmlFor="condiciones"
                       className="text-3xl font-medium w-auto min-w-min"
@@ -458,23 +464,28 @@ function FichaSaludContext() {
                     >
                       Peso:
                     </label>
-                    <InputText
-                      className="text-2xl"
-                      placeholder="Ingrese las Condiciones Médicas"
+                    <InputNumber
                       id="peso"
                       name="peso"
+                      className="text-2xl"
+                      inputId="percent"
+                      value={formData.pesoFichaSalud || 0}
+                      onValueChange={(e: InputNumberValueChangeEvent) => setFormData({
+                        ...formData,
+                        pesoFichaSalud: e.value || 0,
+                      })}
+                      suffix=" kg"
+                      min={0}
+                      minFractionDigits={2}
+                      maxFractionDigits={2}
+                      placeholder="Ingrese el peso"
                       style={{ width: "221px" }}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          pesoFichaSalud: parseFloat(e.currentTarget.value),
-                        })
-                      }
-                      value={formData.pesoFichaSalud.toString()}
                     />
+
+
                   </div>
 
-                  <div className="flex flex-wrap w-full h-full  justify-content-between">
+                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
                     <label
                       htmlFor="condiciones"
                       className="text-3xl font-medium w-auto min-w-min"
@@ -482,117 +493,28 @@ function FichaSaludContext() {
                     >
                       Talla:
                     </label>
-                    <InputText
-                      className="text-2xl"
-                      placeholder="Ingrese las Condiciones Médicas"
-                      id="peso"
-                      name="peso"
-                      style={{ width: "221px" }}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          tallaFichaSalud: parseFloat(e.currentTarget.value),
-                        })
-                      }
-                      value={formData.tallaFichaSalud.toString()}
-                    />
-                  </div>
-                  <div className="flex flex-wrap w-full h-full justify-content-between">
-                    <label
-                      className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginRight: "20px" }}
-                    >
-                      Discapacidad:
-                    </label>
-                    <div>
-                      <input
-                        type="radio"
-                        id="discapacidadTrue"
-                        name="discapacidad"
-                        value="true"
-                        checked={formData.discapacidadNNAFichaSalud === true}
-                        onChange={() =>
-                          setFormData({
-                            ...formData,
-                            discapacidadNNAFichaSalud: true,
-                          })
-                        }
-                      />
-                      <label htmlFor="discapacidadTrue">Si</label>
-                    </div>
-                    <div>
-                      <input
-                        type="radio"
-                        id="discapacidadFalse"
-                        name="discapacidad"
-                        value="false"
-                        checked={formData.discapacidadNNAFichaSalud === false}
-                        onChange={() =>
-                          setFormData({
-                            ...formData,
-                            discapacidadNNAFichaSalud: false,
-                          })
-                        }
-                      />
-                      <label htmlFor="discapacidadFalse">No</label>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  className="flex flex-column flex-wrap gap-4"
-                  style={{ marginTop: "-25px", marginLeft: "25px" }}
-                >
-                  {" "}
 
-                  <div className="flex flex-wrap w-full h-full  justify-content-between">
-                    <label
-                      htmlFor="tipoDiscapacidad"
-                      className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginRight: "20px", marginLeft: "25px" }}
-                    >
-                      Tipo de Discapacidad:
-                    </label>
-                    <InputTextarea
+                    <InputNumber
+                      id="talla"
+                      name="talla"
                       className="text-2xl"
-                      placeholder="Ingrese el Tipo de Discapacidad"
-                      id="tipoDiscapacidad"
-                      name="tipoDiscapacidad"
+                      inputId="percent"
+                      value={formData.tallaFichaSalud || 0}
+                      onValueChange={(e: InputNumberValueChangeEvent) => setFormData({
+                        ...formData,
+                        tallaFichaSalud: e.value || 0,
+                      })}
+                      suffix=" m"
+                      min={0}
+                      minFractionDigits={2}
+                      maxFractionDigits={2}
+                      placeholder="Ingrese la talla"
                       style={{ width: "221px" }}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          tipoDiscapacidadFichaSalud: e.currentTarget.value,
-                        })
-                      }
-                      value={formData.tipoDiscapacidadFichaSalud}
                     />
+
                   </div>
-                  <div className="flex flex-wrap w-full h-full  justify-content-between">
-                    <label
-                      htmlFor="filiacion"
-                      className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginRight: "20px", marginLeft: "25px" }}
-                    >
-                      Porcentaje de Discapacidad:
-                    </label>
-                    <InputText
-                      className="text-2xl"
-                      placeholder="Ingrese la Asistencia"
-                      id="filiacion"
-                      name="filiacion"
-                      style={{ width: "221px" }}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          porcentajeDiscapacidadFichaSalud: parseFloat(
-                            e.currentTarget.value
-                          ),
-                        })
-                      }
-                      value={formData.porcentajeDiscapacidadFichaSalud.toString()}
-                    />
-                  </div>
-                  <div className="flex flex-wrap w-full h-full  justify-content-between">
+
+                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
                     <label
                       htmlFor="enfermedades"
                       className="text-3xl font-medium w-auto min-w-min"
@@ -616,6 +538,113 @@ function FichaSaludContext() {
                       value={formData.enfermedadesPrevalentesFichaSalud}
                     />
                   </div>
+
+                </div>
+                <div className="flex flex-column flex-wrap gap-4" style={{ marginTop: "-36px" }}>
+                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right", paddingRight: "140px" }}>
+                    <label
+                      className="text-3xl font-medium w-auto min-w-min"
+                      style={{ marginRight: "20px" }}
+                    >
+                      Discapacidad:
+                    </label>
+
+                    <div className="mydict" >
+                      <div>
+                        <label>
+                          <input
+                            className="input"
+                            type="radio"
+                            id="discapacidadTrue"
+                            name="discapacidad"
+                            value="true"
+                            checked={formData.discapacidadNNAFichaSalud === true}
+                            onChange={() =>
+                              setFormData({
+                                ...formData,
+                                discapacidadNNAFichaSalud: true,
+                              })
+                            }
+                          />
+                          <span>Si</span>
+                        </label>
+                        <label>
+                          <input
+                            className="input"
+                            type="radio"
+                            id="discapacidadFalse"
+                            name="discapacidad"
+                            value="false"
+                            checked={formData.discapacidadNNAFichaSalud === false}
+                            onChange={() =>
+                              setFormData({
+                                ...formData,
+                                discapacidadNNAFichaSalud: false,
+                              })
+                            }
+                          />
+                          <span>No</span>
+                        </label>
+                      </div>
+                    </div>
+
+                  </div>
+                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
+                    <label
+                      htmlFor="tipoDiscapacidad"
+                      className="text-3xl font-medium w-auto min-w-min"
+                      style={{ marginRight: "20px", marginLeft: "25px" }}
+                    >
+                      Tipo de Discapacidad:
+                    </label>
+                    <InputTextarea
+                      className="text-2xl"
+                      placeholder="Ingrese el Tipo de Discapacidad"
+                      id="tipoDiscapacidad"
+                      name="tipoDiscapacidad"
+                      style={{ width: "221px" }}
+
+                      disabled={!formData.discapacidadNNAFichaSalud}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          tipoDiscapacidadFichaSalud: e.currentTarget.value,
+                        })
+                      }
+                      value={formData.tipoDiscapacidadFichaSalud}
+                    />
+                  </div>
+                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
+                    <label
+                      htmlFor="filiacion"
+                      className="text-3xl font-medium w-auto min-w-min"
+                      style={{ marginRight: "20px", marginLeft: "25px" }}
+                    >
+                      Porcentaje de Discapacidad:
+                    </label>
+
+                    <InputNumber
+                      id="filiacion"
+                      name="filiacion"
+                      className="text-2xl"
+                      inputId="percent"
+                      disabled={!formData.discapacidadNNAFichaSalud}
+                      value={formData.porcentajeDiscapacidadFichaSalud || 0}
+                      onValueChange={(e: InputNumberValueChangeEvent) => setFormData({
+                        ...formData,
+                        porcentajeDiscapacidadFichaSalud: e.value || 0,
+                      })}
+                      suffix=" %"
+                      min={0}
+                      minFractionDigits={2}
+                      maxFractionDigits={2}
+                      placeholder="Ingrese el porcentaje de discapacidad"
+                      style={{ width: "221px" }}
+                    />
+
+                  </div>
+
+
                 </div>
               </div>
               <div
@@ -647,7 +676,7 @@ function FichaSaludContext() {
             </div>
           </form>
         </div>
-        <div style={{ marginTop: "50px" }}>
+        <div style={{ marginTop: "25px" }}>
           <table
             style={{ minWidth: "40rem" }}
             className="mt-4  w-full h-full text-3xl font-large"

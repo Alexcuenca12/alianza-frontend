@@ -295,7 +295,7 @@ function FichaInscripcionContext() {
   }
 
   function loadExcelReportData(data: IFichaEducativa[]) {
-    const reportName = "Ficha de Desvinculación"
+    const reportName = "Ficha de Educativa"
     const logo = 'G1:I1'
     const rowData = data.map((item) => (
       {
@@ -367,9 +367,9 @@ function FichaInscripcionContext() {
       >
         <div
           className="h1-rem"
-          style={{ marginLeft: "40%", marginBottom: "20px" }}
+          style={{ display: 'flex', justifyContent: 'center' }}
         >
-          <h1 className="text-5xl font-smibold lg:md-2  w-full h-full max-w-full max-h-full min-w-min">
+          <h1 className="text-5xl font-smibold lg:md-2 h-full max-w-full max-h-full min-w-min">
             Ficha Educativa
           </h1>
         </div>
@@ -487,10 +487,13 @@ function FichaInscripcionContext() {
             onSubmit={editMode ? handleUpdate : handleSubmit}
             encType="multipart/form-data"
           >
-            <div className="flex flex-wrap flex-row">
-              <div className="flex align-items-center justify-content-center">
-                <div className="flex flex-column flex-wrap gap-4">
-                  <div className="flex flex-wrap w-full h-full justify-content-between">
+            <div className="flex flex-wrap flex-row" style={{ justifyContent: "center", alignItems: "center" }}>
+              <div className="flex align-items-center justify-content-center" style={{ margin: "20px" }}>
+                <div
+                  className="flex flex-column flex-wrap gap-4"
+                  style={{ paddingRight: "25px" }}
+                >
+                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
                     <label
                       htmlFor="centro"
                       className="text-3xl font-medium w-auto min-w-min"
@@ -513,7 +516,7 @@ function FichaInscripcionContext() {
                       value={formData.centroEducativo}
                     />
                   </div>
-                  <div className="flex flex-wrap w-full h-full justify-content-between">
+                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
                     <label
                       htmlFor="inicio"
                       className="text-3xl font-medium w-auto min-w-min"
@@ -536,10 +539,11 @@ function FichaInscripcionContext() {
                       value={formData.direccionEducativa}
                     />
                   </div>
-                  <div className="flex flex-wrap w-full h-full justify-content-between">
+                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
                     <label
                       htmlFor="tiempo_dedicacion"
                       className="text-3xl font-medium w-auto min-w-min"
+                      style={{ paddingRight: "20px" }}
                     >
                       Referencia de la Ubicación:
                     </label>
@@ -563,7 +567,30 @@ function FichaInscripcionContext() {
                   className="flex flex-column flex-wrap gap-4"
                   style={{ marginTop: "5px", marginLeft: "25px" }}
                 >
-                  <div className="flex flex-wrap w-full h-full  justify-content-between">
+                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
+                    <label
+                      htmlFor="tiempo_dedicacion"
+                      className="text-3xl font-medium w-auto min-w-min"
+                      style={{ marginRight: "20px", marginLeft: "25px" }}
+                    >
+                      Grado Actual:
+                    </label>
+                    <InputText
+                      className="text-2xl"
+                      placeholder="Ingrese el Grado"
+                      id="doi"
+                      name="doi"
+                      style={{ width: "221px" }}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          gradoEducativo: e.currentTarget.value,
+                        })
+                      }
+                      value={formData.gradoEducativo}
+                    />
+                  </div>
+                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
                     <label
                       htmlFor="doi"
                       className="text-3xl font-medium w-auto min-w-min"
@@ -586,7 +613,7 @@ function FichaInscripcionContext() {
                       value={formData.jornadaEducativa}
                     />
                   </div>
-                  <div className="flex flex-wrap w-full h-full  justify-content-between">
+                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
                     <label
                       htmlFor="filiacion"
                       className="text-3xl font-medium w-auto min-w-min"
@@ -609,31 +636,7 @@ function FichaInscripcionContext() {
                       value={formData.observacionesEducativa}
                     />
                   </div>
-                  <div className="flex flex-wrap w-full h-full  justify-content-between">
-                    <div className="flex flex-wrap w-full h-full justify-content-between">
-                      <label
-                        htmlFor="tiempo_dedicacion"
-                        className="text-3xl font-medium w-auto min-w-min"
-                        style={{ marginRight: "20px", marginLeft: "25px" }}
-                      >
-                        Grado Actual:
-                      </label>
-                      <InputText
-                        className="text-2xl"
-                        placeholder="Ingrese el Grado"
-                        id="doi"
-                        name="doi"
-                        style={{ width: "221px" }}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            gradoEducativo: e.currentTarget.value,
-                          })
-                        }
-                        value={formData.gradoEducativo}
-                      />
-                    </div>
-                  </div>
+
                 </div>
               </div>
               <div
