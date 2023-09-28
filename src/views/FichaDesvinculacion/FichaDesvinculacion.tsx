@@ -252,11 +252,13 @@ function FichaDesvinculacion() {
             fichaPersonal: null
 
           });
-          setcontra1(
-            contra1.map((contra) =>
-              contra.idFichaDesvinculacion === editItemId ? response : contra
-            )
-          );
+          // setcontra1(
+          //   contra1.map((contra) =>
+          //     contra.idFichaDesvinculacion === editItemId ? response : contra
+          //   )
+          // );
+          loadData();
+
           setEditMode(false);
           setEditItemId(undefined);
         })
@@ -391,7 +393,9 @@ function FichaDesvinculacion() {
       <Card
         header={cardHeader}
         className="border-solid border-red-800 border-3 flex-1 flex-wrap"
-        style={{ width: "90%", marginLeft: "7%", height: "100%" }}
+        style={{ width: "90%", marginLeft: "6%", height: "100%", marginBottom: "35px" }}
+
+
       >
         <div
           className="h1-rem"
@@ -482,7 +486,6 @@ function FichaDesvinculacion() {
                         }
                       });
                       cargarFoto(parseInt(e.value))
-                      // loadData()                                            loadDataID(parseInt(e.value))
                       loadDataID(parseInt(e.value))
 
                       console.log(formData)
@@ -656,7 +659,6 @@ function FichaDesvinculacion() {
         >
           <thead>
             <tr >
-
               <td colSpan={12} className="tdBtn">
                 <ReportBar
                   reportName={excelReportData?.reportName!}
@@ -666,7 +668,6 @@ function FichaDesvinculacion() {
 
                 />
               </td>
-
             </tr>
             <tr style={{ backgroundColor: "#871b1b", color: "white" }}>
               <th>Nº de Registro </th>

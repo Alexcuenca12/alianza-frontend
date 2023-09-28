@@ -231,11 +231,8 @@ function FichaPersonal() {
                         tipoFamilia: null,
                         fichaPersonal: null
                     });
-                    setFichaFamiliar(
-                        listFichaFamiliar.map((contra) =>
-                            contra.idFichaFamiliar === editItemId ? response : contra
-                        )
-                    );
+                    loadData();
+
                     setEditMode(false);
                     setEditItemId(undefined);
                 })

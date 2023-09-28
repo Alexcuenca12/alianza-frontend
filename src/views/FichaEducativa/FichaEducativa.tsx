@@ -13,6 +13,8 @@ import swal from "sweetalert";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Dropdown } from "primereact/dropdown";
 
+import { IExcelReportParams, IHeaderItem } from "../../interfaces/IExcelReportParams";
+import { ReportBar } from "../../common/ReportBar";
 
 import '../../styles/FiltroFichas.css'
 
@@ -20,6 +22,8 @@ function FichaInscripcionContext() {
   const [idPersona, setIDPersona] = useState<number>(0);
   const personalService = new FichaPersonalService();
   const fichaPersonalService = new FichaPersonalService();
+
+  const [excelReportData, setExcelReportData] = useState<IExcelReportParams | null>(null);
 
 
   const [busqueda, setBusqueda] = useState<string>('');
@@ -49,31 +53,6 @@ function FichaInscripcionContext() {
     estVinculacion: false,
   });
 
-  // const buscarPorCedula = () => {
-  //   if (cedula.trim() === "") {
-  //     swal("Advertencia", "Ingrese una cédula válida para buscar", "warning");
-  //     return;
-  //   }
-  //   personalService
-  //     .getByPersona(true, cedula)
-  //     .then((data) => {
-  //       console.log("p1", data);
-  //       setFormDataPersona(data);
-  //       console.log("p2", data);
-  //       setIDPersona(data.idFichaPersonal);
-  //       console.log("p3", data);
-  //       setFormData({
-  //         ...formData,
-  //         fichaPersonal: {
-  //           idFichaPersonal: data.idFichaPersonal,
-  //         },
-  //       });
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error al buscar por cédula:", error);
-  //     });
-  // };
-
   const [contra1, setcontra1] = useState<IFichaEducativa[]>([]);
   const [formData, setFormData] = useState<IFichaEducativa>({
     idFichaEducativa: 0,
@@ -97,6 +76,7 @@ function FichaInscripcionContext() {
       .getAll()
       .then((data) => {
         setcontra1(data);
+        loadExcelReportData(data);
         setDataLoaded(true); // Marcar los datos como cargados
       })
       .catch((error) => {
@@ -246,10 +226,13 @@ function FichaInscripcionContext() {
           );
           setEditMode(false);
           setEditItemId(undefined);
+          loadData();
+
         })
         .catch((error) => {
           console.error("Error al actualizar el formulario:", error);
         });
+
     }
   };
 
@@ -311,6 +294,62 @@ function FichaInscripcionContext() {
 
   }
 
+  function loadExcelReportData(data: IFichaEducativa[]) {
+    const reportName = "Ficha de Educativa"
+    const logo = 'G1:I1'
+    const rowData = data.map((item) => (
+      {
+        idFicha: item.idFichaEducativa,
+        cedula: item.fichaPersonal?.ciIdentidad,
+        nombres: item.fichaPersonal?.nombres,
+        apellidos: item.fichaPersonal?.apellidos,
+        grado: item.gradoEducativo,
+        jornada: item.jornadaEducativa,
+        centro: item.centroEducativo,
+        direccion: item.direccionEducativa,
+        referencia: item.referenciaEducativa,
+        observacion: item.observacionesEducativa,
+      }
+    ));
+    const headerItems: IHeaderItem[] = [
+      { header: "№ FICHA" },
+      { header: "CEDULA" },
+      { header: "NOMBRES" },
+      { header: "APELLIDOS" },
+      { header: "GRADO" },
+      { header: "JORNADA" },
+      { header: "CENTRO EDUCATIVO" },
+      { header: "DIRECCION" },
+      { header: "REFERENCIA" },
+      { header: "OBSERVACION" },
+    ]
+    console.log(reportName, '  //  ',
+      headerItems, '  //  ',
+      rowData)
+
+    setExcelReportData({
+      reportName,
+      headerItems,
+      rowData,
+      logo
+    }
+    )
+  }
+
+  const loadDataID = (id: number) => {
+    setcontra1([]);
+    educaService
+      .getBusquedaID(id)
+      .then((data) => {
+        setcontra1(data);
+        loadExcelReportData(data);
+        setDataLoaded(true); // Marcar los datos como cargados
+      })
+      .catch((error) => {
+        console.error("Error al obtener los datos:", error);
+      });
+  };
+
   const resetFiltro = () => {
     setBusqueda('')
     setFoto('https://cdn-icons-png.flaticon.com/128/666/666201.png')
@@ -328,9 +367,9 @@ function FichaInscripcionContext() {
       >
         <div
           className="h1-rem"
-          style={{ marginLeft: "40%", marginBottom: "20px" }}
+          style={{ display: 'flex', justifyContent: 'center' }}
         >
-          <h1 className="text-5xl font-smibold lg:md-2  w-full h-full max-w-full max-h-full min-w-min">
+          <h1 className="text-5xl font-smibold lg:md-2 h-full max-w-full max-h-full min-w-min">
             Ficha Educativa
           </h1>
         </div>
@@ -415,7 +454,7 @@ function FichaInscripcionContext() {
                         }
                       });
                       cargarFoto(parseInt(e.value))
-                      // loadData()
+                      loadDataID(parseInt(e.value))
                       console.log(formData)
                     }}
                     value={formData.fichaPersonal?.idFichaPersonal}
@@ -448,10 +487,13 @@ function FichaInscripcionContext() {
             onSubmit={editMode ? handleUpdate : handleSubmit}
             encType="multipart/form-data"
           >
-            <div className="flex flex-wrap flex-row">
-              <div className="flex align-items-center justify-content-center">
-                <div className="flex flex-column flex-wrap gap-4">
-                  <div className="flex flex-wrap w-full h-full justify-content-between">
+            <div className="flex flex-wrap flex-row" style={{ justifyContent: "center", alignItems: "center" }}>
+              <div className="flex align-items-center justify-content-center" style={{ margin: "20px" }}>
+                <div
+                  className="flex flex-column flex-wrap gap-4"
+                  style={{ paddingRight: "25px" }}
+                >
+                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
                     <label
                       htmlFor="centro"
                       className="text-3xl font-medium w-auto min-w-min"
@@ -474,7 +516,7 @@ function FichaInscripcionContext() {
                       value={formData.centroEducativo}
                     />
                   </div>
-                  <div className="flex flex-wrap w-full h-full justify-content-between">
+                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
                     <label
                       htmlFor="inicio"
                       className="text-3xl font-medium w-auto min-w-min"
@@ -497,10 +539,11 @@ function FichaInscripcionContext() {
                       value={formData.direccionEducativa}
                     />
                   </div>
-                  <div className="flex flex-wrap w-full h-full justify-content-between">
+                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
                     <label
                       htmlFor="tiempo_dedicacion"
                       className="text-3xl font-medium w-auto min-w-min"
+                      style={{ paddingRight: "20px" }}
                     >
                       Referencia de la Ubicación:
                     </label>
@@ -524,7 +567,30 @@ function FichaInscripcionContext() {
                   className="flex flex-column flex-wrap gap-4"
                   style={{ marginTop: "5px", marginLeft: "25px" }}
                 >
-                  <div className="flex flex-wrap w-full h-full  justify-content-between">
+                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
+                    <label
+                      htmlFor="tiempo_dedicacion"
+                      className="text-3xl font-medium w-auto min-w-min"
+                      style={{ marginRight: "20px", marginLeft: "25px" }}
+                    >
+                      Grado Actual:
+                    </label>
+                    <InputText
+                      className="text-2xl"
+                      placeholder="Ingrese el Grado"
+                      id="doi"
+                      name="doi"
+                      style={{ width: "221px" }}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          gradoEducativo: e.currentTarget.value,
+                        })
+                      }
+                      value={formData.gradoEducativo}
+                    />
+                  </div>
+                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
                     <label
                       htmlFor="doi"
                       className="text-3xl font-medium w-auto min-w-min"
@@ -547,7 +613,7 @@ function FichaInscripcionContext() {
                       value={formData.jornadaEducativa}
                     />
                   </div>
-                  <div className="flex flex-wrap w-full h-full  justify-content-between">
+                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
                     <label
                       htmlFor="filiacion"
                       className="text-3xl font-medium w-auto min-w-min"
@@ -570,31 +636,7 @@ function FichaInscripcionContext() {
                       value={formData.observacionesEducativa}
                     />
                   </div>
-                  <div className="flex flex-wrap w-full h-full  justify-content-between">
-                    <div className="flex flex-wrap w-full h-full justify-content-between">
-                      <label
-                        htmlFor="tiempo_dedicacion"
-                        className="text-3xl font-medium w-auto min-w-min"
-                        style={{ marginRight: "20px", marginLeft: "25px" }}
-                      >
-                        Grado Actual:
-                      </label>
-                      <InputText
-                        className="text-2xl"
-                        placeholder="Ingrese el Grado"
-                        id="doi"
-                        name="doi"
-                        style={{ width: "221px" }}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            gradoEducativo: e.currentTarget.value,
-                          })
-                        }
-                        value={formData.gradoEducativo}
-                      />
-                    </div>
-                  </div>
+
                 </div>
               </div>
               <div
@@ -632,6 +674,17 @@ function FichaInscripcionContext() {
             className="mt-4  w-full h-full text-3xl font-large"
           >
             <thead>
+              <tr >
+                <td colSpan={12} className="tdBtn">
+                  <ReportBar
+                    reportName={excelReportData?.reportName!}
+                    headerItems={excelReportData?.headerItems!}
+                    rowData={excelReportData?.rowData!}
+                    logo={excelReportData?.logo!}
+
+                  />
+                </td>
+              </tr>
               <tr style={{ backgroundColor: "#871b1b", color: "white" }}>
                 <th>Nº de Registro</th>
                 <th>Centro Educativo</th>

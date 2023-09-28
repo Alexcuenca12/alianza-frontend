@@ -22,9 +22,9 @@ export default function SideBarMenuCardView({
       <div className={classNames("profileInfo", isOpen ? "" : "collapsed")}>
         <div className="name">{card.displayName}</div>
         <div className="title">{card.title}</div>
-        <div className="url">
+        {/* <div className="url">
           <a href={card.url}>Ir al perfil</a>
-        </div>
+        </div> */}
       </div>
     </div>
   );

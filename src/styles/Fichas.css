@@ -15,8 +15,6 @@ select {
     width: 100%;
     justify-content: center;
     align-items: center;
-
-    /* margin-top: 0px; */
 }
 
 .container .form {
@@ -37,7 +35,7 @@ select {
     --input-hovered-border: 1px solid red;
     position: relative;
     width: var(--width-of-input);
-
+    padding-top: 10px;
 }
 
 
@@ -65,11 +63,7 @@ select {
     column-gap: 50px;
 }
 
-.form .gender-box {
-    width: 100%;
-    margin-top: 15px;
 
-}
 
 .form :where(.gender-option, .gender) {
     margin-top: 6px;
@@ -115,72 +109,6 @@ select {
     justify-content: center;
     margin-top: 30px;
 }
-
-.btn {
-    /* padding: 12.5px 30px;
-    border: 0;
-    border-radius: 100px;
-    background-color: #B0252A;
-    color: #ffffff;
-    font-weight: Bold;
-    transition: all 0.5s;
-    -webkit-transition: all 0.5s; */
-}
-
-/* 
-.btn:hover {
-    background-color: #f41e26;
-    box-shadow: 0 0 20px #6fff9150;
-    transform: scale(1.1);
-}
-
-.btn:active {
-    background-color: #3d94cf;
-    transition: all 0.25s;
-    -webkit-transition: all 0.25s;
-    box-shadow: none;
-    transform: scale(0.98);
-} */
-
-/* .btn {
-    border: 2px solid #B0252A;
-
-    padding: 15px 25px;
-    border: unset;
-    border-radius: 15px;
-    color: #212121;
-    z-index: 1;
-    background: transparent;
-    position: relative;
-    font-weight: 1000;
-    font-size: 17px;
-    -webkit-box-shadow: 4px 8px 19px -3px rgba(0, 0, 0, 0.27);
-    box-shadow: 4px 8px 19px -3px rgba(0, 0, 0, 0.27);
-    transition: all 250ms;
-    overflow: hidden;
-}
-
-.btn::before {
-    content: '';
-    position: absolute;
-    height: 100%;
-    width: 0%;
-    top: 0;
-    left: -40px;
-    transform: skewX(45deg);
-    background-color: #B0252A;
-    z-index: -1;
-    transition: all 1s;
-}
-
-.btn:hover {
-    color: #e8e8e8;
-}
-
-.btn:hover::before {
-    width: 160%;
-} */
-
 
 
 .form {
@@ -272,13 +200,12 @@ input:focus~.input-border {
 /* //estilos de radiobuttons */
 :focus {
     outline: 0;
-    border-color: #2260ff;
-    box-shadow: 0 0 0 4px #b5c9fc;
 }
 
 .mydict div {
     display: flex;
     flex-wrap: wrap;
+    width: 100%;
     /* margin-top: 0.5rem; */
     /* justify-content: center; */
 }
@@ -295,9 +222,9 @@ input:focus~.input-border {
 
 .mydict input[type="radio"]:checked+span {
     box-shadow: 0 0 0 0.0625em #B0252A;
-    background-color: #ff73005b;
+    background-color: #FF4242;
     z-index: 1;
-    color: #B0252A;
+    color: #ffffff;
 }
 
 label span {

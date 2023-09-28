@@ -2,16 +2,16 @@
 
 
 .SideBarMenuItemView {
-    text-align: left;
+    text-align: center;
     display: flex;
     align-items: center;
-    margin: 0 5px;
+    margin: 1px 5px;
 
     a {
         color: white;
         text-decoration: none;
         display: block;
-        padding: 10px;
+        padding: 5px;
         width: 100%;
         border-radius: 5px;
 
@@ -29,11 +29,11 @@
                 height: 32px;
             }
 
-            label {
+            .label {
                 font-weight: 500;
+                font-size: 12px;
                 margin-left: 10px;
                 overflow: hidden;
-
             }
         }
 
@@ -55,14 +55,14 @@
         }
 
         &:hover {
-            background-color: #325ba8;
-            color: white;
+            background-color: #DCE3EB;
+            color: rgb(0, 0, 0);
         }
 
         &:hover {
             &+.tooltip {
                 display: inline-block;
-                animation-duration: 0.4s;
+                animation-duration: 0.7s;
                 animation-name: tooltip;
             }
         }
@@ -73,8 +73,8 @@
     .tooltip {
         position: absolute;
         background-color: black;
-        left: 70px;
-        padding: 10px;
+        left: 60px;
+        padding: 5px;
         border-radius: 4px;
         text-transform: capitalize;
         display: none;

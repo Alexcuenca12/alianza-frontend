@@ -15,6 +15,9 @@ import { InputTextarea } from "primereact/inputtextarea";
 import '../../styles/FiltroFichas.css'
 import { FichaPersonalService } from "../../services/FichaPersonalService";
 import { IFichaPersonal } from "../../interfaces/IFichaPersonal";
+import { IExcelReportParams, IHeaderItem } from "../../interfaces/IExcelReportParams";
+import { ReportBar } from "../../common/ReportBar";
+
 
 
 function FichaInscripcionContext() {
@@ -27,6 +30,7 @@ function FichaInscripcionContext() {
   const [busqueda, setBusqueda] = useState<string>('');
   const [foto, setFoto] = useState<string>('https://cdn-icons-png.flaticon.com/128/666/666201.png');
   const [listFperonales, setListFperonales] = useState<IFichaPersonal[]>([]);
+  const [excelReportData, setExcelReportData] = useState<IExcelReportParams | null>(null);
 
 
 
@@ -62,6 +66,7 @@ function FichaInscripcionContext() {
       .getAll()
       .then((data) => {
         setcontra1(data);
+        loadExcelReportData(data);
         setDataLoaded(true); // Marcar los datos como cargados
       })
       .catch((error) => {
@@ -98,19 +103,10 @@ function FichaInscripcionContext() {
       .then((response) => {
         resetForm();
         swal("Publicacion", "Datos Guardados Correctamente", "success");
-
-        repreService
-          .getAll()
-          .then((data) => {
-            setcontra1(data);
-            resetForm();
-            if (fileUploadRef.current) {
-              fileUploadRef.current.clear();
-            }
-          })
-          .catch((error) => {
-            console.error("Error al obtener los datos:", error);
-          });
+        if (fileUploadRef.current) {
+          fileUploadRef.current.clear();
+        }
+        loadData();
       })
       .catch((error) => {
         console.error("Error al enviar el formulario:", error);
@@ -221,11 +217,7 @@ function FichaInscripcionContext() {
             fichaPersonal: null
 
           });
-          setcontra1(
-            contra1.map((contra) =>
-              contra.idFichaRepresentante === editItemId ? response : contra
-            )
-          );
+          loadData();
           setEditMode(false);
           setEditItemId(undefined);
         })
@@ -307,6 +299,55 @@ function FichaInscripcionContext() {
     setListFperonales([])
 
 
+  };
+
+  function loadExcelReportData(data: IFichaRepresentante[]) {
+    const reportName = "Ficha del Representante"
+    const logo = 'G1:K1'
+    const rowData = data.map((item) => (
+      {
+        idFicha: item.idFichaRepresentante,
+        cedula: item.fichaPersonal?.ciIdentidad,
+        nombres: item.fichaPersonal?.nombres,
+        apellidos: item.fichaPersonal?.apellidos,
+
+      }
+    ));
+    const headerItems: IHeaderItem[] = [
+      { header: "№ FICHA" },
+      { header: "CEDULA" },
+      { header: "NOMBRES" },
+      { header: "APELLIDOS" },
+      { header: "FECHA DE DESVINCULACIÓN" },
+      { header: "MOTIVO" },
+
+
+    ]
+    console.log(reportName, '  //  ',
+      headerItems, '  //  ',
+      rowData)
+
+    setExcelReportData({
+      reportName,
+      headerItems,
+      rowData,
+      logo
+    }
+    )
+  }
+
+  const loadDataID = (id: number) => {
+    setcontra1([]);
+    repreService
+      .getBusquedaID(id)
+      .then((data) => {
+        setcontra1(data);
+        loadExcelReportData(data);
+        setDataLoaded(true); // Marcar los datos como cargados
+      })
+      .catch((error) => {
+        console.error("Error al obtener los datos:", error);
+      });
   };
 
 
@@ -407,7 +448,7 @@ function FichaInscripcionContext() {
                         }
                       });
                       cargarFoto(parseInt(e.value))
-                      // loadData()
+                      loadDataID(parseInt(e.value))
                       console.log(formData)
                     }}
                     value={formData.fichaPersonal?.idFichaPersonal}
@@ -439,14 +480,14 @@ function FichaInscripcionContext() {
             onSubmit={editMode ? handleUpdate : handleSubmit}
             encType="multipart/form-data"
           >
-            <div className="flex flex-wrap flex-row">
-              <div className="flex align-items-center justify-content-center">
-                <div className="flex flex-column flex-wrap gap-4">
-                  <div className="flex flex-wrap w-full h-full justify-content-between">
+            <div className="flex flex-wrap flex-row" style={{ justifyContent: "center" }}>
+              <div className="flex align-items-center justify-content-center" style={{ margin: "10px" }}>
+                <div className="flex flex-column flex-wrap gap-4" style={{ marginRight: "35px" }}>
+                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
                     <label
                       htmlFor="centro"
                       className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginRight: "20px" }}
+                      style={{ marginRight: "10px" }}
                     >
                       Nombres Representante:
                     </label>
@@ -465,11 +506,11 @@ function FichaInscripcionContext() {
                       value={formData.nombresRepre}
                     />
                   </div>
-                  <div className="flex flex-wrap w-full h-full justify-content-between">
+                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
                     <label
                       htmlFor="apellidosRepre"
                       className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginRight: "20px" }}
+                      style={{ marginRight: "10px" }}
                     >
                       Apellidos Representante:
                     </label>
@@ -488,10 +529,11 @@ function FichaInscripcionContext() {
                       value={formData.apellidosRepre}
                     />
                   </div>
-                  <div className="flex flex-wrap w-full h-full justify-content-between">
+                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
                     <label
                       htmlFor="cedulaRepre"
                       className="text-3xl font-medium w-auto min-w-min"
+                      style={{ marginRight: "10px" }}
                     >
                       Cédula del representate:
                     </label>
@@ -510,11 +552,11 @@ function FichaInscripcionContext() {
                       value={formData.cedulaRepre}
                     />
                   </div>
-                  <div className="flex flex-wrap w-full h-full justify-content-between">
+                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
                     <label
                       htmlFor="parentescoRepre"
                       className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginRight: "20px" }}
+                      style={{ marginRight: "10px" }}
                     >
                       Parentesco:
                     </label>
@@ -535,14 +577,12 @@ function FichaInscripcionContext() {
                   </div>
                 </div>
                 <div
-                  className="flex flex-column flex-wrap gap-4"
-                  style={{ marginTop: "5px", marginLeft: "25px" }}
-                >
-                  <div className="flex flex-wrap w-full h-full  justify-content-between">
+                  className="flex flex-column flex-wrap gap-4" style={{ marginRight: "35px" }}>
+                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
                     <label
                       htmlFor="contactoRepre"
                       className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginRight: "20px", marginLeft: "25px" }}
+                      style={{ marginRight: "10px" }}
                     >
                       Nº de Contacto:
                     </label>
@@ -561,11 +601,11 @@ function FichaInscripcionContext() {
                       value={formData.contactoRepre}
                     />
                   </div>
-                  <div className="flex flex-wrap w-full h-full  justify-content-between">
+                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
                     <label
                       htmlFor="contactoEmergenciaRepre"
                       className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginRight: "20px", marginLeft: "25px" }}
+                      style={{ marginRight: "10px" }}
                     >
                       Nº de Emergencia:
                     </label>
@@ -584,11 +624,11 @@ function FichaInscripcionContext() {
                       value={formData.contactoEmergenciaRepre}
                     />
                   </div>
-                  <div className="flex flex-wrap w-full h-full justify-content-between">
+                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
                     <label
                       htmlFor="tiempo_dedicacion"
                       className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginRight: "20px", marginLeft: "25px" }}
+                      style={{ marginRight: "10px" }}
                     >
                       Fecha de Nacimiento:
                     </label>
@@ -619,11 +659,11 @@ function FichaInscripcionContext() {
                       }
                     />
                   </div>
-                  <div className="flex flex-wrap w-full h-full justify-content-between">
+                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
                     <label
                       htmlFor="nivelInstruccionRepre"
                       className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginRight: "20px", marginLeft: "25px" }}
+                      style={{ marginRight: "10px" }}
                     >
                       Nivel de Instrucción:
                     </label>
@@ -645,19 +685,13 @@ function FichaInscripcionContext() {
                   </div>
                 </div>
                 <div className="flex flex-column flex-wrap gap-4">
-                  <div
-                    className="flex flex-wrap w-full h-full justify-content-between"
-                    style={{
-                      marginTop: "30px",
-                    }}
-                  >
+                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
+
                     <label
                       htmlFor="ocupacionPrimariaRepre"
                       className="text-3xl font-medium w-auto min-w-min"
-                      style={{
-                        marginRight: "20px",
-                        marginLeft: "25px",
-                      }}
+                      style={{ marginRight: "10px" }}
+
                     >
                       Ocupación Representante:
                     </label>
@@ -676,11 +710,11 @@ function FichaInscripcionContext() {
                       value={formData.ocupacionPrimariaRepre}
                     />
                   </div>
-                  <div className="flex flex-wrap w-full h-full justify-content-between">
+                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
                     <label
                       htmlFor="ocupacionSecundariaRepre"
                       className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginRight: "20px", marginLeft: "25px" }}
+                      style={{ marginRight: "10px" }}
                     >
                       Ocupación Secundaria:
                     </label>
@@ -699,11 +733,11 @@ function FichaInscripcionContext() {
                       value={formData.ocupacionSecundariaRepre}
                     />
                   </div>
-                  <div className="flex flex-wrap w-full h-full justify-content-between">
+                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
                     <label
                       htmlFor="lugarTrabajoRepre"
                       className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginRight: "20px", marginLeft: "25px" }}
+                      style={{ marginRight: "10px" }}
                     >
                       Lugar de Trabajo:
                     </label>
@@ -722,11 +756,11 @@ function FichaInscripcionContext() {
                       value={formData.lugarTrabajoRepre}
                     />
                   </div>
-                  <div className="flex flex-wrap w-full h-full justify-content-between">
+                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
                     <label
                       htmlFor="observacionesRepre"
                       className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginRight: "20px", marginLeft: "25px" }}
+                      style={{ marginRight: "10px" }}
                     >
                       Observaciones:
                     </label>
@@ -787,6 +821,18 @@ function FichaInscripcionContext() {
             className="mt-4  w-full h-full text-3xl font-large"
           >
             <thead>
+              <tr >
+
+                <td colSpan={12} className="tdBtn">
+                  <ReportBar
+                    reportName={excelReportData?.reportName!}
+                    headerItems={excelReportData?.headerItems!}
+                    rowData={excelReportData?.rowData!}
+                    logo={excelReportData?.logo!}
+                  />
+                </td>
+
+              </tr>
               <tr style={{ backgroundColor: "#871b1b", color: "white" }}>
                 <th>Nº de Registro</th>
                 <th>Centro Educativo</th>

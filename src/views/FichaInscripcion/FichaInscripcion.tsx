@@ -15,6 +15,8 @@ import { FichaInscripcionService } from "../../services/FichaInscripcionService"
 import { FichaPersonalService } from "../../services/FichaPersonalService";
 import { CursoService } from "../../services/CursoService";
 import swal from "sweetalert";
+import { ReportBar } from "../../common/ReportBar";
+import { IExcelReportParams, IHeaderItem } from "../../interfaces/IExcelReportParams";
 import '../../styles/FiltroFichas.css'
 
 
@@ -24,6 +26,7 @@ function FichaInscripcionContext() {
   const [foto, setFoto] = useState<string>('https://cdn-icons-png.flaticon.com/128/666/666201.png');
   const [listFperonales, setListFperonales] = useState<IFichaPersonal[]>([]);
 
+  const [excelReportData, setExcelReportData] = useState<IExcelReportParams | null>(null);
 
   const [idPersona, setIDPersona] = useState<number>(0);
 
@@ -64,7 +67,6 @@ function FichaInscripcionContext() {
   const [formData, setFormData] = useState<IFichaInscripcion>({
     idFichaInscripcion: 0,
     fechaIngresoInscrip: "",
-    fechaEgreso: "",
     proyectoInscrip: "",
     situacionIngresoInscrip: "",
     asistenciaInscrip: "",
@@ -94,6 +96,7 @@ function FichaInscripcionContext() {
       .getAll()
       .then((data) => {
         setcontra1(data);
+        loadExcelReportData(data);
         setDataLoaded(true); // Marcar los datos como cargados
       })
       .catch((error) => {
@@ -107,20 +110,10 @@ function FichaInscripcionContext() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log(idPersona);
-    if (
-      new Date(formData.fechaIngresoInscrip) >= new Date(formData.fechaEgreso)
-    ) {
-      swal(
-        "Advertencia",
-        "La Fecha de Ingreso debe ser menor que la Fecha de Egreso",
-        "warning"
-      );
-      return;
-    }
+
 
     if (
       !formData.asistenciaInscrip ||
-      !formData.fechaEgreso ||
       !formData.jornadaAsistenciaInscrip ||
       !formData.proyectoInscrip ||
       !formData.situacionIngresoInscrip ||
@@ -220,16 +213,7 @@ function FichaInscripcionContext() {
     e.preventDefault();
 
     // Validación: Verificar que la fecha de ingreso sea menor que la fecha de egreso
-    if (
-      new Date(formData.fechaIngresoInscrip) >= new Date(formData.fechaEgreso)
-    ) {
-      swal(
-        "Advertencia",
-        "La Fecha de Ingreso debe ser menor que la Fecha de Egreso",
-        "warning"
-      );
-      return;
-    }
+
 
     if (editItemId !== undefined) {
       inscripService
@@ -242,7 +226,6 @@ function FichaInscripcionContext() {
           });
           setFormData({
             fechaIngresoInscrip: "",
-            fechaEgreso: "",
             proyectoInscrip: "",
             situacionIngresoInscrip: "",
             asistenciaInscrip: "",
@@ -250,11 +233,7 @@ function FichaInscripcionContext() {
             fichaPersonal: null,
             curso: null,
           });
-          setcontra1(
-            contra1.map((contra) =>
-              contra.idFichaInscripcion === editItemId ? response : contra
-            )
-          );
+          loadData();
           setEditMode(false);
           setEditItemId(undefined);
         })
@@ -267,7 +246,6 @@ function FichaInscripcionContext() {
   const resetForm = () => {
     setFormData({
       fechaIngresoInscrip: "",
-      fechaEgreso: "",
       proyectoInscrip: "",
       situacionIngresoInscrip: "",
       asistenciaInscrip: "",
@@ -328,6 +306,66 @@ function FichaInscripcionContext() {
     setListFperonales([])
 
 
+  };
+
+  function loadExcelReportData(data: IFichaInscripcion[]) {
+    const reportName = "Ficha de Inscripción"
+    const logo = 'G1:I1'
+    const rowData = data.map((item) => (
+      {
+        idFicha: item.idFichaInscripcion,
+        cedula: item.fichaPersonal?.ciIdentidad,
+        nombres: item.fichaPersonal?.nombres,
+        apellidos: item.fichaPersonal?.apellidos,
+        fechaInscripcion: new Date(item.fechaIngresoInscrip!).toLocaleDateString("es-ES", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        }),
+        curso: item.curso,
+        jornadaAsistenciaInscrip: item.jornadaAsistenciaInscrip,
+        asistenciaInscrip: item.asistenciaInscrip,
+        proyecto: item.proyectoInscrip,
+        situacion: item.situacionIngresoInscrip,
+      }
+    ));
+    const headerItems: IHeaderItem[] = [
+      { header: "№ FICHA" },
+      { header: "CEDULA" },
+      { header: "NOMBRES" },
+      { header: "APELLIDOS" },
+      { header: "FECHA DE INSCRIPCION" },
+      { header: "CURSO" },
+      { header: "JORNADA" },
+      { header: "ASISTENCIA" },
+      { header: "PROYECTO" },
+      { header: "SITUACION" },
+
+
+    ]
+
+
+    setExcelReportData({
+      reportName,
+      headerItems,
+      rowData,
+      logo
+    }
+    )
+  }
+
+  const loadDataID = (id: number) => {
+    setcontra1([]);
+    inscripService
+      .getBusquedaID(id)
+      .then((data) => {
+        setcontra1(data);
+        loadExcelReportData(data);
+        setDataLoaded(true); // Marcar los datos como cargados
+      })
+      .catch((error) => {
+        console.error("Error al obtener los datos:", error);
+      });
   };
 
 
@@ -427,7 +465,8 @@ function FichaInscripcionContext() {
                         }
                       });
                       cargarFoto(parseInt(e.value))
-                      // loadData()
+                      loadDataID(parseInt(e.value))
+
                       console.log(formData)
                     }}
                     value={formData.fichaPersonal?.idFichaPersonal}
@@ -459,7 +498,7 @@ function FichaInscripcionContext() {
             onSubmit={editMode ? handleUpdate : handleSubmit}
             encType="multipart/form-data"
           >
-            <div className="flex flex-wrap flex-row">
+            <div className="flex flex-wrap flex-row" style={{ justifyContent: "center" }}>
               <div className="flex align-items-center justify-content-center">
                 <div className="flex flex-column flex-wrap gap-4">
 
@@ -498,40 +537,30 @@ function FichaInscripcionContext() {
                       }
                     />
                   </div>
+
                   <div className="flex flex-wrap w-full h-full justify-content-between">
+
+
                     <label
                       htmlFor="inicio"
                       className="text-3xl font-medium w-auto min-w-min"
                       style={{ marginRight: "20px" }}
                     >
-                      Fecha de Egreso:
+                      Curso:
                     </label>
 
-                    <Calendar
-                      className="text-2xl"
-                      id="inicio"
-                      name="inicio"
-                      required
-                      placeholder="Ingrese la Fecha de Egreso"
-                      dateFormat="yy-mm-dd" // Cambiar el formato a ISO 8601
-                      showIcon
-                      maxDate={new Date()}
-                      onChange={(e) => {
-                        const selectedDate =
-                          e.value instanceof Date ? e.value : null;
-                        const formattedDate = selectedDate
-                          ? selectedDate.toISOString().split("T")[0] // Formatear a ISO 8601
-                          : "";
-                        setFormData({
-                          ...formData,
-                          fechaEgreso: formattedDate,
-                        });
-                      }}
-                      value={
-                        formData.fechaEgreso
-                          ? new Date(formData.fechaEgreso)
-                          : null
+                    <Dropdown
+                      id="curso"
+                      name="curso"
+                      style={{ width: "220px", marginLeft: "15px" }}
+                      options={cursos}
+                      onChange={(e) =>
+                        setFormData({ ...formData, curso: e.value })
                       }
+                      value={formData.curso} // Make sure this is correctly bound
+                      optionLabel="nombreCurso"
+                      optionValue="idCurso"
+                      placeholder="Seleccione el Curso"
                     />
                   </div>
                   <div className="flex flex-wrap w-full h-full justify-content-between">
@@ -557,9 +586,11 @@ function FichaInscripcionContext() {
                     />
                   </div>
                 </div>
+
+
                 <div
                   className="flex flex-column flex-wrap gap-4"
-                  style={{ marginTop: "5px", marginLeft: "25px" }}
+                  style={{ marginTop: "5px", marginLeft: "50px" }}
                 >
 
                   <div className="flex flex-wrap w-full h-full  justify-content-between">
@@ -635,33 +666,7 @@ function FichaInscripcionContext() {
                     />
                   </div>
                 </div>
-                <div
-                  className="flex flex-column flex-wrap gap-4"
-                  style={{ marginTop: "-45px", marginLeft: "25px" }}
-                >
-                  <div className="flex flex-wrap w-full h-full  justify-content-between">
-                    <label
-                      htmlFor="curso"
-                      className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginRight: "20px", marginLeft: "25px" }}
-                    >
-                      Curso:
-                    </label>
-                    <Dropdown
-                      id="curso"
-                      name="curso"
-                      style={{ width: "220px", marginLeft: "15px" }}
-                      options={cursos}
-                      onChange={(e) =>
-                        setFormData({ ...formData, curso: e.value })
-                      }
-                      value={formData.curso} // Make sure this is correctly bound
-                      optionLabel="nombreCurso"
-                      optionValue="idCurso"
-                      placeholder="Seleccione el Curso"
-                    />
-                  </div>
-                </div>
+
               </div>
               <div
                 className="flex flex-row  w-full h-full justify-content-center  flex-grow-1  row-gap-8 gap-8 flex-wrap mt-6"
@@ -698,6 +703,18 @@ function FichaInscripcionContext() {
             className="mt-4  w-full h-full text-3xl font-large"
           >
             <thead>
+              <tr >
+
+                <td colSpan={12} className="tdBtn">
+                  <ReportBar
+                    reportName={excelReportData?.reportName!}
+                    headerItems={excelReportData?.headerItems!}
+                    rowData={excelReportData?.rowData!}
+                    logo={excelReportData?.logo!}
+                  />
+                </td>
+
+              </tr>
               <tr style={{ backgroundColor: "#871b1b", color: "white" }}>
                 <th>Nº de Publicacion</th>
                 <th>Fecha de Ingreso</th>
@@ -731,18 +748,6 @@ function FichaInscripcionContext() {
                   <td>{contrato.situacionIngresoInscrip}</td>
                   <td>{contrato.asistenciaInscrip}</td>
                   <td>{contrato.jornadaAsistenciaInscrip}</td>
-                  <td>
-                    {contrato.fechaEgreso
-                      ? new Date(contrato.fechaEgreso).toLocaleDateString(
-                        "es-ES",
-                        {
-                          year: "numeric",
-                          month: "2-digit",
-                          day: "2-digit",
-                        }
-                      )
-                      : ""}
-                  </td>
                   <td>
                     <Button
                       type="button"

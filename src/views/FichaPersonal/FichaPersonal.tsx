@@ -13,7 +13,7 @@ import { Fieldset } from "primereact/fieldset";
 import { Card } from "primereact/card";
 import cardHeader from "../../shared/CardHeader";
 import { Calendar } from "primereact/calendar";
-import { Dropdown } from "primereact/dropdown";
+import { Dropdown, DropdownChangeEvent } from 'primereact/dropdown';
 import { Button } from "primereact/button";
 import { ICalcularEdad } from '../../interfaces/ICalcularEdad';
 import CalcularEdad from "../../common/CalcularEdad";
@@ -24,6 +24,9 @@ import { ICanton } from "../../interfaces/ICanton";
 import { RangoEdadService } from "../../services/RangoEdadService";
 import { EtniaService } from "../../services/EtniaService";
 import { Toast } from "primereact/toast";
+import { ProvinciaService } from "../../services/ProvinciaService";
+import { IProvincia } from "../../interfaces/IProvincia";
+import { InputText } from "primereact/inputtext";
 
 
 function FichaPersonal() {
@@ -42,6 +45,7 @@ function FichaPersonal() {
     const fichaPersonalService = new FichaPersonalService();
     const parroquiaService = new ParroquiaService();
     const cantonService = new CantonService();
+    const provinciaService = new ProvinciaService();
     const rangoEdadService = new RangoEdadService();
     const etniaService = new EtniaService();
 
@@ -51,11 +55,22 @@ function FichaPersonal() {
     const [editItemId, setEditItemId] = useState<number | undefined>(undefined);
     const [editMode, setEditMode] = useState(false);
 
+    const [tempCY, setTempCY] = useState<string>();
+    const [tempCX, setTempCX] = useState<string>();
+
+
 
     const [listFichaPersonal, setFichaPersonal] = useState<IFichaPersonal[]>([]);
     const [listParroquias, setListParroquias] = useState<IParroquia[]>([]);
+    const [listCantones, setListCantones] = useState<ICanton[]>([]);
+    const [listProvincias, setListProvincias] = useState<IProvincia[]>([]);
     const [listRangoEdades, setListRangoEdades] = useState<IRangoEdad[]>([]);
     const [listEtnias, setListEtnias] = useState<IEtnia[]>([]);
+    const [selectedProvincia, setSelectedProvincia] = useState<IProvincia | null>();
+    const [selectedCanton, setSelectedCanton] = useState<ICanton | null>();
+
+
+
 
     const [formData, setFormData] = useState<IFichaPersonal>({
         idFichaPersonal: 0,
@@ -83,14 +98,11 @@ function FichaPersonal() {
 
         //METODOS PARA CARGAR LOS COMBOS DEL FORMILARIO
 
-
-
-
         // cargarComboRangos();
         cargarComboEtnias();
         // cargarComboCantones();
         loadData();
-        loadParroquias();
+        loadProvicias();
         loadComboEdades();
     }, []);
 
@@ -105,14 +117,6 @@ function FichaPersonal() {
                 console.error("Error al obtener los datos:", error);
             });
     };
-
-    // const cargarComboRangos = () => {
-    //     const opciones = rangosEdad.map((dato) => ({
-    //         label: `${dato.limInferior} - ${dato.limSuperior}`,
-    //         value: dato.idRangoEdad,
-    //     }));
-    //     setRangosEdadOpc(opciones);
-    // };
 
 
     const cargarComboEtnias = () => {
@@ -129,29 +133,34 @@ function FichaPersonal() {
 
     };
 
-    // const cargarComboCantones = () => {
-
-    //     cantonService
-    //         .getAll()
-    //         .then((data: ICanton[]) => {
-    //             // Mapear los datos y crear un nuevo array en el formato deseado
-    //             const mappedData = data.map((canton: ICanton) => ({
-    //                 label: canton.cantonNombre,
-    //                 value: canton.idCanton,
-    //             }));
-
-    //             // Actualizar el estado con los datos mapeados
-    //             setCantonOpc(mappedData);
-    //         })
-    //         .catch((error) => {
-    //             console.error("Error al obtener los datos:", error);
-    //         });
-
-    // };
-
-    const loadParroquias = () => {
-        parroquiaService
+    const loadProvicias = () => {
+        provinciaService
             .getAll()
+            .then((data) => {
+                setListProvincias(data);
+                setDataLoaded(true); // Marcar los datos como cargados
+            })
+            .catch((error) => {
+                console.error("Error al obtener los datos:", error);
+            });
+    };
+
+    const loadCantones = (id: number) => {
+        cantonService
+            .getBusqueda(id)
+            .then((data) => {
+                setListCantones(data);
+                setDataLoaded(true); // Marcar los datos como cargados
+            })
+            .catch((error) => {
+                console.error("Error al obtener los datos:", error);
+            });
+    };
+
+
+    const loadParroquias = (id: number) => {
+        parroquiaService
+            .getBusqueda(id)
             .then((data) => {
                 setListParroquias(data);
                 setDataLoaded(true); // Marcar los datos como cargados
@@ -194,9 +203,9 @@ function FichaPersonal() {
                     .then((data) => {
                         setFichaPersonal(data);
                         resetForm();
-                        // if (fileUploadRef.current) {
-                        //     fileUploadRef.current.clear();
-                        // }
+                        if (fileUploadRef.current) {
+                            fileUploadRef.current.clear();
+                        }
                     })
                     .catch((error) => {
                         console.error("Error al obtener los datos:", error);
@@ -207,9 +216,6 @@ function FichaPersonal() {
                 console.error("Error al enviar el formulario:", error);
             });
 
-
-        // Aquí puedes enviar los datos del formulario al servidor o realizar otras acciones
-        console.log('Datos enviados:', { formData });
     };
 
     const handleDelete = (id: number | undefined) => {
@@ -265,6 +271,10 @@ function FichaPersonal() {
                 setFormData(editItem);
                 setEditMode(true);
                 setEditItemId(id);
+                setTempCY(editItem.coordenadaY.toString() as string)
+                setTempCX(editItem.coordenadaX.toString() as string)
+                setSelectedCanton(editItem.parroquia?.canton)
+                setSelectedProvincia(editItem.parroquia?.canton.provincia)
             }
         }
     };
@@ -302,11 +312,11 @@ function FichaPersonal() {
                         coordenadaY: 0,
                         estVinculacion: false
                     });
-                    setFichaPersonal(
-                        listFichaPersonal.map((contra) =>
-                            contra.idFichaPersonal === editItemId ? response : contra
-                        )
-                    );
+                    setSelectedCanton(null);
+                    setSelectedProvincia(null);
+                    loadData();
+                    setTempCY('')
+                    setTempCX('')
                     setEditMode(false);
                     setEditItemId(undefined);
                 })
@@ -395,6 +405,10 @@ function FichaPersonal() {
             coordenadaY: 0,
             estVinculacion: false
         });
+        setSelectedCanton(null);
+        setSelectedProvincia(null);
+        setTempCY('')
+        setTempCX('')
 
     };
 
@@ -407,7 +421,7 @@ function FichaPersonal() {
             <Card
                 header={cardHeader}
                 className="border-solid border-red-800 border-3 flex-1 flex-wrap"
-                style={{ marginBottom: "35px" }}
+                style={{ marginBottom: "35px", marginLeft: "6%" }}
             >
 
                 <div
@@ -426,18 +440,18 @@ function FichaPersonal() {
                     {/* <div className="form"> */}
 
                     <form onSubmit={editMode ? handleUpdate : handleSubmit} className='form' encType="multipart/form-data">
-                        <div className='column'>
-                            <div className='input-box'>
-
+                        <div className='column' >
+                            <div className='input-box' style={{ alignSelf: 'flex-end', marginBottom: "50px" }}>
                                 <label className="font-medium w-auto min-w-min" htmlFor="cedula;">Cedula:</label>
-                                <input
-                                    className="input"
-                                    type="text"
+
+                                <InputText
+                                    placeholder=' Ingresar la cedula de identidad'
                                     id="cedula"
-                                    value={formData.ciIdentidad}
-                                    placeholder='Ingrese la cedula de identidad'
+                                    maxLength={10} // Establecer el máximo de 10 caracteres
+                                    keyfilter="pint" // Solo permitir dígitos enteros positivos
                                     onChange={(e) => setFormData({ ...formData, ciIdentidad: e.target.value })}
-                                    required
+                                    title="Ingresar el documento de identidad del NNA"
+                                    value={formData.ciIdentidad}
                                 />
                                 <span className="input-border"></span>
 
@@ -448,14 +462,14 @@ function FichaPersonal() {
                                 <label className="font-medium w-auto min-w-min" htmlFor="foto;">Foto:</label>
 
                                 <FileUpload
-                                    name="pdf"
+                                    name="img"
                                     style={{}}
                                     chooseLabel="Escoger"
                                     uploadLabel="Cargar"
                                     cancelLabel="Cancelar"
                                     emptyTemplate={
                                         <p className="m-0 p-button-rounded">
-                                            Arrastre y suelte los archivos aquí para cargarlos.
+                                            Arrastre y suelte la foto aquí para cargarlos.
                                         </p>
                                     }
                                     customUpload
@@ -474,31 +488,32 @@ function FichaPersonal() {
                             <div className='input-box'>
 
                                 <label className="font-medium w-auto min-w-min" htmlFor="nombres">Nombres:</label>
-                                <input
-                                    className="input"
 
-                                    type="text"
+                                <InputText
+                                    className="input"
+                                    placeholder=' Ingresar los nombres'
                                     id="nombre"
-                                    value={formData.nombres}
-                                    placeholder='Ingrese los nombres'
+                                    keyfilter="alpha" // Solo permitir caracteres alfabeticos
                                     onChange={(e) => setFormData({ ...formData, nombres: e.target.value })}
-                                    required
+                                    title="Ingresar los nombres del NNA"
+                                    value={formData.nombres}
                                 />
+
                                 <span className="input-border"></span>
 
                             </div>
 
                             <div className='input-box'>
                                 <label className="font-medium w-auto min-w-min" htmlFor="apellidos">Apellidos:</label>
-                                <input
-                                    className="input"
-                                    type="text"
-                                    id="nombre"
-                                    value={formData.apellidos}
-                                    placeholder='Ingrese los apellidos'
 
+                                <InputText
+                                    className="input"
+                                    placeholder=' Ingresar los apellidos'
+                                    id="apellido"
+                                    keyfilter="alpha" // Solo permitir caracteres alfabeticos
                                     onChange={(e) => setFormData({ ...formData, apellidos: e.target.value })}
-                                    required
+                                    title="Ingresar los apellidos del NNA"
+                                    value={formData.apellidos}
                                 />
                                 <span className="input-border"></span>
 
@@ -510,115 +525,138 @@ function FichaPersonal() {
 
                         <div className="column">
 
-                            <div className='input-box'>
-                                <label className="font-medium w-auto min-w-min" htmlFor="nacionalidad">Nacionalidad:</label>
-                                <input
-                                    className="input"
-                                    type="text"
-                                    id="nacionalidad"
-                                    value={formData.nacionalidad}
-                                    placeholder='Ingrese la nacionalidad'
+                            <div className='column' style={{ width: "50%" }}>
 
-                                    onChange={(e) => setFormData({ ...formData, nacionalidad: e.target.value })}
-                                    required
-                                />
-                                <span className="input-border"></span>
-
-                            </div>
-
-                            <div className='input-box' style={{ display: 'flex', alignItems: 'center', marginTop: "40px" }}>
-                                <label className="font-medium w-auto min-w-min" htmlFor="fechaNacimiento">Fecha de Nacimiento:</label>
+                                <div className='input-box'
+                                    style={{ display: 'flex', alignItems: 'center', marginTop: "40px" }}
+                                >
+                                    <label className="font-medium w-auto min-w-min" htmlFor="fechaNacimiento">Fecha de Nacimiento: </label>
 
 
-                                <Calendar
-                                    style={{ marginLeft: "20px", width: "60%" }}
-                                    className="text-2xl"
-                                    id="inicio"
-                                    name="inicio"
-                                    placeholder="Ingrese la fecha de nacimiento"
-                                    required
-                                    dateFormat="dd-mm-yy" // Cambiar el formato a ISO 8601
-                                    showIcon
-                                    maxDate={new Date()}
-                                    onChange={(e) => {
-                                        const selectedDate =
-                                            e.value instanceof Date ? e.value : null;
-                                        if (selectedDate) {
-                                            selectedDate.setDate(selectedDate.getDate() + 1);
-                                            const formattedDate = selectedDate
-                                                ? selectedDate.toISOString().split("T")[0] // Formatear a ISO 8601
-                                                : "";
-                                            setFormData({
-                                                ...formData,
-                                                fechaNacimiento: formattedDate,
-                                            });
+                                    <Calendar
+                                        style={{ marginLeft: "20px", width: "60%" }}
+                                        className="text-2xl"
+                                        id="inicio"
+                                        name="inicio"
+                                        placeholder=" Ingresar la fecha de nacimiento"
+                                        dateFormat="dd-mm-yy" // Cambiar el formato a ISO 8601
+                                        showIcon
+                                        maxDate={new Date()}
+                                        onChange={(e) => {
+                                            const selectedDate =
+                                                e.value instanceof Date ? e.value : null;
+                                            if (selectedDate) {
+                                                selectedDate.setDate(selectedDate.getDate() + 1);
+                                                const formattedDate = selectedDate
+                                                    ? selectedDate.toISOString().split("T")[0] // Formatear a ISO 8601
+                                                    : "";
+                                                setFormData({
+                                                    ...formData,
+                                                    fechaNacimiento: formattedDate,
+                                                });
+                                            }
+
+                                        }}
+                                        value={
+                                            formData.fechaNacimiento
+                                                ? new Date(formData.fechaNacimiento)
+                                                : null
                                         }
+                                    />
 
-                                    }}
-                                    value={
-                                        formData.fechaNacimiento
-                                            ? new Date(formData.fechaNacimiento)
-                                            : null
-                                    }
-                                />
+                                    <span className="input-border"></span>
 
-
-                                {/* <input
-                                        className="input"
-
-                                        type="date"
-                                        id="fechaNacimiento"
-                                        value={formData.fechaNacimiento ? formData.fechaNacimiento.toISOString().substr(0, 10) : ''}
-                                        onChange={(e) => setFormData({ ...formData, fechaNacimiento: new Date(e.target.value) })}
-                                        required
-                                    /> */}
-                                <span className="input-border"></span>
-
+                                </div>
                             </div>
+                            <div className='column' style={{ width: "50%" }}>
+
+                                <div className='input-box' style={{ width: "50%" }}>
+                                    <label className="font-medium w-auto min-w-min" htmlFor="nacionalidad">Nacionalidad:</label>
+
+                                    <InputText
+                                        className="input"
+                                        placeholder=' Ingresar la nacionalidad'
+                                        id="nacionalidad"
+                                        keyfilter="alpha" // Solo permitir caracteres alfabeticos
+                                        onChange={(e) => setFormData({ ...formData, nacionalidad: e.target.value })}
+                                        title="Ingresar la nacionalidad del NNA"
+                                        value={formData.nacionalidad}
+                                    />
+                                    <span className="input-border"></span>
+
+                                </div>
+
+
+                                <div className='input-box' style={{ width: "50%" }}>
+                                    <label className="font-medium w-auto min-w-min" htmlFor="etnia">Etnia:</label>
+                                    <div className=" " style={{ width: "100%" }}>
+                                        <Dropdown
+                                            className="text-2xl"
+                                            id="tiempo_dedicacion"
+                                            name="tiempo_dedicacion"
+                                            style={{ width: "100%", height: "36px" }}
+                                            options={listEtnias}
+                                            onChange={(e) =>
+                                                setFormData({
+                                                    ...formData,
+                                                    etnia: { idEtnia: parseInt(e.value), etniaNombre: '' },
+                                                })
+                                            }
+                                            value={formData.etnia?.idEtnia}
+                                            optionLabel="etniaNombre"
+                                            optionValue="idEtnia"
+                                            placeholder="Seleccione la etnia"
+                                        />
+
+
+                                    </div>
+
+                                </div>
+                            </div>
+
+
                         </div>
                         <div className="column">
 
-                            <div className="gender-box">
+                            <div className="input-box">
                                 <label className="font-medium w-auto min-w-min" htmlFor='genero'>Genero:</label>
 
-                                <div className='gender-option'>
-                                    <div className='gender'>
-                                        <div className="mydict">
-                                            <div>
-                                                <label>
-                                                    <input
-                                                        className="input"
-                                                        type="radio"
-                                                        id="genMasculino"
-                                                        name="masculino"
-                                                        value="Masculino"
-                                                        checked={formData.genero === 'Masculino'}
-                                                        onChange={(e) => setFormData({ ...formData, genero: e.target.value })}
 
-                                                    />
-                                                    <span>Masculino</span>
-                                                </label>
-                                                <label>
-                                                    <input
-                                                        className="input"
-                                                        type="radio"
-                                                        id="genFemenino"
-                                                        name="femenino"
-                                                        value="Femenino"
-                                                        checked={formData.genero === 'Femenino'}
-                                                        onChange={(e) => setFormData({ ...formData, genero: e.target.value })}
+                                <div className="mydict">
+                                    <div>
+                                        <label>
+                                            <input
+                                                className="input"
+                                                type="radio"
+                                                id="genMasculino"
+                                                name="masculino"
+                                                value="Masculino"
+                                                checked={formData.genero === 'Masculino'}
+                                                onChange={(e) => setFormData({ ...formData, genero: e.target.value })}
 
-                                                    />
-                                                    <span>Femenino</span>
-                                                </label>
+                                            />
+                                            <span>Masculino</span>
+                                        </label>
+                                        <label>
+                                            <input
+                                                className="input"
+                                                type="radio"
+                                                id="genFemenino"
+                                                name="femenino"
+                                                value="Femenino"
+                                                checked={formData.genero === 'Femenino'}
+                                                onChange={(e) => setFormData({ ...formData, genero: e.target.value })}
 
-
-                                            </div>
-                                        </div>
+                                            />
+                                            <span>Femenino</span>
+                                        </label>
 
 
                                     </div>
                                 </div>
+
+
+
 
                             </div >
 
@@ -630,7 +668,7 @@ function FichaPersonal() {
                                         className="text-2xl"
                                         id="tiempo_dedicacion"
                                         name="tiempo_dedicacion"
-                                        style={{ width: "100%" }}
+                                        style={{ width: "100%", height: "36px" }}
                                         options={listRangoEdades}
                                         onChange={(e) =>
                                             setFormData({
@@ -643,272 +681,245 @@ function FichaPersonal() {
                                         optionValue="idRangoEdad"
                                         placeholder="Seleccione el rango de edad"
                                     />
-                                    {/* <select id="rangoEdad" value={formData.rangoEdad?.idRangoEdad} onChange={(e) => setFormData({ ...formData, rangoEdad: { idRangoEdad: parseInt(e.target.value), limInferior: 18, limSuperior: 30 } })}
-                                        required>
-                                        <option value={0} >Seleccione una opción</option>
-                                        {rangosEdad.map((rango, index) => (
-                                            <option key={index} value={rango.idRangoEdad}>{rango.limInferior} - {rango.limSuperior}</option>
-                                        ))}
-
-                                    </select> */}
 
 
                                 </div>
-
-
-
                             </div>
-
-
-
-
-
                         </div>
 
-                        <div className='input-box'>
-                            <label className="font-medium w-auto min-w-min" htmlFor="etnia">Etnia:</label>
-                            <div className="select-box" style={{ width: "47.1%" }}>
-                                <Dropdown
-                                    className="text-2xl"
-                                    id="tiempo_dedicacion"
-                                    name="tiempo_dedicacion"
-                                    style={{ width: "100%" }}
-                                    options={listEtnias}
-                                    onChange={(e) =>
-                                        setFormData({
-                                            ...formData,
-                                            etnia: { idEtnia: parseInt(e.value), etniaNombre: '' },
-                                        })
-                                    }
-                                    value={formData.etnia?.idEtnia}
-                                    optionLabel="etniaNombre"
-                                    optionValue="idEtnia"
-                                    placeholder="Seleccione la etnia"
-                                />
-                                {/* <select id="etnia" value={formData.etnia?.idEtnia} onChange={(e) => setFormData({ ...formData, etnia: { idEtnia: parseInt(e.target.value), etniaNombre: '' } })}
-                                    required>
-                                    <option value={0} >Seleccione una opción</option>
-                                    {etnias.map((etnia, index) => (
-                                        <option key={index} value={etnia.idEtnia}>{etnia.etniaNombre} </option>
-                                    ))}
 
-                                </select> */}
+                        <div className="column">
 
+                            <div className='input-box'>
+                                <label className="font-medium w-auto min-w-min" htmlFor="provincia">Provincia:</label>
+                                <div className=" ">
 
+                                    <div className="flex justify-content-center">
+                                        <Dropdown
+                                            value={selectedProvincia?.idProvincia}
+                                            onChange={(e: DropdownChangeEvent) => {
+                                                setSelectedProvincia({ idProvincia: parseInt(e.value), provinciaNombre: '' });
+                                                loadCantones(parseInt(e.value));
+                                                setListParroquias([]);
+                                            }}
+                                            options={listProvincias}
+                                            optionLabel="provinciaNombre"
+                                            optionValue="idProvincia"
+                                            placeholder="Seleccione una Provincia"
+                                            filter
+                                            className=""
+                                            style={{ width: "100%", height: "36px" }}
+                                        />
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div className='input-box'>
+                                <label className="font-medium w-auto min-w-min" htmlFor="parroquia">Canton:</label>
+                                <div className=" ">
+
+                                    <div className="flex justify-content-center">
+                                        <Dropdown
+                                            disabled={listCantones.length === 0}
+                                            value={selectedCanton?.idCanton}
+                                            onChange={(e: DropdownChangeEvent) => {
+                                                const Prov: IProvincia = {
+                                                    idProvincia: 0,
+                                                    provinciaNombre: '',
+                                                };
+                                                setSelectedCanton({ idCanton: parseInt(e.value), cantonNombre: '', provincia: Prov });
+                                                loadParroquias(parseInt(e.value))
+                                            }}
+                                            options={listCantones}
+                                            optionLabel="cantonNombre"
+                                            optionValue="idCanton"
+                                            placeholder="Seleccione un Canton"
+                                            filter
+                                            className=""
+                                            style={{ width: "100%", height: "36px" }}
+                                        />
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div className='input-box'>
+                                <label className="font-medium w-auto min-w-min" htmlFor="parroquia">Parroquia:</label>
+                                <div className=" ">
+
+                                    <div className="flex justify-content-center">
+                                        <Dropdown
+                                            disabled={listParroquias.length === 0}
+
+                                            value={formData.parroquia?.idParroquia}
+
+                                            onChange={(e: DropdownChangeEvent) =>
+                                                setFormData({
+                                                    ...formData,
+                                                    parroquia: {
+                                                        idParroquia: parseInt(e.value), parroquiaNombre: '',
+                                                        canton: {
+                                                            idCanton: 0, cantonNombre: '',
+                                                            provincia: {
+                                                                idProvincia: 0, provinciaNombre: ''
+                                                            }
+                                                        }
+                                                    }
+                                                })}
+                                            options={listParroquias}
+                                            optionLabel="parroquiaNombre"
+                                            optionValue="idParroquia"
+                                            placeholder="Seleccione una Parroquia"
+                                            filter
+                                            className="text-2xl"
+                                            style={{ width: "100%", height: "36px" }}
+                                        />
+                                    </div>
+
+                                </div>
                             </div>
 
                         </div>
-
 
                         <div className='input-box'>
                             <label className="font-medium w-auto min-w-min" htmlFor="direccion">Dirección:</label>
-                            <input
+                            <InputText
                                 className="input"
-                                type="text"
+                                placeholder=' Ingresar la direccion'
                                 id="direccion"
-                                value={formData.direccion}
-                                placeholder='Ingrese la direccion del domicilio'
-
+                                keyfilter="alpha" // Solo permitir caracteres alfabeticos
                                 onChange={(e) => setFormData({ ...formData, direccion: e.target.value })}
-                                required
+                                title="Ingresar la dirección de residencia del NNA"
+                                value={formData.direccion}
                             />
+
                             <span className="input-border"></span>
 
                         </div>
 
-                        {/* <div className="column">
-                            <div className='input-box'>
-                                <label className="font-medium w-auto min-w-min" htmlFor="parroquia">Canton:</label>
-                                <div className="select-box">
+                        <div className="column">
+                            <div className='column' style={{ width: "50%" }}>
 
-                                    <Dropdown
-                                        className="text-2xl"
-                                        id="tiempo_dedicacion"
-                                        name="tiempo_dedicacion"
-                                        style={{ width: "100%" }}
-                                        options={listParroquias}
-                                        // onChange={
-                                        // }
-                                        value={formData.parroquia?.idParroquia}
-                                        optionLabel="label"
-                                        optionValue="value"
-                                        placeholder="Seleccione la Parroquia"
+                                <div className='input-box' >
+                                    <label className="font-medium w-auto min-w-min" htmlFor="barrio">Barrio/Sector:</label>
+                                    <InputText
+                                        className="input"
+                                        placeholder=' Ingresar nombre del barrio donde se ubica el hogar'
+                                        id="barrio"
+                                        keyfilter="alpha" // Solo permitir caracteres alfabeticos
+                                        onChange={(e) => setFormData({ ...formData, barrioSector: e.target.value })}
+                                        title="Ingresar el barrio donde se ubica la residencia del NNA"
+                                        value={formData.barrioSector}
                                     />
+                                    <span className="input-border"></span>
+
                                 </div>
 
-                            </div>
-
-                        </div> */}
-
-                        <div className="column">
-
-                            <div className='input-box'>
-                                <label className="font-medium w-auto min-w-min" htmlFor="parroquia">Parroquia:</label>
-                                <div className="select-box">
-
-                                    <Dropdown
-                                        className="text-2xl"
-                                        id="tiempo_dedicacion"
-                                        name="tiempo_dedicacion"
-                                        style={{ width: "100%" }}
-                                        options={listParroquias}
-                                        onChange={(e) =>
-                                            setFormData({
-                                                ...formData,
-                                                parroquia: {
-                                                    idParroquia: parseInt(e.value), parroquiaNombre: '',
-                                                    canton: {
-                                                        idCanton: 0, cantonNombre: '',
-                                                        provincia: {
-                                                            idProvincia: 0, provinciaNombre: ''
-                                                        }
-                                                    }
-                                                }
-                                            })
-                                        }
-                                        value={formData.parroquia?.idParroquia}
-                                        optionLabel="parroquiaNombre"
-                                        optionValue="idParroquia"
-                                        placeholder="Seleccione la Parroquia"
-                                    />
-                                </div>
-
-                            </div>
+                                <div className="input-box">
+                                    <label className="font-medium w-auto min-w-min" htmlFor='zona'>Zona:</label>
 
 
-                            <div className='input-box' >
-                                <label className="font-medium w-auto min-w-min" htmlFor="barrio">Barrio/Sector:</label>
-                                <input
-                                    className="input"
-                                    type="text"
-                                    id="barrio"
-                                    value={formData.barrioSector}
-                                    placeholder='Ingrese nombre del barrio donde se ubica su hogar'
-                                    onChange={(e) => setFormData({ ...formData, barrioSector: e.target.value })}
-                                    required
-                                />
-                                <span className="input-border"></span>
 
-                            </div>
+                                    <div className="mydict" >
+                                        <div>
+                                            <label>
+                                                <input
+                                                    className="input"
+                                                    type="radio"
+                                                    id="zonaUrbana"
+                                                    name="zona"
+                                                    value="Urbana"
+                                                    checked={formData.zona === 'Urbana'}
+                                                    onChange={(e) => setFormData({ ...formData, zona: e.target.value })}
 
-                        </div>
+                                                />
+                                                <span>Urbana</span>
+                                            </label>
+                                            <label>
+                                                <input
+                                                    className="input"
+                                                    type="radio"
+                                                    id="zonaRural"
+                                                    name="zona"
+                                                    value="Rural"
+                                                    checked={formData.zona === 'Rural'}
+                                                    onChange={(e) => setFormData({ ...formData, zona: e.target.value })}
 
-                        <div className="column">
-
-                            <div className="gender-box">
-                                <label className="font-medium w-auto min-w-min" htmlFor='zona'>Zona:</label>
-
-                                <div className='gender-option'>
-                                    <div className='gender' style={{}}>
-
-                                        <div className="mydict" >
-                                            <div>
-                                                <label>
-                                                    <input
-                                                        className="input"
-                                                        type="radio"
-                                                        id="zonaUrbana"
-                                                        name="zona"
-                                                        value="Urbana"
-                                                        checked={formData.zona === 'Urbana'}
-                                                        onChange={(e) => setFormData({ ...formData, zona: e.target.value })}
-
-                                                    />
-                                                    <span>Urbana</span>
-                                                </label>
-                                                <label>
-                                                    <input
-                                                        className="input"
-                                                        type="radio"
-                                                        id="zonaRural"
-                                                        name="zona"
-                                                        value="Rural"
-                                                        checked={formData.zona === 'Rural'}
-                                                        onChange={(e) => setFormData({ ...formData, zona: e.target.value })}
-
-                                                    />
-                                                    <span>Rural</span>
-                                                </label>
+                                                />
+                                                <span>Rural</span>
+                                            </label>
 
 
-                                            </div>
                                         </div>
-
-                                        {/* <input
-                                            type="radio"
-                                            id="zonaUrbana"
-                                            name="zona"
-                                            value="Urbana"
-                                            checked={formData.zona === 'Urbana'}
-                                            onChange={(e) => setFormData({ ...formData, zona: e.target.value })}
-                                            required
-                                        />
-                                        <label htmlFor="zonaUrbana">Urbana</label>
-                                        <input
-                                            type="radio"
-                                            id="zonaRural"
-                                            name="zona"
-                                            value="Rural"
-                                            checked={formData.zona === 'Rural'}
-                                            onChange={(e) => setFormData({ ...formData, zona: e.target.value })}
-                                            required
-                                        />
-                                        <label htmlFor="zonaRural">Rural</label> */}
                                     </div>
+
+
+
+                                </div >
+                            </div>
+
+
+
+
+                            <div className='column' style={{ width: "50%" }}>
+
+
+                                <div className='input-box'>
+                                    <label className="font-medium w-auto min-w-min" htmlFor="referencia">Referencia:</label>
+
+                                    <InputText
+                                        className="input"
+                                        placeholder=' Ingresar una referencia cercana al hogar'
+                                        id="referencia"
+                                        keyfilter="alpha" // Solo permitir caracteres alfabeticos
+                                        onChange={(e) => setFormData({ ...formData, referencia: e.target.value })}
+                                        title="Ingresar una referencia de la residencia del NNA"
+                                        value={formData.referencia}
+                                    />
+
+                                    <span className="input-border"></span>
+
                                 </div>
 
-                            </div >
-
-
-
-                            <div className='input-box'>
-                                <label className="font-medium w-auto min-w-min" htmlFor="referencia">Referencia:</label>
-                                <input
-                                    className="input"
-                                    type="text"
-                                    id="referencia"
-                                    value={formData.referencia}
-                                    placeholder='Ingrese una referencia cercana al hogar'
-                                    onChange={(e) => setFormData({ ...formData, referencia: e.target.value })}
-                                    required
-                                />
-                                <span className="input-border"></span>
-
                             </div>
-
                         </div>
 
+
                         <div className="column">
-
-                            <div className='input-box'>
-                                <label className="font-medium w-auto min-w-min" htmlFor="coordenadaX">Coordenadas en X (longitud) del la residencia:</label>
-                                <input
-                                    className="input"
-                                    type="text"
-                                    id="coordenadaX"
-                                    value={formData.coordenadaX}
-                                    placeholder='Ingrese las coordenadas en X (longitud) del la residencia '
-                                    onChange={(e) => setFormData({ ...formData, coordenadaX: parseFloat(e.target.value) })}
-                                    required
-                                />
-                                <span className="input-border"></span>
-
-                            </div>
-
                             <div className='input-box'>
                                 <label className="font-medium w-auto min-w-min" htmlFor="coordenadaY">Coordenadas en Y (latitud) del la residencia:</label>
-                                <input
+
+                                <InputText
                                     className="input"
-                                    type="text"
+                                    placeholder=' Ingresar las coordenadas en Y (latitud) del la residencia '
                                     id="coordenadaY"
-                                    value={formData.coordenadaY}
-                                    placeholder='Ingrese las coordenadas en Y (latitud) del la residencia '
-                                    onChange={(e) => setFormData({ ...formData, coordenadaY: parseFloat(e.target.value) })}
-                                    required
+                                    keyfilter="num"
+                                    onChange={(e) => { setTempCY(e.target.value); setFormData({ ...formData, coordenadaY: parseFloat(e.target.value) }) }}
+                                    title="Ingresar las coordenadas en Y (latitud) del la residencia "
+                                    value={tempCY}
+                                />
+
+                                <span className="input-border"></span>
+
+                            </div>
+                            <div className='input-box'>
+                                <label className="font-medium w-auto min-w-min" htmlFor="coordenadaX">Coordenadas en X (longitud) del la residencia:</label>
+
+                                <InputText
+                                    className="input"
+                                    placeholder=' Ingresar las coordenadas en X (longitud) del la residencia '
+                                    id="coordenadaX"
+                                    keyfilter="num"
+                                    onChange={(e) => { setTempCX(e.target.value); setFormData({ ...formData, coordenadaX: parseFloat(e.target.value) }) }}
+                                    title="Ingresar las coordenadas en Y (latitud) del la residencia "
+                                    value={tempCX}
                                 />
                                 <span className="input-border"></span>
 
                             </div>
+
+
                         </div>
 
                         <div className='btnSend'>

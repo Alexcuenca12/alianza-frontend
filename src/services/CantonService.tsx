@@ -8,6 +8,11 @@ export class CantonService {
         return axios.get(this.baseUrl + "get").then((res) => res.data);
     }
 
+    //Filtrar por Parroquia
+    getBusqueda(id: number) {
+        return axios.get(`${this.baseUrl}busqueda/${id}`).then((res) => res.data);
+    }
+
     //Crear
     save(canton: any) {
         return axios.post(this.baseUrl + "post", canton).then((res) => res.data);
