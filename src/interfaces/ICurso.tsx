@@ -6,6 +6,6 @@ export interface ICurso {
     nombreCurso: string;
     fechaInicio: string;
     estadoCurso: boolean;
-    rangoEdad: IRangoEdad | null; // Cambiar 'object' a 'IRangoEdad'
-    docente: IDocente | null; // Cambiar 'object' a 'IDocente'
+    rangoEdad: IRangoEdad | null;
+    docente: IDocente | null; 
 }

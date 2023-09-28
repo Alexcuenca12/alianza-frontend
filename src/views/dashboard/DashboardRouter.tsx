@@ -29,6 +29,7 @@ import Encargado from "../Encargado/Encargado";
 import SecretariaContext from "../Secretaria/Secretaria";
 import Curso from "../Curso/Curso";
 import Reporte from "../Reportes/Reporte";
+import Asistencia from "../Asistencia/Asistencia";
 
 export const DashboardRouter = () => {
   //Datos del sessionStorage
@@ -188,7 +189,7 @@ export const DashboardRouter = () => {
                 {rol === 1 ? (
                   <>
                     <SideBarMenu items={items} card={card} />
-                    <FichaSalud />
+                    <Asistencia />
                     <Footer />
                   </>
                 ) : rol === 2 ? (
