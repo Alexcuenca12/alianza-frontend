@@ -20,9 +20,9 @@ function Curso() {
 
   const [contra1, setContra1] = useState<ICurso[]>([]);
   const [formData, setFormData] = useState<ICurso>({
+    idCurso: 0,
     nombreCurso: "",
     fechaInicio: "",
-    fechaFin: "",
     estadoCurso: false,
     rangoEdad: null,
     docente: null,
@@ -49,24 +49,26 @@ function Curso() {
   const docenteService = new DocenteService();
   const rangoService = new RangoEdadService();
 
-  const [selectedDocente, setSelectedDocente] = useState<IDocente | null>(null);
+  // const [selectedDocente, setSelectedDocente] = useState<IDocente | null>(null);
   const [selectedRango, setSelectedRango] = useState<IRangoEdad | null>(null);
 
   useEffect(() => {
-    const loadDocentes = () => {
-      docenteService
-        .getAll()
-        .then((data) => {
-          setDocentes(data);
-          setDataLoaded(true);
-          setSelectedDocente(null);
-        })
-        .catch((error) => {
-          console.error("Error al obtener los datos:", error);
-        });
-    };
+
     loadDocentes();
   }, []);
+
+  const loadDocentes = () => {
+    docenteService
+      .getAll()
+      .then((data) => {
+        setDocentes(data);
+        setDataLoaded(true);
+        // setSelectedDocente(null);
+      })
+      .catch((error) => {
+        console.error("Error al obtener los datos:", error);
+      });
+  };
 
   useEffect(() => {
     const loadRango = () => {
@@ -105,7 +107,6 @@ function Curso() {
     if (
       !formData.nombreCurso ||
       !formData.fechaInicio ||
-      !formData.fechaFin ||
       !formData.estadoCurso ||
       !formData.docente || // Asegúrate de que docente esté seleccionado
       !formData.rangoEdad // Asegúrate de que rangoEdad esté seleccionado
@@ -203,9 +204,10 @@ function Curso() {
 
   const resetForm = () => {
     setFormData({
+      idCurso: 0,
+
       nombreCurso: "",
       fechaInicio: "",
-      fechaFin: "",
       estadoCurso: false,
       rangoEdad: null,
       docente: null,
@@ -302,39 +304,7 @@ function Curso() {
                       }
                     />
                   </div>
-                  <div className="flex flex-wrap w-full h-full  justify-content-between">
-                    <label
-                      htmlFor="fechaFin"
-                      className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginRight: "20px" }}
-                    >
-                      Fecha Fin:
-                    </label>
-                    <Calendar
-                      className="text-2xl"
-                      id="fechaFin"
-                      name="fechaFin"
-                      placeholder="Ingrese la Fecha de Fin"
-                      required
-                      dateFormat="yy-mm-dd"
-                      showIcon
-                      maxDate={new Date()}
-                      onChange={(e) => {
-                        const selectedDate =
-                          e.value instanceof Date ? e.value : null;
-                        const formattedDate = selectedDate
-                          ? selectedDate.toISOString().split("T")[0]
-                          : "";
-                        setFormData({
-                          ...formData,
-                          fechaFin: formattedDate,
-                        });
-                      }}
-                      value={
-                        formData.fechaFin ? new Date(formData.fechaFin) : null
-                      }
-                    />
-                  </div>
+
                 </div>
                 <div
                   className="flex flex-column flex-wrap gap-4"
@@ -356,21 +326,13 @@ function Curso() {
                       name="docente"
                       options={opcionesDocente}
                       onChange={(e) => {
-                        const selectedDocente = docentes.find(
-                          (docente) => docente.idDocente === e.value
-                        );
-                        if (selectedDocente) {
-                          setSelectedDocente(selectedDocente);
-                          setFormData({
-                            ...formData,
-                            docente: selectedDocente,
-                          });
-                        } else {
-                          setSelectedDocente(null);
-                          setFormData({ ...formData, docente: null });
-                        }
+                        setFormData({
+                          ...formData,
+                          docente: { idDocente: parseInt(e.value), materiaDocente: '', tituloDocente: '', persona: null },
+                        });
+
                       }}
-                      value={selectedDocente}
+                      value={formData.docente?.idDocente}
                       optionLabel="etiqueta"
                       optionValue="idDocente"
                       placeholder="Seleccione al Docente"
@@ -390,16 +352,12 @@ function Curso() {
                       name="rangos"
                       options={opcionesRango}
                       onChange={(e) => {
-                        const selectedRango = rangos.find(
-                          (rango) => rango.idRangoEdad === e.value
-                        );
-                        setSelectedRango(selectedRango ?? null); // Actualiza selectedRango con el objeto de rango de edad o null
                         setFormData({
                           ...formData,
-                          rangoEdad: selectedRango ?? null,
-                        });
+                          rangoEdad: { idRangoEdad: parseInt(e.value), limInferior: 0, limSuperior: 0 },
+                        })
                       }}
-                      value={selectedRango ?? null} // Utiliza selectedRango como valor seleccionado o null
+                      value={formData.rangoEdad?.idRangoEdad}
                       optionLabel="etiquetaRango"
                       optionValue="idRangoEdad"
                       placeholder="Seleccione el Rango"
@@ -480,21 +438,13 @@ function Curso() {
                 <td>
                   {curso.fechaInicio
                     ? new Date(curso.fechaInicio).toLocaleDateString("es-ES", {
-                        year: "numeric",
-                        month: "2-digit",
-                        day: "2-digit",
-                      })
+                      year: "numeric",
+                      month: "2-digit",
+                      day: "2-digit",
+                    })
                     : ""}
                 </td>
-                <td>
-                  {curso.fechaFin
-                    ? new Date(curso.fechaFin).toLocaleDateString("es-ES", {
-                        year: "numeric",
-                        month: "2-digit",
-                        day: "2-digit",
-                      })
-                    : ""}
-                </td>
+
                 <td>{curso.estadoCurso ? "Activo" : "Inactivo"}</td>
                 <td>
                   <Button
@@ -510,7 +460,7 @@ function Curso() {
                       justifyContent: "center",
                     }}
                     onClick={() => handleEdit(curso.idCurso?.valueOf())}
-                    // Agrega el evento onClick para la operación de editar
+                  // Agrega el evento onClick para la operación de editar
                   />
                   <Button
                     type="button"
@@ -525,7 +475,7 @@ function Curso() {
                       justifyContent: "center",
                     }}
                     onClick={() => handleDelete(curso.idCurso?.valueOf())}
-                    // Agrega el evento onClick para la operación de eliminar
+                  // Agrega el evento onClick para la operación de eliminar
                   />
                 </td>
               </tr>

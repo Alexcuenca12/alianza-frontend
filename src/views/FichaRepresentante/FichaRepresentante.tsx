@@ -77,9 +77,7 @@ function FichaInscripcionContext() {
     loadData();
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const validarCampos = () => {
     if (
       !formData.nombresRepre ||
       !formData.apellidosRepre ||
@@ -87,7 +85,6 @@ function FichaInscripcionContext() {
       !formData.contactoRepre ||
       !formData.contactoEmergenciaRepre ||
       !formData.ocupacionPrimariaRepre ||
-      !formData.ocupacionSecundariaRepre ||
       !formData.lugarTrabajoRepre ||
       !formData.observacionesRepre ||
       !formData.nivelInstruccionRepre ||
@@ -95,8 +92,13 @@ function FichaInscripcionContext() {
       !formData.fechaNacimientoRepre
     ) {
       swal("Advertencia", "Por favor, complete todos los campos", "warning");
-      return;
+      return false;
     }
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
 
     repreService
       .save(formData)
@@ -485,6 +487,31 @@ function FichaInscripcionContext() {
                 <div className="flex flex-column flex-wrap gap-4" style={{ marginRight: "35px" }}>
                   <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
                     <label
+                      htmlFor="cedulaRepre"
+                      className="text-3xl font-medium w-auto min-w-min"
+                      style={{ marginRight: "10px" }}
+                    >
+                      Cédula del representate:
+                    </label>
+                    <InputText
+                      className="text-2xl"
+                      id="cedulaRepre"
+                      name="cedulaRepre"
+                      maxLength={10} // Establecer el máximo de 10 caracteres
+                      keyfilter="pint" // Solo permitir dígitos enteros positivos
+                      required
+                      placeholder="Ingrese la Cédula"
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          cedulaRepre: e.currentTarget.value,
+                        })
+                      }
+                      value={formData.cedulaRepre}
+                    />
+                  </div>
+                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
+                    <label
                       htmlFor="centro"
                       className="text-3xl font-medium w-auto min-w-min"
                       style={{ marginRight: "10px" }}
@@ -495,6 +522,7 @@ function FichaInscripcionContext() {
                       className="text-2xl"
                       id="inicio"
                       name="centro"
+                      keyfilter={/^[A-Za-z\s]*$/} // Solo permitir caracteres 
                       placeholder="Ingrese los Nombres del Representate"
                       required
                       onChange={(e) =>
@@ -518,6 +546,7 @@ function FichaInscripcionContext() {
                       className="text-2xl"
                       id="apellidosRepre"
                       name="apellidosRepre"
+                      keyfilter={/^[A-Za-z\s]*$/} // Solo permitir caracteres 
                       required
                       placeholder="Ingrese los Apellidos del Representante"
                       onChange={(e) =>
@@ -529,29 +558,7 @@ function FichaInscripcionContext() {
                       value={formData.apellidosRepre}
                     />
                   </div>
-                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
-                    <label
-                      htmlFor="cedulaRepre"
-                      className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginRight: "10px" }}
-                    >
-                      Cédula del representate:
-                    </label>
-                    <InputText
-                      className="text-2xl"
-                      id="cedulaRepre"
-                      name="cedulaRepre"
-                      required
-                      placeholder="Ingrese la Cédula"
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          cedulaRepre: e.currentTarget.value,
-                        })
-                      }
-                      value={formData.cedulaRepre}
-                    />
-                  </div>
+
                   <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
                     <label
                       htmlFor="parentescoRepre"
@@ -564,6 +571,7 @@ function FichaInscripcionContext() {
                       className="text-2xl"
                       id="parentescoRepre"
                       name="parentescoRepre"
+                      keyfilter={/^[A-Za-z\s]*$/} // Solo permitir caracteres 
                       placeholder="Ingrese el Parentesco"
                       required
                       onChange={(e) =>
@@ -591,6 +599,7 @@ function FichaInscripcionContext() {
                       placeholder="Ingrese el nº de Contacto"
                       id="contactoRepre"
                       name="contactoRepre"
+                      keyfilter={/^[\d\s+]*$/}
                       style={{ width: "221px" }}
                       onChange={(e) =>
                         setFormData({
@@ -614,6 +623,7 @@ function FichaInscripcionContext() {
                       placeholder="Ingrese el nº de emergencia"
                       id="contactoEmergenciaRepre"
                       name="contactoEmergenciaRepre"
+                      keyfilter={/^[\d\s+]*$/}
                       style={{ width: "221px" }}
                       onChange={(e) =>
                         setFormData({

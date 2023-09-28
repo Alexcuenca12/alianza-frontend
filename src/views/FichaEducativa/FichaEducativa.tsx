@@ -31,27 +31,8 @@ function FichaInscripcionContext() {
   const [listFperonales, setListFperonales] = useState<IFichaPersonal[]>([]);
 
 
-  const [cedula, setCedula] = useState<string>("");
-  const [formDataPersona, setFormDataPersona] = useState<IFichaPersonal>({
-    idFichaPersonal: 0,
-    foto: "",
-    apellidos: "",
-    nombres: "",
-    ciIdentidad: "",
-    nacionalidad: "",
-    fechaNacimiento: "",
-    rangoEdad: null,
-    genero: "",
-    etnia: null,
-    parroquia: null,
-    zona: "",
-    barrioSector: "",
-    direccion: "",
-    referencia: "",
-    coordenadaX: 0,
-    coordenadaY: 0,
-    estVinculacion: false,
-  });
+  const [listJornadas, setListJornadas] = useState<string[]>(['Matutina', 'Vespertina']);
+
 
   const [contra1, setcontra1] = useState<IFichaEducativa[]>([]);
   const [formData, setFormData] = useState<IFichaEducativa>({
@@ -95,7 +76,6 @@ function FichaInscripcionContext() {
       !formData.direccionEducativa ||
       !formData.referenciaEducativa ||
       !formData.jornadaEducativa ||
-      !formData.observacionesEducativa ||
       !formData.gradoEducativo
     ) {
       swal("Advertencia", "Por favor, complete todos los campos", "warning");
@@ -107,19 +87,11 @@ function FichaInscripcionContext() {
       .then((response) => {
         resetForm();
         swal("Publicacion", "Datos Guardados Correctamente", "success");
-
-        educaService
-          .getAll()
-          .then((data) => {
-            setcontra1(data);
-            resetForm();
-            if (fileUploadRef.current) {
-              fileUploadRef.current.clear();
-            }
-          })
-          .catch((error) => {
-            console.error("Error al obtener los datos:", error);
-          });
+        resetForm();
+        if (fileUploadRef.current) {
+          fileUploadRef.current.clear();
+        }
+        loadData()
       })
       .catch((error) => {
         console.error("Error al enviar el formulario:", error);
@@ -596,22 +568,27 @@ function FichaInscripcionContext() {
                       className="text-3xl font-medium w-auto min-w-min"
                       style={{ marginRight: "20px", marginLeft: "25px" }}
                     >
-                      Jornada de Estudio:
+                      Jornada:
                     </label>
-                    <InputText
+                    <Dropdown
                       className="text-2xl"
-                      placeholder="Ingrese la Jornada de Estudio"
                       id="doi"
                       name="doi"
-                      style={{ width: "221px" }}
+                      style={{ width: "221px", height: "40px" }}
+                      options={listJornadas.map((jornada) => ({ label: jornada, value: jornada }))}
                       onChange={(e) =>
                         setFormData({
                           ...formData,
-                          jornadaEducativa: e.currentTarget.value,
+                          jornadaEducativa: e.value,
                         })
                       }
                       value={formData.jornadaEducativa}
+                      optionLabel="label" // Usamos "label" para mostrar el nombre de la jornada
+                      optionValue="value" // Usamos "value" para el valor seleccionado
+                      placeholder="Ingrese la Jornada de Estudio"
                     />
+
+
                   </div>
                   <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
                     <label
