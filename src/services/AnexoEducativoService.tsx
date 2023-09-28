@@ -7,6 +7,10 @@ export class AnexoEducativoService {
         return axios.get(this.baseUrl + "get").then((res) => res.data);
     }
 
+    getByID(id: number) {
+        return axios.get(`${this.baseUrl}busquedaID/${id}`).then((res) => res.data);
+    }
+
     save(asistencia: any) {
         return axios.post(this.baseUrl + "post", asistencia).then((res) => res.data);
     }

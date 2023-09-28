@@ -22,6 +22,7 @@ import { ReportBar } from "../../common/ReportBar";
 import "../../styles/FiltroFichas.css";
 import { ITipoAnexo } from "../../interfaces/TipoAnexo";
 import { IAnexoEducativo } from "../../interfaces/IAnexoEducativo";
+import { RadioButton } from "primereact/radiobutton";
 
 function FichaEducativaContext() {
   const fichaPersonalService = new FichaPersonalService();
@@ -31,7 +32,7 @@ function FichaEducativaContext() {
 
   const [excelReportData, setExcelReportData] =
     useState<IExcelReportParams | null>(null);
-
+  const [selectedValue, setSelectedValue] = useState(0);
   const [busqueda, setBusqueda] = useState<string>("");
   const [foto, setFoto] = useState<string>(
     "https://cdn-icons-png.flaticon.com/128/666/666201.png"
@@ -127,6 +128,24 @@ function FichaEducativaContext() {
   };
   useEffect(() => {
     loadData();
+  }, []);
+
+  const loadDataAnexos = (id?: number | undefined) => {
+    if (id !== undefined) {
+      anexoService
+        .getByID(id)
+        .then((data) => {
+          setListAEducativo(data);
+          setDataLoaded(true); // Marcar los datos como cargados
+          console.log(data);
+        })
+        .catch((error) => {
+          console.error("Error al obtener los datos:", error);
+        });
+    }
+  };
+  useEffect(() => {
+    loadDataAnexos();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -521,7 +540,6 @@ function FichaEducativaContext() {
                       });
                       cargarFoto(parseInt(e.value));
                       loadDataID(parseInt(e.value));
-                      console.log(formData);
                     }}
                     value={formData.fichaPersonal?.idFichaPersonal}
                     optionLabel="label"
@@ -842,10 +860,11 @@ function FichaEducativaContext() {
                 <th>Observaciones</th>
                 <th>Grado</th>
                 <th>Operaciones</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
-              {contra1.map((contrato) => (
+              {contra1.map((contrato, index) => (
                 <tr
                   className="text-center"
                   key={contrato.idFichaEducativa?.toString()}
@@ -890,6 +909,18 @@ function FichaEducativaContext() {
                       onClick={() =>
                         handleDelete(contrato.idFichaEducativa?.valueOf())
                       }
+                    />
+                  </td>
+                  <td>
+                    <RadioButton
+                      inputId={`selectedRow_${index}`}
+                      name="selectedRow"
+                      value={contrato.idFichaEducativa}
+                      onChange={(e) => {
+                        setSelectedValue(e.value);
+                        loadDataAnexos(parseInt(e.value)); // Llama a loadDataAnexos con el valor seleccionado
+                      }}
+                      checked={selectedValue === contrato.idFichaEducativa}
                     />
                   </td>
                 </tr>
