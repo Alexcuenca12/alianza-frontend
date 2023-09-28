@@ -56,7 +56,7 @@ function FichaEducativaContext() {
     observacionesEducativa: "",
     gradoEducativo: "",
     fichaPersonal: null,
-  });
+});
 
   const [formDataAnexo, setFormDataAnexo] = useState<IAnexoEducativo>({
     idAnexoEducativo: 0,
@@ -135,9 +135,13 @@ function FichaEducativaContext() {
       anexoService
         .getByID(id)
         .then((data) => {
-          setListAEducativo(data);
-          setDataLoaded(true); // Marcar los datos como cargados
+          setDataLoaded(true);
+          setFormDataAnexo(data); 
           console.log(data);
+          setFormDataAnexo({
+            ...formDataAnexo,
+            documentoAnexo: data.documentoAnexo
+          });
         })
         .catch((error) => {
           console.error("Error al obtener los datos:", error);
@@ -147,6 +151,8 @@ function FichaEducativaContext() {
   useEffect(() => {
     loadDataAnexos();
   }, []);
+
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -315,6 +321,7 @@ function FichaEducativaContext() {
       fileUploadRef.current.clear(); // Limpiar el campo FileUpload
     }
   };
+
   if (!dataLoaded) {
     return <div style={{ marginLeft: "50%" }}>Cargando datos...</div>;
   }
@@ -328,7 +335,6 @@ function FichaEducativaContext() {
           ...object,
           label: `${object.ciIdentidad} || ${object.apellidos} ${object.nombres}`,
         }));
-
         setListFperonales(dataWithLabel);
       })
       .catch((error) => {
@@ -401,6 +407,39 @@ function FichaEducativaContext() {
       .catch((error) => {
         console.error("Error al obtener los datos:", error);
       });
+  };
+
+  const decodeBase64 = (base64Data: string) => {
+    try {
+      // Eliminar encabezados o metadatos de la cadena base64
+      const base64WithoutHeader = base64Data.replace(/^data:.*,/, "");
+
+      const decodedData = atob(base64WithoutHeader); // Decodificar la cadena base64
+      const byteCharacters = new Uint8Array(decodedData.length);
+
+      for (let i = 0; i < decodedData.length; i++) {
+        byteCharacters[i] = decodedData.charCodeAt(i);
+      }
+
+      const byteArray = new Blob([byteCharacters], { type: "application/pdf" });
+      const fileUrl = URL.createObjectURL(byteArray);
+
+      const link = document.createElement("a");
+      link.href = fileUrl;
+      link.download = "archivoCon.pdf";
+      link.click();
+      swal({
+        title: "Publicación",
+        text: "Descargando pdf....",
+        icon: "success",
+        timer: 1000,
+      });
+      console.log("pdf descargado...");
+
+      URL.revokeObjectURL(fileUrl);
+    } catch (error) {
+      console.error("Error al decodificar la cadena base64:", error);
+    }
   };
 
   const resetFiltro = () => {
@@ -850,6 +889,22 @@ function FichaEducativaContext() {
                     logo={excelReportData?.logo!}
                   />
                 </td>
+                <td>
+                  <button
+                    type="button"
+                    className=""
+                    style={{
+                      background: "#009688",
+                      borderRadius: "10%",
+                      fontSize: "12px",
+                      color: "black",
+                      justifyContent: "center",
+                    }}
+                    onClick={() => decodeBase64(formDataAnexo.documentoAnexo)}
+                  >
+                    Descargar PDF
+                  </button>
+                </td>
               </tr>
               <tr style={{ backgroundColor: "#871b1b", color: "white" }}>
                 <th>Nº de Registro</th>
@@ -918,7 +973,7 @@ function FichaEducativaContext() {
                       value={contrato.idFichaEducativa}
                       onChange={(e) => {
                         setSelectedValue(e.value);
-                        loadDataAnexos(parseInt(e.value)); // Llama a loadDataAnexos con el valor seleccionado
+                        loadDataAnexos(parseInt(e.value));
                       }}
                       checked={selectedValue === contrato.idFichaEducativa}
                     />
