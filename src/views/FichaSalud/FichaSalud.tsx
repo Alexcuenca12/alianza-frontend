@@ -67,19 +67,45 @@ function FichaSaludContext() {
     loadData();
   }, []);
 
+  // const rellenarNulos = () => {
+  //   alert("hola")
+  //   const updatedData = { ...formData };
+
+  //   if (!updatedData.condicionesMedicas) {
+  //     updatedData.condicionesMedicas = "N/A";
+  //   }
+
+  //   if (!updatedData.enfermedadesPrevalentesFichaSalud) {
+  //     updatedData.enfermedadesPrevalentesFichaSalud = "N/A";
+  //   }
+
+  //   if (!updatedData.tipoDiscapacidadFichaSalud) {
+  //     updatedData.tipoDiscapacidadFichaSalud = "N/A";
+  //   }
+
+  //   setFormData(updatedData);
+
+  //   console.log({ updatedData })
+  //   console.log({ formData })
+  // };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+
+
     if (
-      !formData.condicionesMedicas ||
+      // !formData.condicionesMedicas ||
       !formData.pesoFichaSalud ||
-      !formData.tallaFichaSalud ||
-      !formData.tipoDiscapacidadFichaSalud ||
-      !formData.enfermedadesPrevalentesFichaSalud
+      !formData.tallaFichaSalud
+      // !formData.tipoDiscapacidadFichaSalud ||
+      // !formData.enfermedadesPrevalentesFichaSalud
     ) {
       swal("Advertencia", "Por favor, complete todos los campos", "warning");
       return;
     }
+
+
     saludService
       .save(formData)
       .then((response) => {
@@ -93,7 +119,8 @@ function FichaSaludContext() {
             resetForm();
             if (fileUploadRef.current) {
               fileUploadRef.current.clear();
-            }
+            };
+            resetFiltro()
           })
           .catch((error) => {
             console.error("Error al obtener los datos:", error);
@@ -157,8 +184,8 @@ function FichaSaludContext() {
         setEditMode(true);
         setEditItemId(id);
 
-        setBusqueda(editItem.fichaPersonal?.ciIdentidad ?? "");
-        setFoto(editItem.fichaPersonal?.foto ?? '')
+        setBusqueda(editItem.fichaPersonal?.ciIdentidad || '');
+        setFoto(editItem.fichaPersonal?.foto || '')
 
         setTempPeso(editItem.pesoFichaSalud.toString() as string)
         setTempTalla(editItem.tallaFichaSalud.toString() as string)
@@ -189,21 +216,14 @@ function FichaSaludContext() {
             text: "Datos actualizados correctamente",
             icon: "success",
           });
-          setFormData({
-            condicionesMedicas: "",
-            pesoFichaSalud: 0,
-            tallaFichaSalud: 0,
-            discapacidadNNAFichaSalud: false,
-            tipoDiscapacidadFichaSalud: "",
-            porcentajeDiscapacidadFichaSalud: 0,
-            enfermedadesPrevalentesFichaSalud: "",
-            fichaPersonal: null,
-          });
+          resetForm()
           setTempPeso('')
           setTempTalla('')
           loadData();
           setEditMode(false);
           setEditItemId(undefined);
+          resetFiltro()
+
         })
         .catch((error) => {
           console.error("Error al actualizar el formulario:", error);
@@ -374,7 +394,8 @@ function FichaSaludContext() {
                       setFormData({
                         ...formData,
                         fichaPersonal: {
-                          idFichaPersonal: parseInt(e.value), foto: '',
+                          idFichaPersonal: parseInt(e.value),
+                          foto: '',
                           apellidos: '',
                           nombres: '',
                           ciIdentidad: '',

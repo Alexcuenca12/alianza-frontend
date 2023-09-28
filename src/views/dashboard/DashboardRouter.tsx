@@ -62,7 +62,7 @@ export const DashboardRouter = () => {
 
     {
       id: "4",
-      label: "Ficha Salud",
+      label: "Ficha Medica",
       icon: FcLike,
       url: "/salud",
     },
@@ -74,7 +74,7 @@ export const DashboardRouter = () => {
     },
     {
       id: "6",
-      label: "Ficha Representante",
+      label: "Ficha del Representante",
       icon: FcConferenceCall,
       url: "/representante",
     },

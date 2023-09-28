@@ -493,7 +493,7 @@ function FichaPersonal() {
                                     className="input"
                                     placeholder=' Ingresar los nombres'
                                     id="nombre"
-                                    keyfilter="alpha" // Solo permitir caracteres alfabeticos
+                                    keyfilter={/^[A-Za-z\s]*$/} // Solo permitir caracteres alfabeticos
                                     onChange={(e) => setFormData({ ...formData, nombres: e.target.value })}
                                     title="Ingresar los nombres del NNA"
                                     value={formData.nombres}
@@ -510,7 +510,7 @@ function FichaPersonal() {
                                     className="input"
                                     placeholder=' Ingresar los apellidos'
                                     id="apellido"
-                                    keyfilter="alpha" // Solo permitir caracteres alfabeticos
+                                    keyfilter={/^[A-Za-z\s]*$/} // Solo permitir caracteres alfabeticos
                                     onChange={(e) => setFormData({ ...formData, apellidos: e.target.value })}
                                     title="Ingresar los apellidos del NNA"
                                     value={formData.apellidos}
@@ -788,7 +788,7 @@ function FichaPersonal() {
                                 className="input"
                                 placeholder=' Ingresar la direccion'
                                 id="direccion"
-                                keyfilter="alpha" // Solo permitir caracteres alfabeticos
+                                keyfilter={/^[A-Za-z\s]*$/}// Solo permitir caracteres alfabeticos
                                 onChange={(e) => setFormData({ ...formData, direccion: e.target.value })}
                                 title="Ingresar la dirección de residencia del NNA"
                                 value={formData.direccion}
@@ -807,7 +807,7 @@ function FichaPersonal() {
                                         className="input"
                                         placeholder=' Ingresar nombre del barrio donde se ubica el hogar'
                                         id="barrio"
-                                        keyfilter="alpha" // Solo permitir caracteres alfabeticos
+                                        keyfilter={/^[A-Za-z\s]*$/}// Solo permitir caracteres alfabeticos
                                         onChange={(e) => setFormData({ ...formData, barrioSector: e.target.value })}
                                         title="Ingresar el barrio donde se ubica la residencia del NNA"
                                         value={formData.barrioSector}
@@ -872,7 +872,7 @@ function FichaPersonal() {
                                         className="input"
                                         placeholder=' Ingresar una referencia cercana al hogar'
                                         id="referencia"
-                                        keyfilter="alpha" // Solo permitir caracteres alfabeticos
+                                        keyfilter={/^[A-Za-z\s]*$/} // Solo permitir caracteres alfabeticos
                                         onChange={(e) => setFormData({ ...formData, referencia: e.target.value })}
                                         title="Ingresar una referencia de la residencia del NNA"
                                         value={formData.referencia}

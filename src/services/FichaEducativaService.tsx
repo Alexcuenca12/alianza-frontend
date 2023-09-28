@@ -14,6 +14,8 @@ export class FichaEducativaService {
 
   //Crear
   save(publicacion: any) {
+    publicacion.observacionesEducativa = publicacion.observacionesEducativa || 'N/A';
+
     return axios.post(this.baseUrl + "post", publicacion).then((res) => res.data);
   }
 
@@ -23,6 +25,8 @@ export class FichaEducativaService {
   }
   //Metodo para actualizar un horario basado en el id de la misma
   update(id: number, user: any) {
+    user.observacionesEducativa = user.observacionesEducativa || 'N/A';
+
     return axios
       .put(this.baseUrl + "put/" + id.toString(), user)
       .then((res) => res.data);

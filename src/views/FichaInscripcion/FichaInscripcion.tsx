@@ -28,7 +28,6 @@ function FichaInscripcionContext() {
 
   const [excelReportData, setExcelReportData] = useState<IExcelReportParams | null>(null);
 
-  const [idPersona, setIDPersona] = useState<number>(0);
 
   const forceUpdate = React.useReducer((state) => !state, false)[1];
 
@@ -76,20 +75,22 @@ function FichaInscripcionContext() {
   });
 
   useEffect(() => {
-    const loadCurso = () => {
-      cursoService
-        .getAll()
-        .then((data) => {
-          setCursos(data);
-          setSelectedCurso(null);
-          setDataLoaded(true); // Marcar los datos como cargados
-        })
-        .catch((error) => {
-          console.error("Error al obtener los datos:", error);
-        });
-    };
+
     loadCurso();
   }, []);
+
+  const loadCurso = () => {
+    cursoService
+      .getAll()
+      .then((data) => {
+        setCursos(data);
+        setSelectedCurso(null);
+        setDataLoaded(true); // Marcar los datos como cargados
+      })
+      .catch((error) => {
+        console.error("Error al obtener los datos:", error);
+      });
+  };
 
   const loadData = () => {
     inscripService
@@ -109,9 +110,7 @@ function FichaInscripcionContext() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(idPersona);
-
-
+    console.log({ formData })
     if (
       !formData.asistenciaInscrip ||
       !formData.jornadaAsistenciaInscrip ||
@@ -322,7 +321,8 @@ function FichaInscripcionContext() {
           month: "2-digit",
           day: "2-digit",
         }),
-        curso: item.curso,
+        curso: item.curso?.nombreCurso,
+        profe: `${item.curso?.docente?.persona?.nombresPersona} ${item.curso?.docente?.persona?.apellidosPersona}`,
         jornadaAsistenciaInscrip: item.jornadaAsistenciaInscrip,
         asistenciaInscrip: item.asistenciaInscrip,
         proyecto: item.proyectoInscrip,
@@ -336,6 +336,7 @@ function FichaInscripcionContext() {
       { header: "APELLIDOS" },
       { header: "FECHA DE INSCRIPCION" },
       { header: "CURSO" },
+      { header: "DOCENTE DE CURSO" },
       { header: "JORNADA" },
       { header: "ASISTENCIA" },
       { header: "PROYECTO" },
@@ -555,7 +556,7 @@ function FichaInscripcionContext() {
                       style={{ width: "220px", marginLeft: "15px" }}
                       options={cursos}
                       onChange={(e) =>
-                        setFormData({ ...formData, curso: e.value })
+                        setFormData({ ...formData, curso: { idCurso: parseInt(e.value), docente: null, estadoCurso: true, fechaInicio: "0000-00-00", nombreCurso: '', rangoEdad: null } })
                       }
                       value={formData.curso} // Make sure this is correctly bound
                       optionLabel="nombreCurso"
@@ -722,8 +723,7 @@ function FichaInscripcionContext() {
                 <th>Situación de Ingreso</th>
                 <th>Asistencia</th>
                 <th>Jornada de Asistencia</th>
-                <th>Fecha de Egreso </th>
-                <th>Operaciones</th>
+                <th>Opciones</th>
               </tr>
             </thead>
             <tbody>
