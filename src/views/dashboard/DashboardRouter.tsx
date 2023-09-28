@@ -3,7 +3,7 @@ import Home from "./home/Home";
 import { Toast } from "primereact/toast";
 import React, { useRef } from "react";
 import Footer from "../../common/Footer";
-import { FcBusinessContact, FcBusinessman, FcBusinesswoman } from "react-icons/fc";
+import { FcBusinessContact, FcBusinessman, FcBusinesswoman, FcCalendar } from "react-icons/fc";
 import { FcHome } from "react-icons/fc";
 import { FcExport } from "react-icons/fc";
 import { FcGraduationCap } from "react-icons/fc";
@@ -30,6 +30,7 @@ import SecretariaContext from "../Secretaria/Secretaria";
 import Curso from "../Curso/Curso";
 import Reporte from "../Reportes/Reporte";
 import Asistencia from "../Asistencia/Asistencia";
+import Anexo from "../Anexos/Anexos";
 
 export const DashboardRouter = () => {
   //Datos del sessionStorage
@@ -122,6 +123,13 @@ export const DashboardRouter = () => {
     },
     {
       id: "14",
+      label: "Asistencia",
+      icon: FcCalendar,
+      url: "/asistencia",
+    },
+
+      {
+      id: "15",
       label: "Anexos",
       icon: FcInspection,
       url: "/anexo",
@@ -189,7 +197,7 @@ export const DashboardRouter = () => {
                 {rol === 1 ? (
                   <>
                     <SideBarMenu items={items} card={card} />
-                    <Asistencia />
+                    <FichaSalud />
                     <Footer />
                   </>
                 ) : rol === 2 ? (
@@ -344,6 +352,36 @@ export const DashboardRouter = () => {
                   <>
                     <SideBarMenu items={items} card={card} />
                     <Reporte />
+                    <Footer />
+                  </>
+                ) : rol === 2 ? (
+                  <>
+                    <SideBarMenu items={items} card={card} />
+                  </>
+                ) : (
+                  <SideBarMenu items={items} card={card} />
+                )}
+              </Route>
+              <Route path="/asistencia">
+                {rol === 1 ? (
+                  <>
+                    <SideBarMenu items={items} card={card} />
+                    <Asistencia />
+                    <Footer />
+                  </>
+                ) : rol === 2 ? (
+                  <>
+                    <SideBarMenu items={items} card={card} />
+                  </>
+                ) : (
+                  <SideBarMenu items={items} card={card} />
+                )}
+              </Route>
+              <Route path="/anexo">
+                {rol === 1 ? (
+                  <>
+                    <SideBarMenu items={items} card={card} />
+                    <Anexo />
                     <Footer />
                   </>
                 ) : rol === 2 ? (

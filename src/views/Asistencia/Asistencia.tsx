@@ -330,10 +330,7 @@ function Asistencia() {
                       style={{ width: "250px", height: "40px" }}
                     />
                     <div
-                      className="flex align-items-c
-
-
-enter justify-content-center w-auto min-w-min"
+                      className="flex align-items-center justify-content-center w-auto min-w-min"
                     >
                       <Button
                         type="button"
