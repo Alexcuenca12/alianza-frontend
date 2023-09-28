@@ -10,4 +10,6 @@ export interface IFichaSalud {
   porcentajeDiscapacidadFichaSalud: number;
   enfermedadesPrevalentesFichaSalud: string;
   fichaPersonal: IFichaPersonal | null;
+  fechaRegistro: string | Date | Date[] | null;
+
 }

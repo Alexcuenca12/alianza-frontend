@@ -6,7 +6,7 @@ import { Fieldset } from "primereact/fieldset";
 import { Card } from "primereact/card";
 import { InputTextarea } from "primereact/inputtextarea";
 import { PiFileXlsFill } from "react-icons/pi";
-
+import { Calendar, CalendarChangeEvent } from 'primereact/calendar';
 import cardHeader from "../../shared/CardHeader";
 import { IFichaSalud } from "../../interfaces/IFichaSalud";
 import { IFichaPersonal } from "../../interfaces/IFichaPersonal";
@@ -15,7 +15,7 @@ import { FichaSaludService } from "../../services/FichaSaludService";
 import swal from "sweetalert";
 import { Dropdown } from "primereact/dropdown";
 import '../../styles/FiltroFichas.css'
-import * as XLSX from 'xlsx';
+import { Divider } from 'primereact/divider';
 
 import { InputNumber, InputNumberValueChangeEvent } from 'primereact/inputnumber';
 
@@ -40,6 +40,7 @@ function FichaSaludContext() {
     porcentajeDiscapacidadFichaSalud: 0,
     enfermedadesPrevalentesFichaSalud: "",
     fichaPersonal: null,
+    fechaRegistro: new Date
   });
 
 
@@ -67,27 +68,6 @@ function FichaSaludContext() {
     loadData();
   }, []);
 
-  // const rellenarNulos = () => {
-  //   alert("hola")
-  //   const updatedData = { ...formData };
-
-  //   if (!updatedData.condicionesMedicas) {
-  //     updatedData.condicionesMedicas = "N/A";
-  //   }
-
-  //   if (!updatedData.enfermedadesPrevalentesFichaSalud) {
-  //     updatedData.enfermedadesPrevalentesFichaSalud = "N/A";
-  //   }
-
-  //   if (!updatedData.tipoDiscapacidadFichaSalud) {
-  //     updatedData.tipoDiscapacidadFichaSalud = "N/A";
-  //   }
-
-  //   setFormData(updatedData);
-
-  //   console.log({ updatedData })
-  //   console.log({ formData })
-  // };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -241,6 +221,7 @@ function FichaSaludContext() {
       porcentajeDiscapacidadFichaSalud: 0,
       enfermedadesPrevalentesFichaSalud: "",
       fichaPersonal: null,
+      fechaRegistro: new Date
     });
     setEditMode(false);
     setEditItemId(undefined);
@@ -334,6 +315,22 @@ function FichaSaludContext() {
           </h1>
         </div>
 
+        <div className="" style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "right" }}>
+          <label className="font-medium w-auto min-w-min" htmlFor="fichaPersonal" style={{ marginRight: "10px" }}>Fecha de Registro:</label>
+          <Calendar
+            disabled
+            style={{ width: "95px", marginRight: "25px", fontWeight: "bold" }}
+            value={formData.fechaRegistro}
+            onChange={(e: CalendarChangeEvent) => {
+              if (e.value !== undefined) {
+                setFormData({
+                  ...formData,
+                  fechaRegistro: e.value,
+                });
+              }
+            }} />
+        </div>
+
         <div className="flex justify-content-center flex-wrap container">
           <Fieldset legend="Filtros de busqueda" style={{ width: "1000px", marginBottom: "35px", position: "relative" }}>
             <div style={{ position: "absolute", top: "0", right: "5px", marginTop: "-15px" }}>
@@ -411,7 +408,8 @@ function FichaSaludContext() {
                           referencia: '',
                           coordenadaX: 0,
                           coordenadaY: 0,
-                          estVinculacion: true
+                          estVinculacion: true,
+                          fechaRegistro: null
                         }
                       });
                       cargarFoto(parseInt(e.value))
@@ -443,6 +441,8 @@ function FichaSaludContext() {
 
 
           </Fieldset>
+
+          <Divider />
 
           <form
             onSubmit={editMode ? handleUpdate : handleSubmit}

@@ -15,6 +15,8 @@ export interface IFichaFamiliar {
     otrasSituaciones: string;
     tipoFamilia: ITipoFamilia | null;
     fichaPersonal: IFichaPersonal | null;
+    fechaRegistro: string | Date | Date[] | null;
+
 
 }
 

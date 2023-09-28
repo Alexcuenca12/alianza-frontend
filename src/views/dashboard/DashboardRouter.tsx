@@ -189,7 +189,8 @@ export const DashboardRouter = () => {
                 {rol === 1 ? (
                   <>
                     <SideBarMenu items={items} card={card} />
-                    <Asistencia />
+                    <FichaSalud></FichaSalud>
+                    {/* <Asistencia /> */}
                     <Footer />
                   </>
                 ) : rol === 2 ? (

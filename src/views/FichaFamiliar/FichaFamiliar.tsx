@@ -9,11 +9,13 @@ import { FileUpload, FileUploadSelectEvent } from "primereact/fileupload";
 import { Fieldset } from "primereact/fieldset";
 import { Card } from "primereact/card";
 import cardHeader from "../../shared/CardHeader";
-import { Calendar } from "primereact/calendar";
+import { Calendar, CalendarChangeEvent } from 'primereact/calendar';
 import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
 import { InputText } from 'primereact/inputtext';
 
+
+import { Divider } from 'primereact/divider';
 
 import { ICalcularEdad } from '../../interfaces/ICalcularEdad';
 import CalcularEdad from "../../common/CalcularEdad";
@@ -63,7 +65,9 @@ function FichaPersonal() {
         discapacidadIntegrantes: false,
         otrasSituaciones: '',
         tipoFamilia: null,
-        fichaPersonal: null
+        fichaPersonal: null,
+        fechaRegistro: new Date
+
     });
 
     useEffect(() => {
@@ -229,7 +233,9 @@ function FichaPersonal() {
                         discapacidadIntegrantes: false,
                         otrasSituaciones: '',
                         tipoFamilia: null,
-                        fichaPersonal: null
+                        fichaPersonal: null,
+                        fechaRegistro: new Date
+
                     });
                     loadData();
 
@@ -258,7 +264,9 @@ function FichaPersonal() {
             discapacidadIntegrantes: false,
             otrasSituaciones: '',
             tipoFamilia: null,
-            fichaPersonal: null
+            fichaPersonal: null,
+            fechaRegistro: new Date
+
         });
 
     };
@@ -405,6 +413,23 @@ function FichaPersonal() {
                         Ficha Familiar
                     </h1>
                 </div>
+
+                <div className="" style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "right" }}>
+                    <label className="font-medium w-auto min-w-min" htmlFor="fichaPersonal" style={{ marginRight: "10px" }}>Fecha de Registro:</label>
+                    <Calendar
+                        disabled
+                        style={{ width: "95px", marginRight: "25px", fontWeight: "bold" }}
+                        value={formData.fechaRegistro}
+                        onChange={(e: CalendarChangeEvent) => {
+                            if (e.value !== undefined) {
+                                setFormData({
+                                    ...formData,
+                                    fechaRegistro: e.value,
+                                });
+                            }
+                        }} />
+                </div>
+
                 <section className="flex justify-content-center flex-wrap container">
 
 
@@ -485,7 +510,8 @@ function FichaPersonal() {
                                                     referencia: '',
                                                     coordenadaX: 0,
                                                     coordenadaY: 0,
-                                                    estVinculacion: true
+                                                    estVinculacion: true,
+                                                    fechaRegistro: null
                                                 }
                                             });
                                             cargarFoto(parseInt(e.value))
@@ -515,9 +541,9 @@ function FichaPersonal() {
                                 </div>
                             </div>
                         </section>
-
-
                     </Fieldset>
+
+                    <Divider />
 
                     <form onSubmit={editMode ? handleUpdate : handleSubmit} className='form' encType="multipart/form-data">
 

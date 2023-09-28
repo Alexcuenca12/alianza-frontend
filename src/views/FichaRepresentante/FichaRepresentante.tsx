@@ -2,7 +2,6 @@ import React, { useEffect, useState, useRef } from "react";
 import { InputText } from "primereact/inputtext";
 import { FileUpload, FileUploadSelectEvent } from "primereact/fileupload";
 import { Button } from "primereact/button";
-import { Calendar } from "primereact/calendar";
 import { Fieldset } from "primereact/fieldset";
 import { Card } from "primereact/card";
 import { Dropdown } from "primereact/dropdown";
@@ -17,6 +16,7 @@ import { FichaPersonalService } from "../../services/FichaPersonalService";
 import { IFichaPersonal } from "../../interfaces/IFichaPersonal";
 import { IExcelReportParams, IHeaderItem } from "../../interfaces/IExcelReportParams";
 import { ReportBar } from "../../common/ReportBar";
+import { Calendar, CalendarChangeEvent } from 'primereact/calendar';
 
 
 
@@ -51,7 +51,8 @@ function FichaInscripcionContext() {
     nivelInstruccionRepre: "",
     parentescoRepre: "",
     fichaInscripcion: null,
-    fichaPersonal: null
+    fichaPersonal: null,
+    fechaRegistro: new Date
 
   });
 
@@ -216,7 +217,8 @@ function FichaInscripcionContext() {
             nivelInstruccionRepre: "",
             parentescoRepre: "",
             fichaInscripcion: null,
-            fichaPersonal: null
+            fichaPersonal: null,
+            fechaRegistro: new Date
 
           });
           loadData();
@@ -244,7 +246,8 @@ function FichaInscripcionContext() {
       nivelInstruccionRepre: "",
       parentescoRepre: "",
       fichaInscripcion: null,
-      fichaPersonal: null
+      fichaPersonal: null,
+      fechaRegistro: new Date
 
     });
     setEditMode(false);
@@ -370,6 +373,23 @@ function FichaInscripcionContext() {
           </h1>
         </div>
 
+
+        <div className="" style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "right" }}>
+          <label className="font-medium w-auto min-w-min" htmlFor="fichaPersonal" style={{ marginRight: "10px" }}>Fecha de Registro:</label>
+          <Calendar
+            disabled
+            style={{ width: "95px", marginRight: "25px", fontWeight: "bold" }}
+            value={formData.fechaRegistro}
+            onChange={(e: CalendarChangeEvent) => {
+              if (e.value !== undefined) {
+                setFormData({
+                  ...formData,
+                  fechaRegistro: e.value,
+                });
+              }
+            }} />
+        </div>
+
         <div className="flex justify-content-center flex-wrap container">
           <Fieldset legend="Filtros de busqueda" style={{ width: "1000px", marginBottom: "35px", position: "relative" }}>
             <div style={{ position: "absolute", top: "0", right: "5px", marginTop: "-15px" }}>
@@ -446,7 +466,8 @@ function FichaInscripcionContext() {
                           referencia: '',
                           coordenadaX: 0,
                           coordenadaY: 0,
-                          estVinculacion: true
+                          estVinculacion: true,
+                          fechaRegistro: null
                         }
                       });
                       cargarFoto(parseInt(e.value))
@@ -475,9 +496,10 @@ function FichaInscripcionContext() {
                 </div>
               </div>
             </section>
-
-
           </Fieldset>
+
+          <Divider />
+
           <form
             onSubmit={editMode ? handleUpdate : handleSubmit}
             encType="multipart/form-data"

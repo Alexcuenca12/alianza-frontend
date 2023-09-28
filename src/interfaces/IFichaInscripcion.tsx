@@ -10,4 +10,6 @@ export interface IFichaInscripcion {
     jornadaAsistenciaInscrip: string;
     fichaPersonal: IFichaPersonal | null;
     curso: ICurso | null;
+    fechaRegistro: string | Date | Date[] | null;
+
 }

@@ -12,10 +12,10 @@ import { FichaPersonalService } from "../../services/FichaPersonalService";
 import swal from "sweetalert";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Dropdown } from "primereact/dropdown";
-
+import { Calendar, CalendarChangeEvent } from 'primereact/calendar';
 import { IExcelReportParams, IHeaderItem } from "../../interfaces/IExcelReportParams";
 import { ReportBar } from "../../common/ReportBar";
-
+import { Divider } from 'primereact/divider';
 import '../../styles/FiltroFichas.css'
 
 function FichaInscripcionContext() {
@@ -44,6 +44,8 @@ function FichaInscripcionContext() {
     observacionesEducativa: "",
     gradoEducativo: "",
     fichaPersonal: null,
+    fechaRegistro: new Date
+
   });
 
   const fileUploadRef = useRef<FileUpload>(null);
@@ -190,6 +192,8 @@ function FichaInscripcionContext() {
             observacionesEducativa: "",
             gradoEducativo: "",
             fichaPersonal: null,
+            fechaRegistro: new Date
+
           });
           setcontra1(
             contra1.map((contra) =>
@@ -217,6 +221,8 @@ function FichaInscripcionContext() {
       observacionesEducativa: "",
       gradoEducativo: "",
       fichaPersonal: null,
+      fechaRegistro: new Date
+
     });
     setEditMode(false);
     setEditItemId(undefined);
@@ -346,6 +352,22 @@ function FichaInscripcionContext() {
           </h1>
         </div>
 
+        <div className="" style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "right" }}>
+          <label className="font-medium w-auto min-w-min" htmlFor="fichaPersonal" style={{ marginRight: "10px" }}>Fecha de Registro:</label>
+          <Calendar
+            disabled
+            style={{ width: "95px", marginRight: "25px", fontWeight: "bold" }}
+            value={formData.fechaRegistro}
+            onChange={(e: CalendarChangeEvent) => {
+              if (e.value !== undefined) {
+                setFormData({
+                  ...formData,
+                  fechaRegistro: e.value,
+                });
+              }
+            }} />
+        </div>
+
         <section className="flex justify-content-center flex-wrap container">
           <Fieldset legend="Filtros de busqueda" style={{ width: "1000px", marginBottom: "45px", position: "relative" }}>
             <div style={{ position: "absolute", top: "0", right: "5px", marginTop: "-15px" }}>
@@ -422,7 +444,8 @@ function FichaInscripcionContext() {
                           referencia: '',
                           coordenadaX: 0,
                           coordenadaY: 0,
-                          estVinculacion: true
+                          estVinculacion: true,
+                          fechaRegistro: null
                         }
                       });
                       cargarFoto(parseInt(e.value))
@@ -453,8 +476,9 @@ function FichaInscripcionContext() {
               </div>
             </section>
 
-
           </Fieldset>
+          <Divider />
+
           <form
             onSubmit={editMode ? handleUpdate : handleSubmit}
             encType="multipart/form-data"

@@ -1,7 +1,6 @@
 // src/components/RegistroForm.tsx
 import React, { useEffect, useState, useRef } from "react";
 import '../../styles/Fichas.css'
-
 import { IRangoEdad } from '../../interfaces/IRangoEdad';
 import { IFichaPersonal } from '../../interfaces/IFichaPersonal';
 import { FichaPersonalService } from '../../services/FichaPersonalService';
@@ -12,13 +11,13 @@ import { FileUpload, FileUploadSelectEvent } from "primereact/fileupload";
 import { Fieldset } from "primereact/fieldset";
 import { Card } from "primereact/card";
 import cardHeader from "../../shared/CardHeader";
-import { Calendar } from "primereact/calendar";
+import { Calendar, CalendarChangeEvent } from 'primereact/calendar';
 import { Dropdown, DropdownChangeEvent } from 'primereact/dropdown';
 import { Button } from "primereact/button";
 import { ICalcularEdad } from '../../interfaces/ICalcularEdad';
 import CalcularEdad from "../../common/CalcularEdad";
 import { CantonService } from "../../services/CantonService";
-
+import { Divider } from 'primereact/divider';
 import { ParroquiaService } from "../../services/ParroquiaService";
 import { ICanton } from "../../interfaces/ICanton";
 import { RangoEdadService } from "../../services/RangoEdadService";
@@ -90,7 +89,9 @@ function FichaPersonal() {
         referencia: '',
         coordenadaX: 0,
         coordenadaY: 0,
-        estVinculacion: false
+        estVinculacion: false,
+        fechaRegistro: new Date
+
     });
 
 
@@ -310,7 +311,8 @@ function FichaPersonal() {
                         referencia: '',
                         coordenadaX: 0,
                         coordenadaY: 0,
-                        estVinculacion: false
+                        estVinculacion: false,
+                        fechaRegistro: null
                     });
                     setSelectedCanton(null);
                     setSelectedProvincia(null);
@@ -403,7 +405,8 @@ function FichaPersonal() {
             referencia: '',
             coordenadaX: 0,
             coordenadaY: 0,
-            estVinculacion: false
+            estVinculacion: false,
+            fechaRegistro: new Date
         });
         setSelectedCanton(null);
         setSelectedProvincia(null);
@@ -432,12 +435,24 @@ function FichaPersonal() {
                         Ficha de Personal
                     </h1>
                 </div>
-                <section className='container' style={{}}>
 
-                    {/* <header className="title">
-                        Ficha Personal
-                    </header> */}
-                    {/* <div className="form"> */}
+                <div className="" style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "right" }}>
+                    <label className="font-medium w-auto min-w-min" htmlFor="fichaPersonal" style={{ marginRight: "10px" }}>Fecha de Registro:</label>
+                    <Calendar
+                        disabled
+                        style={{ width: "95px", marginRight: "25px", fontWeight: "bold" }}
+                        value={formData.fechaRegistro}
+                        onChange={(e: CalendarChangeEvent) => {
+                            if (e.value !== undefined) {
+                                setFormData({
+                                    ...formData,
+                                    fechaRegistro: e.value,
+                                });
+                            }
+                        }} />
+                </div>
+
+                <section className='container' style={{}}>
 
                     <form onSubmit={editMode ? handleUpdate : handleSubmit} className='form' encType="multipart/form-data">
                         <div className='column' >

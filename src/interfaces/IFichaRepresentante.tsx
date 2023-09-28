@@ -16,5 +16,7 @@ export interface IFichaRepresentante {
   parentescoRepre: string;
   fichaInscripcion: object | null;
   fichaPersonal: IFichaPersonal | null;
+  fechaRegistro: string | Date | Date[] | null;
+
 
 }
