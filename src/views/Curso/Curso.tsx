@@ -53,7 +53,6 @@ function Curso() {
   const [selectedRango, setSelectedRango] = useState<IRangoEdad | null>(null);
 
   useEffect(() => {
-
     loadDocentes();
   }, []);
 
@@ -304,7 +303,6 @@ function Curso() {
                       }
                     />
                   </div>
-
                 </div>
                 <div
                   className="flex flex-column flex-wrap gap-4"
@@ -328,9 +326,13 @@ function Curso() {
                       onChange={(e) => {
                         setFormData({
                           ...formData,
-                          docente: { idDocente: parseInt(e.value), materiaDocente: '', tituloDocente: '', persona: null },
+                          docente: {
+                            idDocente: parseInt(e.value),
+                            materiaDocente: "",
+                            tituloDocente: "",
+                            persona: null,
+                          },
                         });
-
                       }}
                       value={formData.docente?.idDocente}
                       optionLabel="etiqueta"
@@ -354,8 +356,12 @@ function Curso() {
                       onChange={(e) => {
                         setFormData({
                           ...formData,
-                          rangoEdad: { idRangoEdad: parseInt(e.value), limInferior: 0, limSuperior: 0 },
-                        })
+                          rangoEdad: {
+                            idRangoEdad: parseInt(e.value),
+                            limInferior: 0,
+                            limSuperior: 0,
+                          },
+                        });
                       }}
                       value={formData.rangoEdad?.idRangoEdad}
                       optionLabel="etiquetaRango"
@@ -438,10 +444,10 @@ function Curso() {
                 <td>
                   {curso.fechaInicio
                     ? new Date(curso.fechaInicio).toLocaleDateString("es-ES", {
-                      year: "numeric",
-                      month: "2-digit",
-                      day: "2-digit",
-                    })
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                      })
                     : ""}
                 </td>
 
@@ -460,7 +466,7 @@ function Curso() {
                       justifyContent: "center",
                     }}
                     onClick={() => handleEdit(curso.idCurso?.valueOf())}
-                  // Agrega el evento onClick para la operación de editar
+                    // Agrega el evento onClick para la operación de editar
                   />
                   <Button
                     type="button"
@@ -475,7 +481,7 @@ function Curso() {
                       justifyContent: "center",
                     }}
                     onClick={() => handleDelete(curso.idCurso?.valueOf())}
-                  // Agrega el evento onClick para la operación de eliminar
+                    // Agrega el evento onClick para la operación de eliminar
                   />
                 </td>
               </tr>
