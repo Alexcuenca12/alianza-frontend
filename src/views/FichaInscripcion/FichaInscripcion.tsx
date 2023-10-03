@@ -382,7 +382,7 @@ function FichaInscripcionContext() {
       <Card
         header={cardHeader}
         className="border-solid border-red-800 border-3 flex-1 flex-wrap"
-        style={{ width: "90%", marginLeft: "7%", height: "100%" }}
+        style={{ width: "90%", marginLeft: "3%", height: "100%" }}
       >
         <div
           className="h1-rem"

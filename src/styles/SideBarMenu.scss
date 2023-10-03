@@ -1,15 +1,86 @@
 @import'./commons.scss';
 
+.layoutP {
+  width: 100%;
+  height: 100%;
 
+  display: grid;
+  grid:
+    "header" auto "main" 1fr "footer" auto / 1fr;
+  // gap: 8px;
+}
+
+
+.headerP {
+  grid-area: header;
+  height: 55px;
+  width: 100%;
+  position: fixed;
+  background-color: #B0252A;
+  z-index: 1000;
+}
+
+.mainP {
+  grid-area: main;
+  padding-top: 50px;
+}
+
+.footerP {
+  grid-area: footer;
+}
+
+.layoutHead {
+  width: 100%;
+  height: auto;
+  display: flex;
+  gap: 16px;
+}
+
+.grow1Head {
+  flex-grow: 1;
+  height: 55px;
+  display: flex;
+  align-items: center;
+}
+
+
+.header-logo img {
+  display: block;
+  height: 45px;
+}
+
+.layoutS {
+  width: 100%;
+  height: 100%;
+
+  display: grid;
+  grid:
+    "sidebar body" 1fr / auto 1fr;
+  gap: 8px;
+}
+
+.sidebarS {
+  grid-area: sidebar;
+  width: 50px;
+}
+
+.bodyS {
+  grid-area: body;
+  display: grid;
+  place-items: center;
+}
+
+//SIDEBAR
 
 .SideBarMenuexpanded {
   position: fixed;
   @include transition(width);
-  width: 250px;
+  width: 230px;
   background-color: #222;
   color: white;
-  left: 0;
-  top: 0;
+  padding-top: 25px;
+  // left: 0;
+  // bottom: 0;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -17,14 +88,17 @@
 }
 
 .SideBarMenucollapsed {
+
   // Incluye el mixin para la transición
   position: fixed;
   @include transition(width);
-  width: 50px;
+  width: 60px;
   background-color: #222;
   color: white;
-  left: 0;
-  top: 0;
+  // left: 0;
+  // bottom: 0;
+  padding-top: 25px;
+
   align-items: center;
   height: 100%;
   display: flex;
@@ -36,12 +110,15 @@
 
 .menuScrollexpanded {
   overflow: auto;
-  height: 570px;
+  height: 73%;
+  padding-bottom: 20px;
 }
 
 .menuScrollcollapsed {
   overflow: auto;
-  height: 625px;
+  height: 82%;
+  padding-bottom: 20px;
+
 }
 
 .menuScrollexpanded::-webkit-scrollbar {
@@ -50,6 +127,16 @@
 }
 
 .menuScrollexpanded::-webkit-scrollbar-thumb {
+  border-radius: 20px;
+  background: #888;
+}
+
+.menuScrollcollapsed::-webkit-scrollbar {
+  width: 2px;
+  height: 8px;
+}
+
+.menuScrollcollapsed::-webkit-scrollbar-thumb {
   border-radius: 20px;
   background: #888;
 }
@@ -64,28 +151,41 @@
   gap: 8px;
 }
 
-.exitcollapsed {
-  display: grid;
-  place-items: center;
-  text-align: center;
-  padding-bottom: 16px;
-  padding-top: 5px;
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  overflow: hidden;
-}
+// .exitcollapsed {
+//   display: grid;
+//   place-items: center;
+//   text-align: center;
+//   padding-bottom: 16px;
+//   padding-top: 5px;
+//   position: absolute;
+//   bottom: 0;
+//   width: 100%;
+//   overflow: hidden;
+// }
 
-.exitexpanded {
-  display: grid;
-  place-items: center;
-  text-align: center;
-  padding-bottom: 10px;
-  padding-top: 5px;
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  overflow: hidden;
+// .exitexpanded {
+//   display: grid;
+//   place-items: center;
+//   text-align: center;
+//   padding-bottom: 10px;
+//   padding-top: 5px;
+//   position: absolute;
+//   bottom: 0;
+//   width: 100%;
+//   overflow: hidden;
+// }
+
+.exit {
+  display: block;
+  // display: grid;
+  // place-items: center;
+  // text-align: center;
+  // padding-bottom: 10px;
+  // padding-top: 5px;
+  // position: absolute;
+  // bottom: 0;
+  // width: 100%;
+  // overflow: hidden;
 }
 
 
@@ -100,7 +200,7 @@
     align-items: center;
     cursor: pointer;
     border-radius: 5px;
-    background-color: transparent;
+    background-color: #FF4141;
     color: white;
     padding: 2px;
     width: 50px;

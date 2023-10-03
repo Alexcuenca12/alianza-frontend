@@ -1,14 +1,20 @@
 .header {
   min-height: 100vh;
   background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.4)),
-    url("https://scontent.fcue1-1.fna.fbcdn.net/v/t39.30808-6/364064561_290376973524310_2212779540903185788_n.jpg?_nc_cat=102&ccb=1-7&_nc_sid=49d041&_nc_ohc=fkuHlcJoI2MAX-SQbon&_nc_ht=scontent.fcue1-1.fna&oh=00_AfChj4cEmFm8DWNrVI_EhS96cw0-HeVQwpTLhePm0ayF8g&oe=6508F678") center/cover no-repeat;
+    url("../assets/fondo.png") center/cover no-repeat;
   justify-content: stretch;
-  position: fixed; /* Agregado */
-  top: 0; /* Agregado */
-  left: 0; /* Agregado */
-  right: 0; /* Agregado */
-  bottom: 0; /* Agregado */
-  z-index: -1; /* Agregado */
+  position: fixed;
+  /* Agregado */
+  top: 0;
+  /* Agregado */
+  left: 0;
+  /* Agregado */
+  right: 0;
+  /* Agregado */
+  bottom: 0;
+  /* Agregado */
+  z-index: -1;
+  /* Agregado */
 }
 
 .header>.container {

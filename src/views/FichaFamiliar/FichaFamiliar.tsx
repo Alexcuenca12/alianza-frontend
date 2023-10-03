@@ -102,28 +102,50 @@ function FichaPersonal() {
             });
     };
 
+    const validaciones = () => {
+
+        if (!formData.jefaturaFamiliar || (formData.tipoFamilia && formData.tipoFamilia.idTipoFamilia <= 0)) {
+            swal("Alerta", "Debe llenar los campos obligatorios", "warning");
+            return false;
+        } else {
+            if ((formData.numAdultos + formData.numAdultosMayores + formData.numNNA) !== formData.numIntegrantes) {
+                swal("Alerta", "El numero de integrantes no coincide", "warning");
+                return false;
+
+            } else {
+                return true;
+            }
+        }
+
+
+
+    }
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        service
-            .save(formData)
-            .then((response) => {
-                resetForm();
-                swal("Publicacion", "Datos Guardados Correctamente", "success");
+        if (validaciones()) {
+            service
+                .save(formData)
+                .then((response) => {
+                    resetForm();
+                    swal("Perfecto", "Datos Guardados Correctamente", "success");
 
-                service
-                    .getAll()
-                    .then((data) => {
-                        setFichaFamiliar(data);
-                        resetForm();
-                    })
-                    .catch((error) => {
-                        console.error("Error al obtener los datos:", error);
-                    });
+                    service
+                        .getAll()
+                        .then((data) => {
+                            setFichaFamiliar(data);
+                            resetForm();
+                        })
+                        .catch((error) => {
+                            console.error("Error al obtener los datos:", error);
+                        });
 
-            })
-            .catch((error) => {
-                console.error("Error al enviar el formulario:", error);
-            });
+                })
+                .catch((error) => {
+                    console.error("Error al enviar el formulario:", error);
+                });
+        }
+
 
 
         // Aquí puedes enviar los datos del formulario al servidor o realizar otras acciones
@@ -328,22 +350,6 @@ function FichaPersonal() {
         setListFperonales([])
 
 
-    };
-
-    const generarExcel = () => {
-        const wb = XLSX.utils.book_new();
-
-        // Crear una copia de la lista excluyendo el campo 'foto'
-        // const listSinFoto = listFichaFamiliar.map(({ foto, ...rest }) => rest);
-
-        const ws = XLSX.utils.json_to_sheet(listFichaFamiliar);
-
-        // Resto del código para aplicar estilos y encabezados (como se mostró en tu código original) ...
-
-        XLSX.utils.book_append_sheet(wb, ws, 'FichaFamiliar');
-
-        // Descargar el archivo Excel
-        XLSX.writeFile(wb, 'FichaFamiliar.xlsx');
     };
 
 
@@ -555,6 +561,7 @@ function FichaPersonal() {
                                         className="input"
                                         type="text"
                                         id="jefaturaFamiliar"
+
                                         value={formData.jefaturaFamiliar}
                                         placeholder='Ingrese el nombre del jefe del hogar'
 
@@ -593,41 +600,39 @@ function FichaPersonal() {
 
 
 
-                                <div className="gender-box">
+                                <div className="input-box">
                                     <label className="font-medium w-auto min-w-min" htmlFor='genero'>Visita Domiciliar:</label>
 
-                                    <div className='gender-option'>
-                                        <div className='gender'>
-                                            <div className="mydict">
-                                                <div>
-                                                    <label>
-                                                        <input
-                                                            className="input"
-                                                            type="radio"
-                                                            id="genSI"
-                                                            name="genSI"
-                                                            value="true"
-                                                            checked={formData.visitaDomiciliaria === true}
-                                                            onChange={(e) => setFormData({ ...formData, visitaDomiciliaria: true })}
-                                                        />
-                                                        <span>SI</span>
-                                                    </label>
-                                                    <label>
-                                                        <input
-                                                            className="input"
-                                                            type="radio"
-                                                            id="genNO"
-                                                            name="genNO"
-                                                            value="false"
-                                                            checked={formData.visitaDomiciliaria === false}
-                                                            onChange={(e) => setFormData({ ...formData, visitaDomiciliaria: false })}
+                                    <div className='gender'>
+                                        <div className="mydict">
+                                            <div>
+                                                <label>
+                                                    <input
+                                                        className="input"
+                                                        type="radio"
+                                                        id="genSI"
+                                                        name="genSI"
+                                                        value="true"
+                                                        checked={formData.visitaDomiciliaria === true}
+                                                        onChange={(e) => setFormData({ ...formData, visitaDomiciliaria: true })}
+                                                    />
+                                                    <span>SI</span>
+                                                </label>
+                                                <label>
+                                                    <input
+                                                        className="input"
+                                                        type="radio"
+                                                        id="genNO"
+                                                        name="genNO"
+                                                        value="false"
+                                                        checked={formData.visitaDomiciliaria === false}
+                                                        onChange={(e) => setFormData({ ...formData, visitaDomiciliaria: false })}
 
-                                                        />
-                                                        <span>NO</span>
-                                                    </label>
+                                                    />
+                                                    <span>NO</span>
+                                                </label>
 
 
-                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -754,41 +759,37 @@ function FichaPersonal() {
 
                         <div className="column">
 
-                            <div className="gender-box">
+                            <div className="input-box">
                                 <label className="font-medium w-auto min-w-min" htmlFor='discapacidadIntegrantes'>¿En su residencia, convive alguna persona con discapacidad?:</label>
 
-                                <div className='gender-option'>
-                                    <div className='gender'>
-                                        <div className="mydict">
-                                            <div>
-                                                <label>
-                                                    <input
-                                                        className="input"
-                                                        type="radio"
-                                                        id="genSiDis"
-                                                        name="genSiDis"
-                                                        value="true"
-                                                        checked={formData.discapacidadIntegrantes === true}
-                                                        onChange={(e) => setFormData({ ...formData, discapacidadIntegrantes: true })}
-                                                    />
-                                                    <span>SI</span>
-                                                </label>
-                                                <label>
-                                                    <input
-                                                        className="input"
-                                                        type="radio"
-                                                        id="genNoDis"
-                                                        name="genNoDis"
-                                                        value="false"
-                                                        checked={formData.discapacidadIntegrantes === false}
-                                                        onChange={(e) => setFormData({ ...formData, discapacidadIntegrantes: false })}
+                                <div className='gender'>
+                                    <div className="mydict">
+                                        <div>
+                                            <label>
+                                                <input
+                                                    className="input"
+                                                    type="radio"
+                                                    id="genSiDis"
+                                                    name="genSiDis"
+                                                    value="true"
+                                                    checked={formData.discapacidadIntegrantes === true}
+                                                    onChange={(e) => setFormData({ ...formData, discapacidadIntegrantes: true })}
+                                                />
+                                                <span>SI</span>
+                                            </label>
+                                            <label>
+                                                <input
+                                                    className="input"
+                                                    type="radio"
+                                                    id="genNoDis"
+                                                    name="genNoDis"
+                                                    value="false"
+                                                    checked={formData.discapacidadIntegrantes === false}
+                                                    onChange={(e) => setFormData({ ...formData, discapacidadIntegrantes: false })}
 
-                                                    />
-                                                    <span>NO</span>
-                                                </label>
-
-
-                                            </div>
+                                                />
+                                                <span>NO</span>
+                                            </label>
                                         </div>
                                     </div>
                                 </div>
@@ -797,13 +798,22 @@ function FichaPersonal() {
 
 
                             <div className='input-box'>
-                                <label className="font-medium w-auto min-w-min" htmlFor="otrasSituaciones">Otras situaciones familiares:</label>
+                                {/* <label className="font-medium w-auto min-w-min" htmlFor="otrasSituaciones">Otras situaciones familiares:</label> */}
+                                <label className="font-medium w-auto min-w-min" htmlFor="otrasSituaciones">
+                                    {formData.discapacidadIntegrantes
+                                        ? 'Brinde mas detalles acerca de la situacion:'
+                                        : 'Otras situaciones:'}
+                                </label>
                                 <input
                                     className="input"
                                     type="text"
                                     id="organizacionBeneficio"
+                                    placeholder={
+                                        formData.discapacidadIntegrantes
+                                            ? 'Proporcione mas detalles acerca de la situacion de su familiar'
+                                            : 'Otras situaciones familiares relacionadas'
+                                    }
                                     value={formData.otrasSituaciones}
-                                    placeholder='Otras situaciones familiares relacionadas'
 
                                     onChange={(e) => setFormData({ ...formData, otrasSituaciones: e.target.value })}
                                     required
@@ -902,7 +912,7 @@ function FichaPersonal() {
                                     <td>{ficha.numAdultosMayores}</td>
                                     <td>{ficha.beneficioAdicional || 'N/A'}</td>
                                     <td>{ficha.organizacionBeneficio || 'N/A'}</td>
-                                    <td>{ficha.otrasSituaciones || 'N/A'}</td>
+                                    <td>{ficha.discapacidadIntegrantes ? "SI" : "NO"}</td>
                                     {/* <td>{ficha.organizacionBeneficio}</td> */}
 
                                     <td style={{ display: "flex", gap: "10px", justifyContent: "center" }}>

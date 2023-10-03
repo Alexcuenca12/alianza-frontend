@@ -979,9 +979,9 @@ function FichaPersonal() {
                                 <th>Nº Ficha</th>
                                 <th>Cedula</th>
                                 <th>Nombre</th>
+                                <th>Fecha de Registro</th>
                                 <th>Nacionalidad</th>
                                 <th>Fecha de Nacimiento</th>
-                                {/* <th>Rango de edad</th> */}
                                 <th>Genero</th>
                                 <th>Etnia</th>
                                 <th>Canton</th>
@@ -1003,17 +1003,8 @@ function FichaPersonal() {
                                     <td>{ficha.idFichaPersonal}</td>
                                     <td>{ficha.ciIdentidad}</td>
                                     <td>{ficha.apellidos} {ficha.nombres}</td>
+                                    <td>{ficha.fechaRegistro?.toString()}</td>
                                     <td>{ficha.nacionalidad}</td>
-                                    {/* <td>{ficha.fechaNacimiento
-                                        ? new Date(
-                                            ficha.fechaNacimiento
-                                        ).toLocaleDateString("es-ES", {
-                                            year: "numeric",
-                                            month: "2-digit",
-                                            day: "2-digit",
-                                        })
-                                        : ""}</td> */}
-
                                     <td>{ficha.fechaNacimiento}</td>
                                     {/* <td>{ficha.rangoEdad?.limInferior} - {ficha.rangoEdad?.limSuperior}</td> */}
                                     <td>{ficha.genero}</td>

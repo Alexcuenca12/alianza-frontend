@@ -3,7 +3,7 @@ import { format, differenceInYears, parse } from 'date-fns';
 import { ICalcularEdad } from '../interfaces/ICalcularEdad';
 
 
-function CalcularEdad({ fechaNacimiento }: ICalcularEdad) {
+function CalcularEdad(fechaNacimiento: string) {
     // Convierte la cadena de fecha en un objeto de fecha
     const fechaNacimientoDate = parse(fechaNacimiento, 'dd/MM/yyyy', new Date());
 

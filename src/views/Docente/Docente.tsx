@@ -11,12 +11,7 @@ import swal from "sweetalert";
 
 function DocenteContext() {
 
-  const tableContainerStyle = {
-    minWidth: "40rem",
-    overflowX: "auto",
-  };
 
-  
   const [docentes, setDocentes] = useState<IDocente[]>([]);
   const [formData, setFormData] = useState<IDocente>({
     idDocente: 0,
@@ -47,8 +42,8 @@ function DocenteContext() {
     loadData();
   }, []);
 
-  const handlePersonaSubmit = (e: React.FormEvent)  => {
-    e.preventDefault(); 
+  const handlePersonaSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     if (!formData.persona) {
       swal(
         "Advertencia",
@@ -124,19 +119,19 @@ function DocenteContext() {
           const docenteToDelete = docentes.find(
             (docente) => docente.idDocente === id
           );
-  
+
           if (!docenteToDelete) {
             // Docente no encontrado, maneja el error según sea necesario
             console.error("Docente no encontrado");
             return;
           }
-  
+
           if (docenteToDelete.persona) {
             // Si el docente está relacionado con una persona, verificamos si otros docentes también la tienen relacionada
             const isPersonaUsed = docentes.some((docente) =>
               docente.persona?.idPersona === docenteToDelete.persona?.idPersona
             );
-  
+
             if (!isPersonaUsed) {
               // Si la persona no está relacionada con otros docentes, la eliminamos
               const personaId = docenteToDelete.persona.idPersona;
@@ -197,8 +192,8 @@ function DocenteContext() {
       });
     }
   };
-  
-  
+
+
   const handleEdit = (id: number | undefined) => {
     if (id !== undefined) {
       const editItem = docentes.find((docente) => docente.idDocente === id);
