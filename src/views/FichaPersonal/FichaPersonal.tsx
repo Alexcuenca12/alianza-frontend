@@ -1648,16 +1648,16 @@ function FichaPersonal() {
                                         key={ficha.idFichaPersonal?.toString()}
                                     >
 
-                                        <td>{ficha.idFichaPersonal}</td>
-                                        <td >{ficha.ciPasaporte}</td>
-                                        <td >{ficha.nombres}</td>
-                                        <td >{ficha.apellidos} </td>
-                                        <td>{ficha.nacionalidad}</td>
-                                        <td>{calcularEdad(ficha.fechaNacimiento)}</td>
-                                        <td>{ficha.genero}</td>
-                                        <td>{ficha.parroquia?.canton.cantonNombre}</td>
-                                        <td>{ficha.barrioSector}</td>
-                                        <td>
+                                        <td className="tdFichas">{ficha.idFichaPersonal}</td>
+                                        <td className="tdFichas">{ficha.ciPasaporte}</td>
+                                        <td className="tdFichas">{ficha.nombres}</td>
+                                        <td className="tdFichas">{ficha.apellidos} </td>
+                                        <td className="tdFichas">{ficha.nacionalidad}</td>
+                                        <td className="tdFichas">{calcularEdad(ficha.fechaNacimiento)}</td>
+                                        <td className="tdFichas">{ficha.genero}</td>
+                                        <td className="tdFichas">{ficha.parroquia?.canton.cantonNombre}</td>
+                                        <td className="tdFichas">{ficha.barrioSector}</td>
+                                        <td className="tdFichas">
                                             {ficha.foto ? (
                                                 <>
                                                     <section className="imgSection" style={{ position: "relative" }}>
@@ -1696,7 +1696,7 @@ function FichaPersonal() {
 
                                         </td>
 
-                                        <td >
+                                        <td className="tdFichas">
                                             <Button
                                                 type="button"
                                                 className=""
@@ -1717,7 +1717,7 @@ function FichaPersonal() {
 
                                         </td>
 
-                                        <td>
+                                        <td className="tdFichas">
                                             <Button
                                                 type="button"
                                                 className=""
