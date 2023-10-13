@@ -470,7 +470,7 @@ function FichaInscripcionContext() {
                           coordenadaX: 0,
                           coordenadaY: 0,
                           estVinculacion: true,
-                          fechaRegistro: null
+                          fechaRegistro: new Date()
                         }
                       });
                       cargarFoto(parseInt(e.value))

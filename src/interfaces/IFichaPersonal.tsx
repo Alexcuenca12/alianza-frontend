@@ -12,7 +12,7 @@ export interface IFichaPersonal {
     nacionalidad: string;
     actTrabInfantil: boolean;
     detalleActTrabInfantil: string;
-    fechaNacimiento: string;
+    fechaNacimiento: string | Date;
     rangoEdad: IRangoEdad | null;
     genero: string;
     etnia: IEtnia | null;

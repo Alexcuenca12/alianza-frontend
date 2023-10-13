@@ -10,6 +10,48 @@ select {
     padding: 0.75rem 0.75rem;
 }
 
+td {
+    border-bottom: 1px solid #dcdcdc;
+    padding-left: 10px;
+    padding-right: 10px;
+    min-width: 100px;
+    max-width: 300px;
+}
+
+.theadTab {
+    background-color: #871b1b;
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 900;
+    padding-left: 10px;
+    padding-right: 10px;
+    height: 30px;
+    min-width: 100px;
+    max-width: 300px;
+
+}
+
+.tblContainer {
+    margin-top: 15px;
+    overflow-x: auto;
+    overflow-y: auto;
+    max-width: 100%;
+    max-height: 500px;
+}
+
+
+.tableFichas {
+    margin-top: 15px;
+    border-collapse: collapse;
+}
+
+
+.buttonRefresh .pi-refresh {
+
+    font-size: 20px;
+}
+
 .inputContainer {
     display: grid;
     width: 100%;

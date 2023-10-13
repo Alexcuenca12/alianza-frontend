@@ -18,9 +18,21 @@ export class FichaPersonalService {
     return this.api.get("get").then((res) => res.data);
   }
 
+  gelAllByEst(est: boolean) {
+    //Método para listar todas los Usuarios
+
+    return this.api
+      .get(`gelAllByEst/${est}`)
+      .then((res) => res.data);
+  }
   getEstudiantes(id: number) {
     //Método para listar todas los Usuarios
     return this.api.get(`lista/${id}`).then((res) => res.data);
+  }
+
+  cedulaUnicaFP(ci: string) {
+    //Método para listar todas los Usuarios
+    return this.api.get(`cedulaUnicaFP?ci=${ci}`).then((res) => res.data);
   }
 
   getByPersona(est: boolean, busqueda: string) {
