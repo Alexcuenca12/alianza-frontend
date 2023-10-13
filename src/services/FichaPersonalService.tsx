@@ -54,6 +54,13 @@ export class FichaPersonalService {
       .then((res) => res.data);
   }
 
+  getBusquedaFP(est: boolean, busq: string) {
+    busq = busq || "NA";
+    return this.api
+      .get(`busquedaFP/${est}/${busq}`)
+      .then((res) => res.data);
+  }
+
   save(fichaPersonal: any) {
     return this.api
       .post("post", fichaPersonal)

@@ -7,8 +7,11 @@ export interface IFichaPersonal {
     foto: string;
     apellidos: string;
     nombres: string;
-    ciIdentidad: string;
+    tipoIdentificacion: string;
+    ciPasaporte: string;
     nacionalidad: string;
+    actTrabInfantil: boolean;
+    detalleActTrabInfantil: string;
     fechaNacimiento: string;
     rangoEdad: IRangoEdad | null;
     genero: string;

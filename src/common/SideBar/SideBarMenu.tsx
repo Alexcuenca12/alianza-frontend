@@ -16,49 +16,51 @@ interface SideBarProps {
 }
 
 export function SideBarMenu({ items, card, bodyComponent, footerComponent }: SideBarProps) {
-  const [isOpen, setIsOpen] = useState<boolean>(true);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const menuRef = useRef<HTMLDivElement | null>(null);
 
 
-  // useEffect(() => {
-  //   // Función para manejar clics fuera del menú
-  //   function handleClickOutside(event: MouseEvent) {
-  //     if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-  //       setIsOpen(false);
-  //     }
-  //   }
-
-  //   // Agregar un event listener para escuchar clics en todo el documento
-  //   document.addEventListener('click', handleClickOutside);
-
-  //   return () => {
-  //     // Eliminar el event listener cuando el componente se desmonta
-  //     document.removeEventListener('click', handleClickOutside);
-  //   };
-  // }, []);
-
   useEffect(() => {
+
+
+    // Función para manejar clics fuera del menú
     function handleClickOutside(event: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     }
 
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        setIsOpen(false);
-      }
-    }
-
+    // Agregar un event listener para escuchar clics en todo el documento
     document.addEventListener('click', handleClickOutside);
-    document.addEventListener('keydown', handleKeyDown);
 
     return () => {
+      // Eliminar el event listener cuando el componente se desmonta
       document.removeEventListener('click', handleClickOutside);
-      document.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
+
+  // useEffect(() => {
+  //   function handleClickOutside(event: MouseEvent) {
+  //     if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+  //       setIsOpen(false);
+  //     }
+  //   }
+
+  //   function handleKeyDown(event: KeyboardEvent) {
+  //     if (event.key === "Escape") {
+  //       setIsOpen(false);
+  //     }
+  //   }
+
+  //   document.addEventListener('click', handleClickOutside);
+  //   document.addEventListener('keydown', handleKeyDown);
+
+  //   return () => {
+  //     document.removeEventListener('click', handleClickOutside);
+  //     document.removeEventListener('keydown', handleKeyDown);
+  //   };
+  // }, []);
 
   function handleClick() {
     console.log("Botón clickeado");
@@ -74,7 +76,7 @@ export function SideBarMenu({ items, card, bodyComponent, footerComponent }: Sid
 
           <section className="layoutHead">
             <div className="grow1Head" style={{ justifyContent: "left", paddingLeft: "35px" }}>
-              <div className="menuButton">
+              <div className="menuButton" ref={menuRef}>
                 <button className="hamburgerIcon" onClick={handleClick}>
                   <VscMenu></VscMenu>
                 </button>
@@ -108,10 +110,14 @@ export function SideBarMenu({ items, card, bodyComponent, footerComponent }: Sid
           <section className="layoutS">
             <div className="sidebarS">
               <div
-                ref={menuRef}
+                // ref={menuRef}
                 className={classNames("SideBarMenu", isOpen ? "expanded" : "collapsed")}
               >
-
+                {/* <div className="menuButton">
+                  <button className="hamburgerIcon" onClick={handleClick}>
+                    <VscMenu></VscMenu>
+                  </button>
+                </div> */}
 
                 <SideBarMenuCardView card={card} isOpen={isOpen} />
                 <div className={classNames("menuScroll", isOpen ? "expanded" : "collapsed")}>

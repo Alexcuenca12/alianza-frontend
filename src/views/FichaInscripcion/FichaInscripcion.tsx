@@ -48,17 +48,18 @@ function FichaInscripcionContext() {
   const [busquedaCedulaCompleta, setBusquedaCedulaCompleta] = useState(false);
 
   const tipoProyectoOptions = [
+    { label: "APIA", value: "APIA" },
+    { label: "EMAC", value: "EMAC" },
     { label: "MIES", value: "MIES" },
     { label: "MUNICIPIO", value: "MUNICIPIO" },
-    { label: "EMAC", value: "EMAC" },
   ];
   const jornadaOptions = [
     { label: "Matutina", value: "Matutina" },
     { label: "Vespertina", value: "Vespertina" },
   ];
   const diasOptions = [
-    { label: "Lunes a Viernes", value: "Lunes a Viernes" },
-    { label: "Lunes a Sábado", value: "Lunes a Sábado" },
+    { label: "Lun - Mie - Vie", value: "Lun - Mie - Vie" },
+    { label: "Lun a Vie", value: "Lun a Vie" },
   ];
 
   const [contra1, setcontra1] = useState<IFichaInscripcion[]>([]);
@@ -191,7 +192,7 @@ function FichaInscripcionContext() {
         setEditMode(true);
         setEditItemId(id);
 
-        setBusqueda(editItem.fichaPersonal?.ciIdentidad ?? "");
+        setBusqueda(editItem.fichaPersonal?.ciPasaporte ?? "");
         setFoto(editItem.fichaPersonal?.foto ?? '')
 
 
@@ -201,7 +202,7 @@ function FichaInscripcionContext() {
             ...editItem,
             fichaPersonal: {
               ...editItem.fichaPersonal,
-              label: `${editItem.fichaPersonal.ciIdentidad} || ${editItem.fichaPersonal.apellidos} ${editItem.fichaPersonal.nombres}`,
+              label: `${editItem.fichaPersonal.ciPasaporte} || ${editItem.fichaPersonal.apellidos} ${editItem.fichaPersonal.nombres}`,
             },
           };
           setListFperonales([editItemWithLabel.fichaPersonal]);
@@ -277,7 +278,7 @@ function FichaInscripcionContext() {
       .then((data: IFichaPersonal[]) => {
         const dataWithLabel = data.map((object) => ({
           ...object,
-          label: `${object.ciIdentidad} || ${object.apellidos} ${object.nombres}`,
+          label: `${object.ciPasaporte} || ${object.apellidos} ${object.nombres}`,
         }));
 
         setListFperonales(dataWithLabel); // Establecer los datos procesados en el estado
@@ -320,7 +321,7 @@ function FichaInscripcionContext() {
     const rowData = data.map((item) => (
       {
         idFicha: item.idFichaInscripcion,
-        cedula: item.fichaPersonal?.ciIdentidad,
+        cedula: item.fichaPersonal?.ciPasaporte,
         nombres: item.fichaPersonal?.nombres,
         apellidos: item.fichaPersonal?.apellidos,
         fechaInscripcion: new Date(item.fechaIngresoInscrip!).toLocaleDateString("es-ES", {
@@ -472,7 +473,10 @@ function FichaInscripcionContext() {
                           idFichaPersonal: parseInt(e.value), foto: '',
                           apellidos: '',
                           nombres: '',
-                          ciIdentidad: '',
+                          ciPasaporte: '',
+                          tipoIdentificacion: '',
+                          actTrabInfantil: false,
+                          detalleActTrabInfantil: '',
                           nacionalidad: '',
                           fechaNacimiento: '',
                           rangoEdad: null,
@@ -581,7 +585,7 @@ function FichaInscripcionContext() {
                       style={{ width: "220px", marginLeft: "15px" }}
                       options={cursos}
                       onChange={(e) =>
-                        setFormData({ ...formData, curso: { idCurso: parseInt(e.value), docente: null, estadoCurso: true, fechaInicio: "0000-00-00", nombreCurso: '', rangoEdad: null } })
+                        setFormData({ ...formData, curso: { idCurso: parseInt(e.value), docente: null, fechaInicio: "0000-00-00", nombreCurso: '', rangoEdad: null } })
                       }
                       value={formData.curso} // Make sure this is correctly bound
                       optionLabel="nombreCurso"

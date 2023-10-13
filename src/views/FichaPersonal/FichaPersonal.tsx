@@ -26,6 +26,9 @@ import { Toast } from "primereact/toast";
 import { ProvinciaService } from "../../services/ProvinciaService";
 import { IProvincia } from "../../interfaces/IProvincia";
 import { InputText } from "primereact/inputtext";
+import { calcularEdad } from "../../services/functions/calcularEdad";
+import { ReportBar } from "../../common/ReportBar";
+import { IExcelReportParams, IHeaderItem } from "../../interfaces/IExcelReportParams";
 
 
 function FichaPersonal() {
@@ -47,6 +50,7 @@ function FichaPersonal() {
     const provinciaService = new ProvinciaService();
     const rangoEdadService = new RangoEdadService();
     const etniaService = new EtniaService();
+    const [excelReportData, setExcelReportData] = useState<IExcelReportParams | null>(null);
 
 
     const fileUploadRef = useRef<FileUpload>(null);
@@ -57,9 +61,10 @@ function FichaPersonal() {
     const [tempCY, setTempCY] = useState<string>();
     const [tempCX, setTempCX] = useState<string>();
 
+    const [busqueda, setBusqueda] = useState<string>('');
 
 
-    const [listFichaPersonal, setFichaPersonal] = useState<IFichaPersonal[]>([]);
+    const [listFichaPersonal, setListFichaPersonal] = useState<IFichaPersonal[]>([]);
     const [listParroquias, setListParroquias] = useState<IParroquia[]>([]);
     const [listCantones, setListCantones] = useState<ICanton[]>([]);
     const [listProvincias, setListProvincias] = useState<IProvincia[]>([]);
@@ -69,14 +74,20 @@ function FichaPersonal() {
     const [selectedCanton, setSelectedCanton] = useState<ICanton | null>();
 
 
-
+    const tipoDocumentoOpc = [
+        { label: "Cédula", value: "Cédula" },
+        { label: "Pasaporte", value: "Pasaporte" },
+    ];
 
     const [formData, setFormData] = useState<IFichaPersonal>({
         idFichaPersonal: 0,
         foto: '',
         apellidos: '',
         nombres: '',
-        ciIdentidad: '',
+        tipoIdentificacion: '',
+        actTrabInfantil: false,
+        detalleActTrabInfantil: '',
+        ciPasaporte: '',
         nacionalidad: '',
         fechaNacimiento: '',
         rangoEdad: null,
@@ -90,7 +101,7 @@ function FichaPersonal() {
         coordenadaX: 0,
         coordenadaY: 0,
         estVinculacion: false,
-        fechaRegistro: new Date
+        fechaRegistro: new Date()
 
     });
 
@@ -111,7 +122,9 @@ function FichaPersonal() {
         fichaPersonalService
             .getAll()
             .then((data) => {
-                setFichaPersonal(data);
+                setListFichaPersonal(data);
+                loadExcelReportData(data);
+
                 setDataLoaded(true); // Marcar los datos como cargados
             })
             .catch((error) => {
@@ -133,6 +146,7 @@ function FichaPersonal() {
             });
 
     };
+
 
     const loadProvicias = () => {
         provinciaService
@@ -190,6 +204,7 @@ function FichaPersonal() {
             });
     };
 
+
     const handleSubmit = (e: React.FormEvent) => {
         formData.estVinculacion = true;
         e.preventDefault();
@@ -202,7 +217,7 @@ function FichaPersonal() {
                 fichaPersonalService
                     .getAll()
                     .then((data) => {
-                        setFichaPersonal(data);
+                        setListFichaPersonal(data);
                         resetForm();
                         if (fileUploadRef.current) {
                             fileUploadRef.current.clear();
@@ -216,6 +231,8 @@ function FichaPersonal() {
             .catch((error) => {
                 console.error("Error al enviar el formulario:", error);
             });
+
+        console.log({ formData });
 
     };
 
@@ -241,7 +258,7 @@ function FichaPersonal() {
                     fichaPersonalService
                         .delete(id)
                         .then(() => {
-                            setFichaPersonal(
+                            setListFichaPersonal(
                                 listFichaPersonal.filter((contra) => contra.idFichaPersonal !== id)
                             );
                             swal(
@@ -298,7 +315,10 @@ function FichaPersonal() {
                         foto: '',
                         apellidos: '',
                         nombres: '',
-                        ciIdentidad: '',
+                        ciPasaporte: '',
+                        tipoIdentificacion: '',
+                        actTrabInfantil: false,
+                        detalleActTrabInfantil: '',
                         nacionalidad: '',
                         fechaNacimiento: '',
                         rangoEdad: null,
@@ -326,6 +346,7 @@ function FichaPersonal() {
                     console.error("Error al actualizar el formulario:", error);
                 });
         }
+        console.log({ formData });
     };
 
     const customBytesUploader = (event: FileUploadSelectEvent) => {
@@ -384,6 +405,24 @@ function FichaPersonal() {
         }
     };
 
+    const loadRelacion = () => {
+
+        fichaPersonalService
+            .getBusquedaFP(true, busqueda)
+            .then((data: IFichaPersonal[]) => {
+
+                loadExcelReportData(data);
+                setListFichaPersonal(data); // Establecer los datos procesados en el estado
+                // setDataLoaded(true); // Puedes marcar los datos como cargados si es necesario
+            })
+            .catch((error) => {
+                console.error("Error al obtener los datos:", error);
+            });
+
+
+        // console.log('Datos enviados:', { listFichaPersonal });
+
+    };
 
 
     const resetForm = () => {
@@ -392,7 +431,10 @@ function FichaPersonal() {
             foto: '',
             apellidos: '',
             nombres: '',
-            ciIdentidad: '',
+            ciPasaporte: '',
+            tipoIdentificacion: '',
+            actTrabInfantil: false,
+            detalleActTrabInfantil: '',
             nacionalidad: '',
             fechaNacimiento: '',
             rangoEdad: null,
@@ -415,6 +457,77 @@ function FichaPersonal() {
 
     };
 
+
+    function loadExcelReportData(data: IFichaPersonal[]) {
+        const reportName = "Ficha Personal"
+        const logo = 'G1:I1'
+
+        const rowData = data.map((item) => (
+            {
+                idFichaPersonal: item.idFichaPersonal,
+                foto: item.foto || '',
+                apellidos: item.apellidos || '',
+                nombres: item.nombres || '',
+                tipoIdentificacion: item.tipoIdentificacion || '',
+                ciPasaporte: item.ciPasaporte || '',
+                nacionalidad: item.nacionalidad || '',
+                actTrabInfantil: item.actTrabInfantil || false,
+                detalleActTrabInfantil: item.detalleActTrabInfantil || '',
+                fechaNacimiento: item.fechaNacimiento || '',
+                edad: `${calcularEdad(item.fechaNacimiento)} años`,
+                rangoEdad: `${item.rangoEdad?.limInferior} - ${item.rangoEdad?.limSuperior}`,
+                genero: item.genero || '',
+                etnia: item.etnia?.etniaNombre,
+                provincia: item.parroquia?.canton.provincia.provinciaNombre,
+                canton: item.parroquia?.canton.cantonNombre,
+                parroquia: item.parroquia?.parroquiaNombre,
+                zona: item.zona || '',
+                barrioSector: item.barrioSector || '',
+                direccion: item.direccion || '',
+                referencia: item.referencia || '',
+                coordenadaX: item.coordenadaX || '',
+                coordenadaY: item.coordenadaY || '',
+                estVinculacion: item.estVinculacion || false,
+                fechaRegistro: item.fechaRegistro || ''
+            }
+        ));
+        const headerItems: IHeaderItem[] = [
+            { header: "ID FICHA PERSONAL" },
+            { header: "FOTO" },
+            { header: "APELLIDOS" },
+            { header: "NOMBRES" },
+            { header: "TIPO IDENTIFICACIÓN" },
+            { header: "CI/PASAPORTE" },
+            { header: "NACIONALIDAD" },
+            { header: "ACT. TRAB. INFANTIL" },
+            { header: "DETALLE ACT. TRAB. INFANTIL" },
+            { header: "FECHA NACIMIENTO" },
+            { header: "EDAD" },
+            { header: "RANGO DE EDAD" },
+            { header: "GENERO" },
+            { header: "ETNIA" },
+            { header: "PROVINCIA" },
+            { header: "CANTON" },
+            { header: "PARROQUIA" },
+            { header: "ZONA" },
+            { header: "BARRIO/SECTOR" },
+            { header: "DIRECCIÓN" },
+            { header: "REFERENCIA" },
+            { header: "COORDENADA X" },
+            { header: "COORDENADA Y" },
+            { header: "EST. VINCULACIÓN" },
+            { header: "FECHA REGISTRO" }
+
+
+        ]
+        setExcelReportData({
+            reportName,
+            headerItems,
+            rowData,
+            logo
+        }
+        )
+    }
 
 
     return (
@@ -453,50 +566,97 @@ function FichaPersonal() {
                 </div>
 
                 <section className='container' style={{}}>
+                    <Divider />
 
                     <form onSubmit={editMode ? handleUpdate : handleSubmit} className='form' encType="multipart/form-data">
-                        <div className='column' >
-                            <div className='input-box' style={{ alignSelf: 'flex-end', marginBottom: "50px" }}>
-                                <label className="font-medium w-auto min-w-min" htmlFor="cedula;">Cedula:</label>
+                        <div className='column' style={{}}>
+                            <div className='column' style={{ width: "50%", display: "grid" }}>
 
-                                <InputText
-                                    placeholder=' Ingresar la cedula de identidad'
-                                    id="cedula"
-                                    maxLength={10} // Establecer el máximo de 10 caracteres
-                                    keyfilter="pint" // Solo permitir dígitos enteros positivos
-                                    onChange={(e) => setFormData({ ...formData, ciIdentidad: e.target.value })}
-                                    title="Ingresar el documento de identidad del NNA"
-                                    value={formData.ciIdentidad}
-                                />
-                                <span className="input-border"></span>
+                                <div className='input-box' style={{}}>
+                                    <label className="font-medium w-auto min-w-min" htmlFor="tipoDocumento">Tipo de documento:</label>
+                                    <div className=" " style={{ width: "100%" }}>
+                                        <Dropdown
+                                            className="text-2xl"
+                                            id="tiempo_dedicacion"
+                                            name="tiempo_dedicacion"
+                                            style={{ width: "100%", height: "36px" }}
+                                            options={tipoDocumentoOpc}
+                                            onChange={(e) =>
+                                                setFormData({
+                                                    ...formData,
+                                                    tipoIdentificacion: e.value, ciPasaporte: ''
+                                                })
+                                            }
+                                            value={formData.tipoIdentificacion}
+                                            optionLabel="label"
+                                            optionValue="value"
+                                            placeholder="Seleccione el tipo de documento de identificación"
+                                        />
 
+
+                                    </div>
+
+                                </div>
+
+                                <div className='input-box' >
+                                    <label className="font-medium w-auto min-w-min" htmlFor="cedula;">
+                                        {!formData.tipoIdentificacion
+                                            ? 'Debe seleccionar el tipo de identificaicon'
+                                            : formData.tipoIdentificacion === 'Cédula'
+                                                ? 'Cédula:'
+                                                : 'Pasaporte:'}
+                                    </label>
+
+                                    <InputText
+                                        placeholder={!formData.tipoIdentificacion
+                                            ? 'Se habilitara cuando seleccione el tipo de identificaicon'
+                                            : formData.tipoIdentificacion === 'Cédula'
+                                                ? 'Ingrese el numero de cédula:'
+                                                : 'Ingrese el numero de pasaporte:'}
+                                        id="cedula"
+                                        disabled={!formData.tipoIdentificacion}
+                                        maxLength={formData.tipoIdentificacion === 'Cédula'
+                                            ? 10
+                                            : 1000} // Establecer el máximo de 10 caracteres
+                                        keyfilter="pint" // Solo permitir dígitos enteros positivos
+                                        onChange={(e) => setFormData({ ...formData, ciPasaporte: e.target.value })}
+                                        title="Ingresar el documento de identidad del NNA"
+                                        value={formData.ciPasaporte}
+                                    />
+                                    <span className="input-border"></span>
+
+                                </div>
                             </div>
 
+                            <div className='column' style={{ width: "50%" }}>
 
-                            <div className="input-box" >
-                                <label className="font-medium w-auto min-w-min" htmlFor="foto;">Foto:</label>
+                                <div className="input-box" >
+                                    <label className="font-medium w-auto min-w-min" htmlFor="foto;">Foto:</label>
 
-                                <FileUpload
-                                    name="img"
-                                    style={{}}
-                                    chooseLabel="Escoger"
-                                    uploadLabel="Cargar"
-                                    cancelLabel="Cancelar"
-                                    emptyTemplate={
-                                        <p className="m-0 p-button-rounded">
-                                            Arrastre y suelte la foto aquí para cargarlos.
-                                        </p>
-                                    }
-                                    customUpload
-                                    onSelect={customBytesUploader}
-                                    accept="image/*"
-                                />
+                                    <FileUpload
+                                        name="img"
+                                        style={{}}
+                                        chooseLabel="Escoger"
+                                        uploadLabel="Cargar"
+                                        cancelLabel="Cancelar"
+                                        emptyTemplate={
+                                            <p className="m-0 p-button-rounded">
+                                                Arrastre y suelte la foto aquí para cargarlos.
+                                            </p>
+                                        }
+                                        customUpload
+                                        onSelect={customBytesUploader}
+                                        accept="image/*"
+                                    />
 
 
+                                </div>
                             </div>
+
                         </div>
 
 
+                        <Divider style={{ marginTop: "30px" }} />
 
                         <div className='column'>
 
@@ -560,16 +720,25 @@ function FichaPersonal() {
                                         onChange={(e) => {
                                             const selectedDate =
                                                 e.value instanceof Date ? e.value : null;
+
                                             if (selectedDate) {
                                                 selectedDate.setDate(selectedDate.getDate() + 1);
                                                 const formattedDate = selectedDate
                                                     ? selectedDate.toISOString().split("T")[0] // Formatear a ISO 8601
                                                     : "";
-                                                setFormData({
-                                                    ...formData,
-                                                    fechaNacimiento: formattedDate,
-                                                });
+                                                if (calcularEdad(formattedDate) >= 17) {
+                                                    setFormData({
+                                                        ...formData,
+                                                        fechaNacimiento: formattedDate, rangoEdad: { idRangoEdad: 2, limInferior: 0, limSuperior: 0 },
+                                                    });
+                                                } else {
+                                                    setFormData({
+                                                        ...formData,
+                                                        fechaNacimiento: formattedDate, rangoEdad: { idRangoEdad: 1, limInferior: 0, limSuperior: 0 },
+                                                    });
+                                                }
                                             }
+
 
                                         }}
                                         value={
@@ -703,6 +872,70 @@ function FichaPersonal() {
                         </div>
 
 
+                        <div className="column">
+
+                            <div className='column' style={{ width: "50%" }}>
+                                <div className="input-box">
+                                    <label className="font-medium w-auto min-w-min" htmlFor='actInfantil'>Act/Trab Infantil:</label>
+
+                                    <div className='actInf'>
+                                        <div className="mydict">
+                                            <div>
+                                                <label>
+                                                    <input
+                                                        className="input"
+                                                        type="radio"
+                                                        id="actSI"
+                                                        name="actSI"
+                                                        value="true"
+                                                        checked={formData.actTrabInfantil === true}
+                                                        onChange={(e) => setFormData({ ...formData, actTrabInfantil: true })}
+                                                    />
+                                                    <span>SI</span>
+                                                </label>
+                                                <label>
+                                                    <input
+                                                        className="input"
+                                                        type="radio"
+                                                        id="actNO"
+                                                        name="actNO"
+                                                        value="false"
+                                                        checked={formData.actTrabInfantil === false}
+                                                        onChange={(e) => setFormData({ ...formData, actTrabInfantil: false, detalleActTrabInfantil: '' })}
+
+                                                    />
+                                                    <span>NO</span>
+                                                </label>
+
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div >
+                            </div>
+
+                            <div className='column' style={{ width: "50%" }}>
+                                <div className='input-box'>
+                                    <label className="font-medium w-auto min-w-min" htmlFor="direccion">Detalle de la act/trab Infantil:</label>
+                                    <InputText
+                                        className="input"
+                                        disabled={!formData.actTrabInfantil}
+                                        placeholder='Detalle la actividad/trabajo que realiza el NNA'
+                                        id="detActInf"
+                                        keyfilter={/^[A-Za-z\s]*$/}// Solo permitir caracteres alfabeticos
+                                        onChange={(e) => setFormData({ ...formData, detalleActTrabInfantil: e.target.value })}
+                                        title="Ingresar la dirección de residencia del NNA"
+                                        value={formData.detalleActTrabInfantil}
+                                    />
+
+                                    <span className="input-border"></span>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <Divider style={{ marginTop: "30px" }} />
                         <div className="column">
 
                             <div className='input-box'>
@@ -936,7 +1169,7 @@ function FichaPersonal() {
 
 
                         </div>
-
+                        <Divider style={{ marginTop: "30px" }} />
                         <div className='btnSend'>
                             {/* <button type="submit"
                                     className='btn' >Registrarse</button> */}
@@ -975,6 +1208,56 @@ function FichaPersonal() {
                         className="mt-4  w-full h-full text-3xl font-large"
                     >
                         <thead>
+                            <tr >
+                                <td colSpan={5} >
+                                    <div input-box style={{}}>
+                                        <label className="font-medium w-auto min-w-min" htmlFor='genero'>Cedula o Nombre:</label>
+
+                                        <div className="flex-1" style={{ paddingBottom: '10px' }}>
+                                            <InputText
+                                                placeholder="Cedula de identidad"
+                                                id="integer"
+                                                // keyfilter="int"
+                                                style={{ width: "75%" }}
+
+                                                onChange={(e) => {
+                                                    // Actualizar el estado usando setFormData
+
+                                                    setBusqueda(e.currentTarget.value);
+
+                                                    // Luego, llamar a loadRelacion después de que se actualice el estado
+                                                    loadRelacion();
+                                                }}
+
+                                                onKeyUp={(e) => {
+
+                                                    setBusqueda(e.currentTarget.value);
+
+                                                    // Luego, llamar a loadRelacion después de que se actualice el estado
+                                                    loadRelacion(); // Llama a tu método aquí o realiza las acciones necesarias.
+                                                }}
+
+                                                value={busqueda}
+                                            />
+
+                                            <Button icon="pi pi-search" className="p-button-warning" />
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td colSpan={10} className="" >
+                                    <div style={{ paddingTop: '17px' }}>
+                                        <ReportBar
+                                            reportName={excelReportData?.reportName!}
+                                            headerItems={excelReportData?.headerItems!}
+                                            rowData={excelReportData?.rowData!}
+                                            logo={excelReportData?.logo!}
+                                        />
+                                    </div>
+
+                                </td>
+
+                            </tr>
                             <tr style={{ backgroundColor: "#871b1b", color: "white" }}>
                                 <th>Nº Ficha</th>
                                 <th>Cedula</th>
@@ -1001,11 +1284,11 @@ function FichaPersonal() {
                                 >
 
                                     <td>{ficha.idFichaPersonal}</td>
-                                    <td>{ficha.ciIdentidad}</td>
+                                    <td>{ficha.ciPasaporte}</td>
                                     <td>{ficha.apellidos} {ficha.nombres}</td>
                                     <td>{ficha.fechaRegistro?.toString()}</td>
                                     <td>{ficha.nacionalidad}</td>
-                                    <td>{ficha.fechaNacimiento}</td>
+                                    <td>{calcularEdad(ficha.fechaNacimiento)}</td>
                                     {/* <td>{ficha.rangoEdad?.limInferior} - {ficha.rangoEdad?.limSuperior}</td> */}
                                     <td>{ficha.genero}</td>
                                     <td>{ficha.etnia?.etniaNombre}</td>

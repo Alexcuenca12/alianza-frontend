@@ -353,7 +353,7 @@ function Reporte() {
                                 >
 
                                     <td>{ficha.idFichaPersonal}</td>
-                                    <td>{ficha.ciIdentidad}</td>
+                                    <td>{ficha.ciPasaporte}</td>
                                     <td>{ficha.apellidos} {ficha.nombres}</td>
                                     <td>{ficha.nacionalidad}</td>
                                     {/* <td>{ficha.fechaNacimiento
@@ -366,7 +366,7 @@ function Reporte() {
                                         })
                                         : ""}</td> */}
 
-                                    <td>{ficha.fechaNacimiento}</td>
+                                    <td>{ficha.fechaNacimiento.toString()}</td>
                                     {/* <td>{ficha.rangoEdad?.limInferior} - {ficha.rangoEdad?.limSuperior}</td> */}
                                     <td>{ficha.genero}</td>
                                     <td>{ficha.etnia?.etniaNombre}</td>

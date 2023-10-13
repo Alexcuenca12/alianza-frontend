@@ -164,7 +164,7 @@ function FichaSaludContext() {
         setEditMode(true);
         setEditItemId(id);
 
-        setBusqueda(editItem.fichaPersonal?.ciIdentidad || '');
+        setBusqueda(editItem.fichaPersonal?.ciPasaporte || '');
         setFoto(editItem.fichaPersonal?.foto || '')
 
         setTempPeso(editItem.pesoFichaSalud.toString() as string)
@@ -175,7 +175,7 @@ function FichaSaludContext() {
             ...editItem,
             fichaPersonal: {
               ...editItem.fichaPersonal,
-              label: `${editItem.fichaPersonal.ciIdentidad} || ${editItem.fichaPersonal.apellidos} ${editItem.fichaPersonal.nombres}`,
+              label: `${editItem.fichaPersonal.ciPasaporte} || ${editItem.fichaPersonal.apellidos} ${editItem.fichaPersonal.nombres}`,
             },
           };
           setListFperonales([editItemWithLabel.fichaPersonal]);
@@ -246,7 +246,7 @@ function FichaSaludContext() {
       .then((data: IFichaPersonal[]) => {
         const dataWithLabel = data.map((object) => ({
           ...object,
-          label: `${object.ciIdentidad} || ${object.apellidos} ${object.nombres}`,
+          label: `${object.ciPasaporte} || ${object.apellidos} ${object.nombres}`,
         }));
 
         setListFperonales(dataWithLabel); // Establecer los datos procesados en el estado
@@ -395,7 +395,10 @@ function FichaSaludContext() {
                           foto: '',
                           apellidos: '',
                           nombres: '',
-                          ciIdentidad: '',
+                          ciPasaporte: '',
+                          tipoIdentificacion: '',
+                          actTrabInfantil: false,
+                          detalleActTrabInfantil: '',
                           nacionalidad: '',
                           fechaNacimiento: '',
                           rangoEdad: null,

@@ -153,7 +153,7 @@ function FichaInscripcionContext() {
         setEditMode(true);
         setEditItemId(id);
 
-        setBusqueda(editItem.fichaPersonal?.ciIdentidad ?? "");
+        setBusqueda(editItem.fichaPersonal?.ciPasaporte ?? "");
         setFoto(editItem.fichaPersonal?.foto ?? '')
 
 
@@ -163,7 +163,7 @@ function FichaInscripcionContext() {
             ...editItem,
             fichaPersonal: {
               ...editItem.fichaPersonal,
-              label: `${editItem.fichaPersonal.ciIdentidad} || ${editItem.fichaPersonal.apellidos} ${editItem.fichaPersonal.nombres}`,
+              label: `${editItem.fichaPersonal.ciPasaporte} || ${editItem.fichaPersonal.apellidos} ${editItem.fichaPersonal.nombres}`,
             },
           };
           setListFperonales([editItemWithLabel.fichaPersonal]);
@@ -243,7 +243,7 @@ function FichaInscripcionContext() {
       .then((data: IFichaPersonal[]) => {
         const dataWithLabel = data.map((object) => ({
           ...object,
-          label: `${object.ciIdentidad} || ${object.apellidos} ${object.nombres}`,
+          label: `${object.ciPasaporte} || ${object.apellidos} ${object.nombres}`,
         }));
 
         setListFperonales(dataWithLabel); // Establecer los datos procesados en el estado
@@ -278,7 +278,7 @@ function FichaInscripcionContext() {
     const rowData = data.map((item) => (
       {
         idFicha: item.idFichaEducativa,
-        cedula: item.fichaPersonal?.ciIdentidad,
+        cedula: item.fichaPersonal?.ciPasaporte,
         nombres: item.fichaPersonal?.nombres,
         apellidos: item.fichaPersonal?.apellidos,
         grado: item.gradoEducativo,
@@ -431,7 +431,10 @@ function FichaInscripcionContext() {
                           idFichaPersonal: parseInt(e.value), foto: '',
                           apellidos: '',
                           nombres: '',
-                          ciIdentidad: '',
+                          ciPasaporte: '',
+                          tipoIdentificacion: '',
+                          actTrabInfantil: false,
+                          detalleActTrabInfantil: '',
                           nacionalidad: '',
                           fechaNacimiento: '',
                           rangoEdad: null,

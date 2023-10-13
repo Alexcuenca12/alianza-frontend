@@ -23,7 +23,6 @@ function Curso() {
     idCurso: 0,
     nombreCurso: "",
     fechaInicio: "",
-    estadoCurso: false,
     rangoEdad: null,
     docente: null,
   });
@@ -107,7 +106,6 @@ function Curso() {
     if (
       !formData.nombreCurso ||
       !formData.fechaInicio ||
-      !formData.estadoCurso ||
       !formData.docente || // Asegúrate de que docente esté seleccionado
       !formData.rangoEdad // Asegúrate de que rangoEdad esté seleccionado
     ) {
@@ -208,7 +206,6 @@ function Curso() {
 
       nombreCurso: "",
       fechaInicio: "",
-      estadoCurso: false,
       rangoEdad: null,
       docente: null,
     });
@@ -328,11 +325,11 @@ function Curso() {
                       onChange={(e) => {
                         setFormData({
                           ...formData,
-                          docente: { idDocente: parseInt(e.value), materiaDocente: '', tituloDocente: '', persona: null },
+                          docente: { idUsuario: parseInt(e.value), persona: null, username: '', password: '', rol: null },
                         });
 
                       }}
-                      value={formData.docente?.idDocente}
+                      value={formData.docente?.idUsuario}
                       optionLabel="etiqueta"
                       optionValue="idDocente"
                       placeholder="Seleccione al Docente"
@@ -364,28 +361,7 @@ function Curso() {
                       style={{ width: "250px" }}
                     />
                   </div>
-                  <div className="flex flex-wrap w-full h-full  justify-content-between">
-                    <label
-                      htmlFor="activo"
-                      className="text-3xl font-medium w-auto min-w-min"
-                    >
-                      Curso Activo:
-                    </label>
-                    <SelectButton
-                      className="text-2xl"
-                      id="activo"
-                      name="activo"
-                      options={options}
-                      style={{ width: "221px", marginTop: "10px" }}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          estadoCurso: e.value === "Si",
-                        })
-                      }
-                      value={formData.estadoCurso ? "Si" : "No"}
-                    />
-                  </div>
+
                 </div>
               </div>
               <div
@@ -426,7 +402,6 @@ function Curso() {
               <th>Curso</th>
               <th>Fecha Inicio</th>
               <th>Fecha Fin</th>
-              <th>Estado</th>
               <th>Operaciones</th>
             </tr>
           </thead>
@@ -445,7 +420,6 @@ function Curso() {
                     : ""}
                 </td>
 
-                <td>{curso.estadoCurso ? "Activo" : "Inactivo"}</td>
                 <td>
                   <Button
                     type="button"

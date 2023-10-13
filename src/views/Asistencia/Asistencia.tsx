@@ -392,7 +392,7 @@ enter justify-content-center w-auto min-w-min"
                   className="text-center"
                   key={ficha.idFichaInscripcion?.toString()}
                 >
-                  <td>{ficha.fichaPersonal?.ciIdentidad}</td>
+                  <td>{ficha.fichaPersonal?.ciPasaporte}</td>
                   <td>
                     {ficha.fichaPersonal?.nombres}{" "}
                     {ficha.fichaPersonal?.apellidos}
