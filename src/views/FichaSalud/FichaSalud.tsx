@@ -673,7 +673,6 @@ function FichaSaludContext() {
               </div>
               <div
                 className="flex flex-row  w-full h-full justify-content-center  flex-grow-1  row-gap-8 gap-8 flex-wrap mt-6"
-                style={{ marginLeft: "-45px" }}
               >
                 <div className="flex align-items-center justify-content-center w-auto min-w-min">
                   <Button

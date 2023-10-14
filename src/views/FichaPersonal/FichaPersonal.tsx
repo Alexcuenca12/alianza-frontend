@@ -889,8 +889,12 @@ function FichaPersonal() {
                     </div>
 
                     <section className='container' style={{}}>
-                        <Divider />
-
+                        <Divider align="left">
+                            <div className="inline-flex align-items-center">
+                                <i className="pi pi-book mr-2"></i>
+                                <b>Formulario </b>
+                            </div>
+                        </Divider>
                         <form onSubmit={editMode ? handleUpdate : handleSubmit} className='form' encType="multipart/form-data">
                             <div className='column' style={{}}>
                                 <div className='column' style={{ width: "50%", display: "grid" }}>
@@ -1494,8 +1498,7 @@ function FichaPersonal() {
                             </div>
                             <Divider style={{ marginTop: "30px" }} />
                             <div className='btnSend'>
-                                {/* <button type="submit"
-                                    className='btn' >Registrarse</button> */}
+
                                 <div className="flex align-items-center justify-content-center w-auto min-w-min"
                                     style={{ gap: "25px" }}>
                                     <Button
@@ -1523,98 +1526,112 @@ function FichaPersonal() {
                         </form>
                         {/* </div> */}
                     </section >
-                    <Divider />
 
-                    <div style={{ display: "flex", marginTop: '60px' }}>
-                        <div className="" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                            <label className="font-medium w-auto min-w-min" htmlFor='genero'>Cedula o Nombre:</label>
-
-                            <div className="flex-1" >
-                                <InputText
-                                    placeholder="Cedula de identidad"
-                                    id="integer"
-                                    // keyfilter="int"
-                                    style={{ width: "75%" }}
-
-                                    onChange={(e) => {
-                                        // Actualizar el estado usando setFormData
-
-                                        setBusqueda({ ...busqueda, ciNombre: e.currentTarget.value });
-
-                                        // Luego, llamar a loadRelacion después de que se actualice el estado
-                                        loadRelacion();
-                                    }}
-
-                                    onKeyUp={(e) => {
-
-                                        setBusqueda({ ...busqueda, ciNombre: e.currentTarget.value });
-
-                                        // Luego, llamar a loadRelacion después de que se actualice el estado
-                                        loadRelacion(); // Llama a tu método aquí o realiza las acciones necesarias.
-                                    }}
-
-                                    value={busqueda.ciNombre}
-                                />
-
-                                <Button icon="pi pi-search" className="p-button-warning" />
+                    <div>
+                        <Divider align="left">
+                            <div className="inline-flex align-items-center">
+                                <i className="pi pi-filter-fill mr-2"></i>
+                                <b>Filtro</b>
                             </div>
-                        </div>
+                        </Divider>
+                        <div className="opcTblLayout">
 
-                        <div className="" style={{ flex: 1 }}>
-                            <label className="font-medium w-auto min-w-min" htmlFor='estado'>Estado:</label>
+                            <div className="opcTbl" >
+                                <label className="font-medium w-auto min-w-min" htmlFor='genero'>Cedula o Nombre:</label>
 
-                            <div className="mydict">
-                                <div>
-                                    <label>
-                                        <input
-                                            className="input"
-                                            type="radio"
-                                            id="estAct"
-                                            name="estAct"
-                                            value="true"
-                                            checked={busqueda.estado === true}
-                                            onChange={(e) => { setBusqueda({ ...busqueda, estado: true }); loadRelacion(); }}
-                                        />
-                                        <span>Vinculado</span>
-                                    </label>
-                                    <label>
-                                        <input
-                                            className="input"
-                                            type="radio"
-                                            id="estInact"
-                                            name="estInact"
-                                            value="false"
-                                            checked={busqueda.estado === false}
-                                            onChange={(e) => { setBusqueda({ ...busqueda, estado: false }); loadRelacion(); }}
+                                <div className="flex-1" >
+                                    <InputText
+                                        placeholder="Cedula de identidad"
+                                        id="integer"
+                                        // keyfilter="int"
+                                        style={{ width: "75%" }}
 
-                                        />
-                                        <span>Desvinculado</span>
-                                    </label>
+                                        onChange={(e) => {
+                                            // Actualizar el estado usando setFormData
 
+                                            setBusqueda({ ...busqueda, ciNombre: e.currentTarget.value });
 
+                                            // Luego, llamar a loadRelacion después de que se actualice el estado
+                                            loadRelacion();
+                                        }}
+
+                                        // onKeyUp={(e) => {
+
+                                        //     setBusqueda({ ...busqueda, ciNombre: e.currentTarget.value });
+
+                                        //     // Luego, llamar a loadRelacion después de que se actualice el estado
+                                        //     loadRelacion(); // Llama a tu método aquí o realiza las acciones necesarias.
+                                        // }}
+
+                                        value={busqueda.ciNombre}
+                                    />
+
+                                    <Button icon="pi pi-search" className="p-button-warning" />
                                 </div>
-                            </div >
-                        </div>
+                            </div>
 
-                        <div className="" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                            <label className="font-medium w-auto min-w-min" htmlFor='estado'>Refrescar tabla:</label>
+                            <div className="opcTbl" >
+                                <label className="font-medium w-auto min-w-min" htmlFor='estado'>Estado:</label>
 
-                            <Button className="buttonRefresh" // Agrega una clase CSS personalizada
-                                icon="pi pi-refresh" style={{ width: "120px", height: "39px" }} severity="danger" aria-label="Cancel" onClick={resetBusqueda} />
+                                <div className="mydict">
+                                    <div>
+                                        <label>
+                                            <input
+                                                className="input"
+                                                type="radio"
+                                                id="estAct"
+                                                name="estAct"
+                                                value="true"
+                                                checked={busqueda.estado === true}
+                                                onChange={(e) => { setBusqueda({ ...busqueda, estado: true }); loadRelacion(); }}
+                                            />
+                                            <span>Vinculado</span>
+                                        </label>
+                                        <label>
+                                            <input
+                                                className="input"
+                                                type="radio"
+                                                id="estInact"
+                                                name="estInact"
+                                                value="false"
+                                                checked={busqueda.estado === false}
+                                                onChange={(e) => { setBusqueda({ ...busqueda, estado: false }); loadRelacion(); }}
 
-                        </div>
+                                            />
+                                            <span>Desvinculado</span>
+                                        </label>
 
 
-                        <div className="" style={{ flex: 1, paddingTop: '24px' }}>
-                            <ReportBar
-                                reportName={excelReportData?.reportName!}
-                                headerItems={excelReportData?.headerItems!}
-                                rowData={excelReportData?.rowData!}
-                                logo={excelReportData?.logo!}
-                            />
+                                    </div>
+                                </div >
+                            </div>
+
+                            <div className="opcTbl">
+                                <label className="font-medium w-auto min-w-min" htmlFor='estado'>Refrescar tabla:</label>
+
+                                <Button className="buttonIcon" // Agrega una clase CSS personalizada
+                                    icon="pi pi-refresh" style={{ width: "120px", height: "39px" }} severity="danger" aria-label="Cancel" onClick={resetBusqueda} />
+
+                            </div>
+
+
+                            <div className="" style={{ flex: 1, paddingTop: '24px' }}>
+                                <ReportBar
+                                    reportName={excelReportData?.reportName!}
+                                    headerItems={excelReportData?.headerItems!}
+                                    rowData={excelReportData?.rowData!}
+                                    logo={excelReportData?.logo!}
+                                />
+                            </div>
                         </div>
                     </div>
 
+                    <Divider align="left">
+                        <div className="inline-flex align-items-center">
+                            <i className="pi pi-list mr-2"></i>
+                            <b>Lista  </b>
+                        </div>
+                    </Divider>
 
                     <div className="tblContainer" >
 
@@ -1627,18 +1644,18 @@ function FichaPersonal() {
 
 
                                 <tr>
-                                    <th>Nº Ficha</th>
-                                    <th>Cedula</th>
-                                    <th>Nombres</th>
-                                    <th>Apellidos</th>
-                                    <th>Nacionalidad</th>
-                                    <th>Edad</th>
-                                    <th>Genero</th>
-                                    <th>Canton</th>
-                                    <th>Barrio/Sector</th>
-                                    <th>Foto</th>
-                                    <th>Editar</th>
-                                    <th>Eliminar</th>
+                                    <th className="trFichas">Nº Ficha</th>
+                                    <th className="trFichas">Cedula</th>
+                                    <th className="trFichas">Nombres</th>
+                                    <th className="trFichas">Apellidos</th>
+                                    <th className="trFichas">Nacionalidad</th>
+                                    <th className="trFichas">Edad</th>
+                                    <th className="trFichas">Genero</th>
+                                    <th className="trFichas">Canton</th>
+                                    <th className="trFichas">Barrio/Sector</th>
+                                    <th className="trFichas">Foto</th>
+                                    <th className="trFichas">Editar</th>
+                                    <th className="trFichas">Eliminar</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -1657,11 +1674,11 @@ function FichaPersonal() {
                                         <td className="tdFichas">{ficha.genero}</td>
                                         <td className="tdFichas">{ficha.parroquia?.canton.cantonNombre}</td>
                                         <td className="tdFichas">{ficha.barrioSector}</td>
-                                        <td className="tdFichas">
+                                        <td className="tdFichas" style={{ width: "70px" }}>
                                             {ficha.foto ? (
                                                 <>
-                                                    <section className="imgSection" style={{ position: "relative" }}>
-                                                        <div>
+                                                    <section className="imgSection" >
+                                                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
                                                             <img src={ficha.foto} alt="FotoNNA" style={{ width: "65px" }} />
                                                         </div>
                                                         <div
@@ -1672,7 +1689,8 @@ function FichaPersonal() {
                                                                 margin: "5px",
                                                             }}
                                                         >
-                                                            <button className="BtnDown" onClick={() => decodeBase64Download(ficha.foto)}>
+                                                            <button className="BtnDown" title="Descargar" onClick={() => decodeBase64Download(ficha.foto)}>
+
                                                                 <svg
                                                                     className="svgIcon"
                                                                     viewBox="0 0 384 512"
@@ -1682,7 +1700,6 @@ function FichaPersonal() {
                                                                     <path d="M169.4 470.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 370.8 224 64c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 306.7L54.6 265.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"></path>
                                                                 </svg>
                                                                 <span className="icon2"></span>
-                                                                <span className="tooltip">Download</span>
                                                             </button>
                                                         </div>
                                                     </section>
@@ -1697,10 +1714,11 @@ function FichaPersonal() {
                                         </td>
 
                                         <td className="tdFichas">
-                                            <Button
+                                            <Button className="buttonIcon"
                                                 type="button"
-                                                className=""
-                                                label="✎"
+                                                icon="pi pi-file-edit"
+                                                title="Editar"
+
                                                 style={{
                                                     background: "#ff0000",
                                                     borderRadius: "10%",
@@ -1718,10 +1736,11 @@ function FichaPersonal() {
                                         </td>
 
                                         <td className="tdFichas">
-                                            <Button
+                                            <Button className="buttonIcon"
                                                 type="button"
-                                                className=""
-                                                label="✘"
+                                                icon="pi pi-trash"
+                                                title="Eliminar"
+
                                                 style={{
                                                     background: "#ff0000",
                                                     borderRadius: "10%",
