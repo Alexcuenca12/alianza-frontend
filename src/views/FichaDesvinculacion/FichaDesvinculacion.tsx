@@ -464,14 +464,14 @@ function FichaDesvinculacion() {
             />
           </div>
 
-          <section className='container' style={{}}>
+          <section className="flex justify-content-center flex-wrap container">
             <Divider align="left">
               <div className="inline-flex align-items-center">
                 <i className="pi pi-filter-fill mr-2"></i>
                 <b>Filtro</b>
               </div>
             </Divider>
-            <Fieldset legend="Filtros de busqueda" style={{ width: "1000px", marginBottom: "35px", position: "relative" }}>
+            <Fieldset legend="Filtros de busqueda" style={{ width: "1000px", position: "relative" }}>
               <div style={{ position: "absolute", top: "0", right: "5px", marginTop: "-15px" }}>
                 <label className="font-medium w-auto min-w-min" htmlFor="rangoEdad" style={{ marginRight: "10px" }}>Limpiar filtros:</label>
 
@@ -582,6 +582,7 @@ function FichaDesvinculacion() {
                   <b>Formulario </b>
                 </div>
               </Divider>
+
               <div className='column' style={{}}>
                 <div className='column' style={{ width: "30%", }}>
 
@@ -870,19 +871,7 @@ function FichaDesvinculacion() {
                     </td>
                     <td className="tdFichas">
                       {cargaF.anexosExtras ? (
-                        // <Button
-                        //   type="button"
-                        //   className=""
-                        //   label="Descargar PDF"
-                        //   style={{
-                        //     background: "#009688",
-                        //     borderRadius: "10%",
-                        //     fontSize: "12px",
-                        //     color: "black",
-                        //     justifyContent: "center",#28A66B
-                        //   }}
-                        //   onClick={() => decodeBase64(cargaF.anexosExtras!)}
-                        // />
+
                         <button className="btnPdf" onClick={() => decodeBase64(cargaF.anexosExtras!)}>
                           <div className="svg-wrapper-1">
                             <div className="svg-wrapper">

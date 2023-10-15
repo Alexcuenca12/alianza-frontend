@@ -4,7 +4,7 @@ import { FileUpload, FileUploadSelectEvent } from "primereact/fileupload";
 import { Button } from "primereact/button";
 import { Fieldset } from "primereact/fieldset";
 import { Card } from "primereact/card";
-import { Dropdown } from "primereact/dropdown";
+import { Dropdown, DropdownChangeEvent } from "primereact/dropdown";
 import cardHeader from "../../shared/CardHeader";
 import { Divider } from "primereact/divider";
 import { IFichaRepresentante } from "../../interfaces/IFichaRepresentante";
@@ -12,11 +12,13 @@ import { FichaRepresentanteService } from "../../services/FichaRepresentanteServ
 import swal from "sweetalert";
 import { InputTextarea } from "primereact/inputtextarea";
 import '../../styles/FiltroFichas.css'
+import '../../styles/Fichas.css'
 import { FichaPersonalService } from "../../services/FichaPersonalService";
 import { IFichaPersonal } from "../../interfaces/IFichaPersonal";
 import { IExcelReportParams, IHeaderItem } from "../../interfaces/IExcelReportParams";
 import { ReportBar } from "../../common/ReportBar";
 import { Calendar, CalendarChangeEvent } from 'primereact/calendar';
+import { Toaster } from "react-hot-toast";
 
 
 
@@ -52,7 +54,10 @@ function FichaInscripcionContext() {
     parentescoRepre: "",
     fichaInscripcion: null,
     fichaPersonal: null,
-    fechaRegistro: new Date
+    fechaRegistro: new Date,
+    genero: '',
+    nacionalidad: '',
+    tipoIdentificacion: '',
 
   });
 
@@ -61,6 +66,20 @@ function FichaInscripcionContext() {
   const [editMode, setEditMode] = useState(false);
   const [editItemId, setEditItemId] = useState<number | undefined>(undefined);
   const repreService = new FichaRepresentanteService();
+
+  const tipoDocumentoOpc = [
+    { label: "Cédula", value: "Cédula" },
+    { label: "Pasaporte", value: "Pasaporte" },
+  ];
+
+  const nivelInstrucOpc = [
+    { label: "Sin Instrucción", value: "Sin Instrucción" },
+    { label: "Educación Primaria", value: "Educación Primaria" },
+    { label: "Educación Secundaria", value: "Educación Secundaria" },
+    { label: "Bachillerato o Educación Media", value: "Bachillerato o Educación Media" },
+    { label: "Tercer nivel o Educación Superior", value: "Tercer nivel o Educación Superior" },
+    { label: "Cuarto nivel", value: "Cuarto nivel" },
+  ];
 
   const loadData = () => {
     repreService
@@ -218,7 +237,10 @@ function FichaInscripcionContext() {
             parentescoRepre: "",
             fichaInscripcion: null,
             fichaPersonal: null,
-            fechaRegistro: new Date
+            fechaRegistro: new Date,
+            genero: '',
+            nacionalidad: '',
+            tipoIdentificacion: '',
 
           });
           loadData();
@@ -247,7 +269,10 @@ function FichaInscripcionContext() {
       parentescoRepre: "",
       fichaInscripcion: null,
       fichaPersonal: null,
-      fechaRegistro: new Date
+      fechaRegistro: new Date,
+      genero: '',
+      nacionalidad: '',
+      tipoIdentificacion: '',
 
     });
     setEditMode(false);
@@ -358,189 +383,260 @@ function FichaInscripcionContext() {
 
 
   return (
-    <Fieldset className="fgrid col-fixed ">
-      <Card
-        header={cardHeader}
-        className="border-solid border-red-800 border-3 flex-1 flex-wrap"
-        style={{ width: "95%", marginLeft: "5%", height: "100%" }}
-      >
-        <div
-          className="h1-rem"
-          style={{ marginLeft: "40%", marginBottom: "20px" }}
+    <>
+      <div>
+        <Toaster position="top-right"
+          reverseOrder={true} />
+      </div>
+      <Fieldset className="fgrid col-fixed " style={{ display: 'flex', justifyContent: 'center' }}>
+        <Card
+          header={cardHeader}
+          className="border-solid border-red-800 border-3 flex-1 flex-wrap"
+          style={{ marginBottom: "35px", maxWidth: "1150px" }}
         >
-          <h1 className="text-5xl font-smibold lg:md-2  w-full h-full max-w-full max-h-full min-w-min">
-            Ficha del Representante
-          </h1>
-        </div>
+          <div
+            className="h1-rem"
+            style={{ display: 'flex', justifyContent: 'center' }}
+          >
+            <h1 className="text-5xl font-smibold lg:md-2 h-full max-w-full max-h-full min-w-min">
+              Ficha del Representante
+            </h1>
+          </div>
 
 
-        <div className="" style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "right" }}>
-          <label className="font-medium w-auto min-w-min" htmlFor="fichaPersonal" style={{ marginRight: "10px" }}>Fecha de Registro:</label>
-          <Calendar
-            disabled
-            style={{ width: "95px", marginRight: "25px", fontWeight: "bold" }}
-            value={formData.fechaRegistro}
-            onChange={(e: CalendarChangeEvent) => {
-              if (e.value !== undefined) {
-                setFormData({
-                  ...formData,
-                  fechaRegistro: e.value,
-                });
-              }
-            }} />
-        </div>
+          <div className="" style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "right" }}>
+            <label className="font-medium w-auto min-w-min" htmlFor="fichaPersonal" style={{ marginRight: "10px" }}>Fecha de Registro:</label>
+            <Calendar
+              disabled
+              style={{ width: "95px", marginRight: "25px", fontWeight: "bold" }}
+              value={formData.fechaRegistro}
+              onChange={(e: CalendarChangeEvent) => {
+                if (e.value !== undefined) {
+                  setFormData({
+                    ...formData,
+                    fechaRegistro: e.value,
+                  });
+                }
+              }} />
+          </div>
 
-        <div className="flex justify-content-center flex-wrap container">
-          <Fieldset legend="Filtros de busqueda" style={{ width: "1000px", marginBottom: "35px", position: "relative" }}>
-            <div style={{ position: "absolute", top: "0", right: "5px", marginTop: "-15px" }}>
-              <label className="font-medium w-auto min-w-min" htmlFor="rangoEdad" style={{ marginRight: "10px" }}>Limpiar filtros:</label>
+          <section className="flex justify-content-center flex-wrap container">
+            <Divider align="left">
+              <div className="inline-flex align-items-center">
+                <i className="pi pi-filter-fill mr-2"></i>
+                <b>Filtro</b>
+              </div>
+            </Divider>
+            <Fieldset legend="Filtros de busqueda" style={{ width: "1000px", position: "relative" }}>
+              <div style={{ position: "absolute", top: "0", right: "5px", marginTop: "-15px" }}>
+                <label className="font-medium w-auto min-w-min" htmlFor="rangoEdad" style={{ marginRight: "10px" }}>Limpiar filtros:</label>
 
-              <Button icon="pi pi-times" rounded severity="danger" aria-label="Cancel" onClick={() => resetFiltro()} />
-            </div>
+                <Button icon="pi pi-times" rounded severity="danger" aria-label="Cancel" onClick={() => resetFiltro()} />
+              </div>
 
-            <section className="layout">
-              <div className="">
-                <div input-box>
-                  <label className="font-medium w-auto min-w-min" htmlFor='genero'>Cedula o Nombre:</label>
+              <section className="layout">
+                <div className="">
+                  <div input-box>
+                    <label className="font-medium w-auto min-w-min" htmlFor='genero'>Cedula o Nombre:</label>
 
-                  <div className="flex-1">
-                    <InputText
-                      placeholder="Cedula de identidad"
-                      id="integer"
-                      // keyfilter="int"
-                      style={{ width: "75%" }}
+                    <div className="flex-1">
+                      <InputText
+                        placeholder="Cedula de identidad"
+                        id="integer"
+                        // keyfilter="int"
+                        style={{ width: "75%" }}
 
-                      onChange={(e) => {
-                        // Actualizar el estado usando setFormData
-                        setListFperonales([]); // Asignar un arreglo vacío para vaciar el estado listFperonales
+                        onChange={(e) => {
+                          // Actualizar el estado usando setFormData
+                          setListFperonales([]); // Asignar un arreglo vacío para vaciar el estado listFperonales
 
-                        setBusqueda(e.currentTarget.value);
+                          setBusqueda(e.currentTarget.value);
 
-                        // Luego, llamar a loadRelacion después de que se actualice el estado
-                        loadRelacion();
-                      }}
+                          // Luego, llamar a loadRelacion después de que se actualice el estado
+                          loadRelacion();
+                        }}
 
-                      onKeyUp={(e) => {
-                        setListFperonales([]); // Asignar un arreglo vacío para vaciar el estado listFperonales
+                        onKeyUp={(e) => {
+                          setListFperonales([]); // Asignar un arreglo vacío para vaciar el estado listFperonales
 
-                        setBusqueda(e.currentTarget.value);
+                          setBusqueda(e.currentTarget.value);
 
-                        // Luego, llamar a loadRelacion después de que se actualice el estado
-                        loadRelacion();
-                        loadRelacion(); // Llama a tu método aquí o realiza las acciones necesarias.
-                      }}
+                          // Luego, llamar a loadRelacion después de que se actualice el estado
+                          loadRelacion();
+                          loadRelacion(); // Llama a tu método aquí o realiza las acciones necesarias.
+                        }}
 
-                      value={busqueda}
-                    />
+                        value={busqueda}
+                      />
 
-                    <Button icon="pi pi-search" className="p-button-warning" />
+                      <Button icon="pi pi-search" className="p-button-warning" />
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="">
+                <div className="">
+                  <div>
+                    <label className="font-medium w-auto min-w-min" htmlFor="fichaPersonal">Resultados de la busqueda:</label>
+                    <Dropdown
+                      className="text-2xl"
+                      id="tiempo_dedicacion"
+                      name="tiempo_dedicacion"
+                      style={{ width: "100%" }}
+                      options={listFperonales}
+                      onChange={(e) => {
+                        setFormData({
+                          ...formData,
+                          fichaPersonal: {
+                            idFichaPersonal: parseInt(e.value), foto: '',
+                            apellidos: '',
+                            nombres: '',
+                            ciPasaporte: '',
+                            tipoIdentificacion: '',
+                            actTrabInfantil: false,
+                            detalleActTrabInfantil: '',
+                            nacionalidad: '',
+                            fechaNacimiento: '',
+                            rangoEdad: null,
+                            genero: '',
+                            etnia: null,
+                            parroquia: null,
+                            zona: '',
+                            barrioSector: '',
+                            direccion: '',
+                            referencia: '',
+                            coordenadaX: 0,
+                            coordenadaY: 0,
+                            estVinculacion: true,
+                            fechaRegistro: new Date()
+                          }
+                        });
+                        cargarFoto(parseInt(e.value))
+                        loadDataID(parseInt(e.value))
+                        console.log(formData)
+                      }}
+                      value={formData.fichaPersonal?.idFichaPersonal}
+                      optionLabel="label"
+                      optionValue="idFichaPersonal"
+                      placeholder="Seleccione una persona"
+                    />
+                  </div>
+                </div>
                 <div>
-                  <label className="font-medium w-auto min-w-min" htmlFor="fichaPersonal">Resultados de la busqueda:</label>
-                  <Dropdown
-                    className="text-2xl"
-                    id="tiempo_dedicacion"
-                    name="tiempo_dedicacion"
-                    style={{ width: "100%" }}
-                    options={listFperonales}
-                    onChange={(e) => {
-                      setFormData({
-                        ...formData,
-                        fichaPersonal: {
-                          idFichaPersonal: parseInt(e.value), foto: '',
-                          apellidos: '',
-                          nombres: '',
-                          ciPasaporte: '',
-                          tipoIdentificacion: '',
-                          actTrabInfantil: false,
-                          detalleActTrabInfantil: '',
-                          nacionalidad: '',
-                          fechaNacimiento: '',
-                          rangoEdad: null,
-                          genero: '',
-                          etnia: null,
-                          parroquia: null,
-                          zona: '',
-                          barrioSector: '',
-                          direccion: '',
-                          referencia: '',
-                          coordenadaX: 0,
-                          coordenadaY: 0,
-                          estVinculacion: true,
-                          fechaRegistro: new Date()
+                  <div style={{ display: "grid", placeItems: "center" }}>
+                    <img
+                      src={foto}
+                      alt="FotoNNA"
+                      style={{
+                        // width: "80px",
+                        height: "80px",
+                        borderRadius: "50%", // Borde redondeado
+                        border: "2px solid gray", // Borde gris
+                      }}
+                    />
+                  </div>
+                </div>
+              </section>
+            </Fieldset>
+
+            <form onSubmit={editMode ? handleUpdate : handleSubmit} className='form' encType="multipart/form-data">
+
+              <Divider align="left">
+                <div className="inline-flex align-items-center">
+                  <i className="pi pi-book mr-2"></i>
+                  <b>Formulario </b>
+                </div>
+              </Divider>
+
+              <div className='column' style={{}}>
+                <div className='column' style={{ width: "30.3%" }}>
+                  <div className='input-box' style={{}}>
+                    <label className="font-medium w-auto min-w-min" htmlFor="tipoDocumento">Tipo de documento:</label>
+                    <div className=" " style={{ width: "100%" }}>
+                      <Dropdown
+                        className="text-2xl"
+                        id="tiempo_dedicacion"
+                        name="tiempo_dedicacion"
+                        style={{ width: "100%", height: "36px", alignItems: "center" }}
+                        options={tipoDocumentoOpc}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            tipoIdentificacion: e.value, cedulaRepre: ''
+                          })
                         }
-                      });
-                      cargarFoto(parseInt(e.value))
-                      loadDataID(parseInt(e.value))
-                      console.log(formData)
-                    }}
-                    value={formData.fichaPersonal?.idFichaPersonal}
-                    optionLabel="label"
-                    optionValue="idFichaPersonal"
-                    placeholder="Seleccione una persona"
-                  />
-                </div>
-              </div>
-              <div>
-                <div style={{ display: "grid", placeItems: "center" }}>
-                  <img
-                    src={foto}
-                    alt="FotoNNA"
-                    style={{
-                      // width: "80px",
-                      height: "80px",
-                      borderRadius: "50%", // Borde redondeado
-                      border: "2px solid gray", // Borde gris
-                    }}
-                  />
-                </div>
-              </div>
-            </section>
-          </Fieldset>
+                        value={formData.tipoIdentificacion}
+                        optionLabel="label"
+                        optionValue="value"
+                        placeholder="Seleccione el tipo de documento de identificación"
+                      />
 
-          <Divider />
 
-          <form
-            onSubmit={editMode ? handleUpdate : handleSubmit}
-            encType="multipart/form-data"
-          >
-            <div className="flex flex-wrap flex-row" style={{ justifyContent: "center" }}>
-              <div className="flex align-items-center justify-content-center" style={{ margin: "10px" }}>
-                <div className="flex flex-column flex-wrap gap-4" style={{ marginRight: "35px" }}>
-                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
-                    <label
-                      htmlFor="cedulaRepre"
-                      className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginRight: "10px" }}
-                    >
-                      Cédula del representate:
+                    </div>
+
+                  </div>
+                </div>
+
+                <div className='column' style={{ width: "30.3%" }}>
+                  <div className='input-box' >
+                    <label className="font-medium w-auto min-w-min" htmlFor="cedula;">
+                      {!formData.tipoIdentificacion
+                        ? 'Debe seleccionar el tipo de identificaicon'
+                        : formData.tipoIdentificacion === 'Cédula'
+                          ? 'Cédula:'
+                          : 'Pasaporte:'}
+                    </label>
+
+                    <InputText
+                      placeholder={!formData.tipoIdentificacion
+                        ? 'Se habilitara cuando seleccione el tipo de identificaicon'
+                        : formData.tipoIdentificacion === 'Cédula'
+                          ? 'Ingrese el numero de cédula:'
+                          : 'Ingrese el numero de pasaporte:'}
+                      id="cedula"
+                      disabled={!formData.tipoIdentificacion}
+                      maxLength={formData.tipoIdentificacion === 'Cédula'
+                        ? 10
+                        : 1000} // Establecer el máximo de 10 caracteres
+                      keyfilter="pint" // Solo permitir dígitos enteros positivos
+                      onChange={(e) => setFormData({ ...formData, cedulaRepre: e.target.value })}
+                      title="Ingresar el documento de identidad del NNA"
+                      value={formData.cedulaRepre}
+                    />
+                    <span className="input-border"></span>
+
+                  </div>
+                </div>
+
+                <div className='column' style={{ width: "30.3%", }}>
+                  <div className='input-box' >
+                    <label className="font-medium w-auto min-w-min" htmlFor="cedula;">
+                      Parentesco:
                     </label>
                     <InputText
                       className="text-2xl"
-                      id="cedulaRepre"
-                      name="cedulaRepre"
-                      maxLength={10} // Establecer el máximo de 10 caracteres
-                      keyfilter="pint" // Solo permitir dígitos enteros positivos
+                      id="parentescoRepre"
+                      name="parentescoRepre"
+                      keyfilter={/^[A-Za-z\s]*$/} // Solo permitir caracteres 
+                      placeholder="Ingrese el Parentesco"
                       required
-                      placeholder="Ingrese la Cédula"
                       onChange={(e) =>
                         setFormData({
                           ...formData,
-                          cedulaRepre: e.currentTarget.value,
+                          parentescoRepre: e.currentTarget.value,
                         })
                       }
-                      value={formData.cedulaRepre}
+                      value={formData.parentescoRepre}
                     />
+                    <span className="input-border"></span>
+
                   </div>
-                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
-                    <label
-                      htmlFor="centro"
-                      className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginRight: "10px" }}
-                    >
+
+                </div>
+
+              </div>
+              <div className='column' style={{}}>
+                <div className='column' style={{ width: "30.3%", }}>
+                  <div className='input-box' >
+                    <label className="font-medium w-auto min-w-min" htmlFor="cedula;">
                       Nombres Representante:
                     </label>
                     <InputText
@@ -559,12 +655,11 @@ function FichaInscripcionContext() {
                       value={formData.nombresRepre}
                     />
                   </div>
-                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
-                    <label
-                      htmlFor="apellidosRepre"
-                      className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginRight: "10px" }}
-                    >
+                </div>
+
+                <div className='column' style={{ width: "30.3%", }}>
+                  <div className='input-box' >
+                    <label className="font-medium w-auto min-w-min" htmlFor="cedula;">
                       Apellidos Representante:
                     </label>
                     <InputText
@@ -583,93 +678,18 @@ function FichaInscripcionContext() {
                       value={formData.apellidosRepre}
                     />
                   </div>
-
-                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
-                    <label
-                      htmlFor="parentescoRepre"
-                      className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginRight: "10px" }}
-                    >
-                      Parentesco:
-                    </label>
-                    <InputText
-                      className="text-2xl"
-                      id="parentescoRepre"
-                      name="parentescoRepre"
-                      keyfilter={/^[A-Za-z\s]*$/} // Solo permitir caracteres 
-                      placeholder="Ingrese el Parentesco"
-                      required
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          parentescoRepre: e.currentTarget.value,
-                        })
-                      }
-                      value={formData.parentescoRepre}
-                    />
-                  </div>
                 </div>
-                <div
-                  className="flex flex-column flex-wrap gap-4" style={{ marginRight: "35px" }}>
-                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
-                    <label
-                      htmlFor="contactoRepre"
-                      className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginRight: "10px" }}
-                    >
-                      Nº de Contacto:
-                    </label>
-                    <InputText
-                      className="text-2xl"
-                      placeholder="Ingrese el nº de Contacto"
-                      id="contactoRepre"
-                      name="contactoRepre"
-                      keyfilter={/^[\d\s+]*$/}
-                      style={{ width: "221px" }}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          contactoRepre: e.currentTarget.value,
-                        })
-                      }
-                      value={formData.contactoRepre}
-                    />
-                  </div>
-                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
-                    <label
-                      htmlFor="contactoEmergenciaRepre"
-                      className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginRight: "10px" }}
-                    >
-                      Nº de Emergencia:
-                    </label>
-                    <InputText
-                      className="text-2xl"
-                      placeholder="Ingrese el nº de emergencia"
-                      id="contactoEmergenciaRepre"
-                      name="contactoEmergenciaRepre"
-                      keyfilter={/^[\d\s+]*$/}
-                      style={{ width: "221px" }}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          contactoEmergenciaRepre: e.currentTarget.value,
-                        })
-                      }
-                      value={formData.contactoEmergenciaRepre}
-                    />
-                  </div>
-                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
-                    <label
-                      htmlFor="tiempo_dedicacion"
-                      className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginRight: "10px" }}
-                    >
+
+                <div className='column' style={{ width: "30.3%", }}>
+                  <div className='input-box'
+                    style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                    <label htmlFor="fechaDesvinculacion" className="font-medium w-auto min-w-min">
                       Fecha de Nacimiento:
                     </label>
                     <Calendar
                       className="text-2xl"
                       id="fechaNacimientoRepre"
+                      style={{ width: "100%" }}
                       name="fechaNacimientoRepre"
                       placeholder="Ingrese la fecha de nacimiento"
                       required
@@ -694,86 +714,98 @@ function FichaInscripcionContext() {
                       }
                     />
                   </div>
-                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
-                    <label
-                      htmlFor="nivelInstruccionRepre"
-                      className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginRight: "10px" }}
-                    >
-                      Nivel de Instrucción:
-                    </label>
+                </div>
+
+              </div>
+              <div className='column' style={{}}>
+                <div className='column' style={{ width: "30.3%", }}>
+                  <div className="input-box">
+                    <label className="font-medium w-auto min-w-min" htmlFor='genero'>Genero:</label>
+
+
+                    <div className="mydict">
+                      <div>
+                        <label>
+                          <input
+                            className="input"
+                            type="radio"
+                            id="genMasculino"
+                            name="masculino"
+                            value="Masculino"
+                            checked={formData.genero === 'Masculino'}
+                            onChange={(e) => setFormData({ ...formData, genero: e.target.value })}
+
+                          />
+                          <span>Masculino</span>
+                        </label>
+                        <label>
+                          <input
+                            className="input"
+                            type="radio"
+                            id="genFemenino"
+                            name="femenino"
+                            value="Femenino"
+                            checked={formData.genero === 'Femenino'}
+                            onChange={(e) => setFormData({ ...formData, genero: e.target.value })}
+
+                          />
+                          <span>Femenino</span>
+                        </label>
+                      </div>
+                    </div>
+
+                  </div >
+                </div>
+
+                <div className='column' style={{ width: "30.3%", }}>
+                  <div className='input-box' style={{}}>
+                    <label className="font-medium w-auto min-w-min" htmlFor="nacionalidad">Nacionalidad:</label>
+
                     <InputText
-                      className="text-2xl"
-                      id="nivelInstruccionRepre"
-                      style={{ width: "221px" }}
-                      name="nivelInstruccionRepre"
-                      placeholder="Ingrese el Nivel de Instrucción"
-                      required
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          nivelInstruccionRepre: e.currentTarget.value,
-                        })
-                      }
-                      value={formData.nivelInstruccionRepre}
+                      className="input"
+                      placeholder=' Ingresar la nacionalidad'
+                      id="nacionalidad"
+                      keyfilter="alpha" // Solo permitir caracteres alfabeticos
+                      onChange={(e) => setFormData({ ...formData, nacionalidad: e.target.value })}
+                      title="Ingresar la nacionalidad del NNA"
+                      value={formData.nacionalidad}
                     />
+                    <span className="input-border"></span>
+
                   </div>
                 </div>
-                <div className="flex flex-column flex-wrap gap-4">
-                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
 
-                    <label
-                      htmlFor="ocupacionPrimariaRepre"
-                      className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginRight: "10px" }}
+                <div className='column' style={{ width: "30.3%", }}>
+                  <div className='input-box'>
+                    <label className="font-medium w-auto min-w-min" htmlFor="provincia">Nivel de Instruccion:</label>
+                    <div className=" ">
 
-                    >
-                      Ocupación Representante:
-                    </label>
-                    <InputText
-                      className="text-2xl"
-                      id="ocupacionPrimariaRepre"
-                      name="ocupacionPrimariaRepre"
-                      placeholder="Ingrese la Ocupación del Representante"
-                      required
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          ocupacionPrimariaRepre: e.currentTarget.value,
-                        })
-                      }
-                      value={formData.ocupacionPrimariaRepre}
-                    />
+                      <div className="flex justify-content-center">
+                        <Dropdown
+                          value={formData.nivelInstruccionRepre}
+                          onChange={(e: DropdownChangeEvent) => {
+                            setFormData({ ...formData, nivelInstruccionRepre: e.value });
+
+                          }}
+                          options={nivelInstrucOpc}
+                          optionLabel="label"
+                          optionValue="value"
+                          placeholder="Seleccione el nivel de instrucción"
+                          style={{ width: "100%", height: "36px", alignItems: "center" }}
+                        />
+                        <span className="input-border"></span>
+
+                      </div>
+
+                    </div>
                   </div>
-                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
-                    <label
-                      htmlFor="ocupacionSecundariaRepre"
-                      className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginRight: "10px" }}
-                    >
-                      Ocupación Secundaria:
-                    </label>
-                    <InputText
-                      className="text-2xl"
-                      id="ocupacionSecundariaRepre"
-                      name="ocupacionSecundariaRepre"
-                      required
-                      placeholder="Ingrese la Ocupación Secundaria del Representante"
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          ocupacionSecundariaRepre: e.currentTarget.value,
-                        })
-                      }
-                      value={formData.ocupacionSecundariaRepre}
-                    />
-                  </div>
-                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
-                    <label
-                      htmlFor="lugarTrabajoRepre"
-                      className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginRight: "10px" }}
-                    >
+                </div>
+
+              </div>
+              <div className='column' style={{}}>
+                <div className='column' style={{ width: "30.3%", }}>
+                  <div className='input-box' >
+                    <label className="font-medium w-auto min-w-min" htmlFor="cedula;">
                       Lugar de Trabajo:
                     </label>
                     <InputText
@@ -791,19 +823,110 @@ function FichaInscripcionContext() {
                       value={formData.lugarTrabajoRepre}
                     />
                   </div>
-                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
-                    <label
-                      htmlFor="observacionesRepre"
-                      className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginRight: "10px" }}
-                    >
+                </div>
+
+                <div className='column' style={{ width: "30.3%", }}>
+                  <div className='input-box' >
+                    <label className="font-medium w-auto min-w-min" htmlFor="cedula;">
+                      Ocupación:
+                    </label>
+                    <InputText
+                      className="text-2xl"
+                      id="ocupacionPrimariaRepre"
+                      name="ocupacionPrimariaRepre"
+                      placeholder="Ingrese la Ocupación del Representante"
+                      required
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          ocupacionPrimariaRepre: e.currentTarget.value,
+                        })
+                      }
+                      value={formData.ocupacionPrimariaRepre}
+                    />
+                  </div>
+                </div>
+
+                <div className='column' style={{ width: "30.3%", }}>
+                  <div className='input-box' >
+                    <label className="font-medium w-auto min-w-min" htmlFor="cedula;">
+                      Ocupación Secundaria:
+                    </label>
+                    <InputText
+                      className="text-2xl"
+                      id="ocupacionSecundariaRepre"
+                      name="ocupacionSecundariaRepre"
+                      required
+                      placeholder="Ingrese la Ocupación Secundaria del Representante"
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          ocupacionSecundariaRepre: e.currentTarget.value,
+                        })
+                      }
+                      value={formData.ocupacionSecundariaRepre}
+                    />
+                  </div>
+                </div>
+
+              </div>
+              <div className='column' style={{}}>
+                <div className='column' style={{ width: "30.3%", }}>
+                  <div className='input-box' >
+                    <label className="font-medium w-auto min-w-min" htmlFor="cedula;">
+                      Número de Contacto:
+                    </label>
+                    <InputText
+                      className="text-2xl"
+                      placeholder="Ingrese el nº de Contacto"
+                      id="contactoRepre"
+                      name="contactoRepre"
+                      keyfilter={/^[\d\s+]*$/}
+                      style={{}}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          contactoRepre: e.currentTarget.value,
+                        })
+                      }
+                      value={formData.contactoRepre}
+                    />
+                  </div>
+                </div>
+
+                <div className='column' style={{ width: "30.3%", }}>
+                  <div className='input-box' >
+                    <label className="font-medium w-auto min-w-min" htmlFor="cedula;">
+                      Número de Emergencia:
+                    </label>
+                    <InputText
+                      className="text-2xl"
+                      placeholder="Ingrese el nº de emergencia"
+                      id="contactoEmergenciaRepre"
+                      name="contactoEmergenciaRepre"
+                      keyfilter={/^[\d\s+]*$/}
+                      style={{}}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          contactoEmergenciaRepre: e.currentTarget.value,
+                        })
+                      }
+                      value={formData.contactoEmergenciaRepre}
+                    />
+                  </div>
+                </div>
+
+                <div className='column' style={{ width: "30.3%", }}>
+                  <div className='input-box' style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', paddingBottom: '35px' }}>
+                    <label className="font-medium w-auto min-w-min" htmlFor="cedula;">
                       Observaciones:
                     </label>
                     <InputTextarea
                       className="text-2xl"
                       id="observacionesRepre"
                       name="observacionesRepre"
-                      style={{ width: "193px" }}
+                      style={{ width: "100%" }}
                       required
                       placeholder="Observaciones"
                       onChange={(e) =>
@@ -816,125 +939,117 @@ function FichaInscripcionContext() {
                     />
                   </div>
                 </div>
+
               </div>
-              <div
-                className="flex flex-column flex-wrap gap-4"
-                style={{ marginTop: "5px", marginLeft: "25px" }}
-              ></div>
-              <div
-                className="flex flex-row  w-full h-full justify-content-center  flex-grow-1  row-gap-8 gap-8 flex-wrap mt-6"
-                style={{ marginLeft: "-45px" }}
-              >
-                <div className="flex align-items-center justify-content-center w-auto min-w-min">
+              <div className='btnSend' style={{ marginTop: "1px" }}>
+
+                <div className="flex align-items-center justify-content-center w-auto min-w-min"
+                  style={{ gap: "25px" }}>
                   <Button
                     type="submit"
                     label={editMode ? "Actualizar" : "Guardar"}
-                    className="w-full text-3xl min-w-min "
+                    className="btn"
                     rounded
+                    style={{
+                      width: "100px",
+                    }}
                     onClick={editMode ? handleUpdate : handleSubmit}
                   />
-                </div>
-                <div className="flex align-items-center justify-content-center w-auto min-w-min">
                   <Button
                     type="button"
                     label="Cancelar"
-                    className="w-full text-3xl min-w-min"
+                    className="btn"
+                    style={{
+                      width: "100px",
+                    }}
                     rounded
                     onClick={() => {
                       resetForm();
                       resetFiltro();
-                      setEditMode(false);
                     }} />
                 </div>
               </div>
-            </div>
-          </form>
-        </div>
-        <div style={{ marginTop: "50px" }}>
-          <table
-            style={{ minWidth: "40rem" }}
-            className="mt-4  w-full h-full text-3xl font-large"
-          >
-            <thead>
-              <tr >
+            </form>
+          </section>
 
-                <td colSpan={12} className="tdBtn">
-                  <ReportBar
-                    reportName={excelReportData?.reportName!}
-                    headerItems={excelReportData?.headerItems!}
-                    rowData={excelReportData?.rowData!}
-                    logo={excelReportData?.logo!}
-                  />
-                </td>
+          <div className="tblContainer" >
+            <table className="tableFichas">
+              <thead className="theadTab" >
 
-              </tr>
-              <tr style={{ backgroundColor: "#871b1b", color: "white" }}>
-                <th>Nº de Registro</th>
-                <th>Centro Educativo</th>
-                <th>Dirección </th>
-                <th>Referencia</th>
-                <th>Jornada de Asistencia</th>
-                <th>Observaciones</th>
-                <th>Grado</th>
-                <th>Operaciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {contra1.map((contrato) => (
-                <tr
-                  className="text-center"
-                  key={contrato.idFichaRepresentante?.toString()}
-                >
-                  <td>{contrato.idFichaRepresentante}</td>
-                  <td>{contrato.nombresRepre}</td>
-                  <td>{contrato.apellidosRepre}</td>
-                  <td>{contrato.cedulaRepre}</td>
-                  <td>{contrato.contactoRepre}</td>
-                  <td>{contrato.contactoEmergenciaRepre}</td>
-                  <td>{contrato.fechaNacimientoRepre}</td>
-                  <td>
-                    <Button
-                      type="button"
-                      className=""
-                      label="✎"
-                      style={{
-                        background: "#ff9800",
-                        borderRadius: "5%",
-                        fontSize: "25px",
-                        width: "50px",
-                        color: "black",
-                        justifyContent: "center",
-                      }}
-                      onClick={() =>
-                        handleEdit(contrato.idFichaRepresentante?.valueOf())
-                      }
-                    // Agrega el evento onClick para la operación de editar
-                    />
-                    <Button
-                      type="button"
-                      className=""
-                      label="✘"
-                      style={{
-                        background: "#ff0000",
-                        borderRadius: "10%",
-                        fontSize: "25px",
-                        width: "50px",
-                        color: "black",
-                        justifyContent: "center",
-                      }}
-                      onClick={() =>
-                        handleDelete(contrato.idFichaRepresentante?.valueOf())
-                      }
-                    />
-                  </td>
+                <tr style={{ backgroundColor: "#871b1b", color: "white" }}>
+                  <th className="trFichas">Nº de Registro</th>
+                  <th className="trFichas">Centro Educativo</th>
+                  <th className="trFichas">Dirección </th>
+                  <th className="trFichas">Referencia</th>
+                  <th className="trFichas">Jornada de Asistencia</th>
+                  <th className="trFichas">Observaciones</th>
+                  <th className="trFichas">Grado</th>
+                  <th className="trFichas">Editar</th>
+                  <th className="trFichas">Eliminar</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Card>
-    </Fieldset>
+              </thead>
+              <tbody>
+                {contra1.map((contrato) => (
+                  <tr
+                    className="text-center"
+                    key={contrato.idFichaRepresentante?.toString()}
+                  >
+                    <td className="tdFichas">{contrato.idFichaRepresentante}</td>
+                    <td className="tdFichas">{contrato.nombresRepre}</td>
+                    <td className="tdFichas">{contrato.apellidosRepre}</td>
+                    <td className="tdFichas">{contrato.cedulaRepre}</td>
+                    <td className="tdFichas">{contrato.contactoRepre}</td>
+                    <td className="tdFichas">{contrato.contactoEmergenciaRepre}</td>
+                    <td className="tdFichas">{contrato.fechaNacimientoRepre}</td>
+                    <td className="tdFichas">
+                      <Button className="buttonIcon"
+                        type="button"
+                        icon="pi pi-file-edit"
+                        style={{
+                          background: "#ff9800",
+                          borderRadius: "5%",
+                          fontSize: "25px",
+                          width: "50px",
+                          color: "black",
+                          justifyContent: "center",
+                        }}
+                        onClick={() =>
+                          handleEdit(contrato.idFichaRepresentante?.valueOf())
+                        }
+                      // Agrega el evento onClick para la operación de editar
+                      />
+
+                    </td>
+
+                    <td className="tdFichas">
+                      <Button className="buttonIcon"
+                        type="button"
+                        icon="pi pi-trash"
+                        style={{
+                          background: "#ff0000",
+                          borderRadius: "10%",
+                          fontSize: "25px",
+                          width: "50px",
+                          color: "black",
+                          justifyContent: "center",
+                        }}
+                        onClick={() =>
+                          handleDelete(contrato.idFichaRepresentante?.valueOf())
+                        }
+                      // Agrega el evento onClick para la operación de eliminar
+                      />
+                    </td>
+
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      </Fieldset>
+    </>
   );
+
 }
 
 export default FichaInscripcionContext;

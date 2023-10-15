@@ -1030,13 +1030,13 @@ function FichaPersonal() {
                                 <div className='column' style={{ width: "50%" }}>
 
                                     <div className='input-box'
-                                        style={{ display: 'flex', alignItems: 'center', marginTop: "40px" }}
-                                    >
-                                        <label className="font-medium w-auto min-w-min" htmlFor="fechaNacimiento">Fecha de Nacimiento: </label>
+                                        style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                                        <label htmlFor="fechaDesvinculacion" className="font-medium w-auto min-w-min">
+                                            Fecha de Nacimiento: </label>
 
 
                                         <Calendar
-                                            style={{ marginLeft: "20px", width: "60%" }}
+                                            style={{ width: "60%" }}
                                             className="text-2xl"
                                             id="inicio"
                                             name="inicio"

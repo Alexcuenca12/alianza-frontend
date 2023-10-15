@@ -13,8 +13,6 @@ export class FichaRepresentanteService {
   //Crear
   save(publicacion: any) {
 
-    publicacion.ocupacionSecundariaRepre = publicacion.ocupacionSecundariaRepre || 'N/A'
-
     return axios.post(this.baseUrl + "post", publicacion).then((res) => res.data);
   }
 
