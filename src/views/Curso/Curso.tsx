@@ -322,13 +322,13 @@ function Curso() {
                       id="docente"
                       name="docente"
                       options={opcionesDocente}
-                      onChange={(e) => {
-                        setFormData({
-                          ...formData,
-                          docente: { idUsuario: parseInt(e.value), persona: null, username: '', password: '', rol: null },
-                        });
+                      // onChange={(e) => {
+                      //   setFormData({
+                      //     ...formData,
+                      //     docente: { idUsuario: parseInt(e.value), persona: null, username: '', password: '', rol: null },
+                      //   });
 
-                      }}
+                      // }}
                       value={formData.docente?.idUsuario}
                       optionLabel="etiqueta"
                       optionValue="idDocente"

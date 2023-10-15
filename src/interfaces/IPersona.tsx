@@ -1,6 +1,9 @@
+import { IUsuario } from "./IUsuario";
+
 export interface IPersona {
-  idPersona?: number;
-  apellidosPersona?: string | null;
-  nombresPersona?: string | null;
-  ciIdentidadPersona?: string | null;
+  idPersona: number;
+  apellidosPersona: string;
+  nombresPersona: string;
+  tipoIdentificacion: string;
+  ciPasaporte: string;
 }

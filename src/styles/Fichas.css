@@ -130,13 +130,18 @@ select {
     align-items: center;
 }
 
-.container .form {
+/* .container .form {
+    margin-top: 15px;
+} */
+
+.form {
+    width: 100%;
     margin-top: 15px;
 }
 
-.form .input-box {
+.input-box {
     width: 100%;
-    margin-top: 15px;
+    margin-bottom: 15px;
 
 }
 

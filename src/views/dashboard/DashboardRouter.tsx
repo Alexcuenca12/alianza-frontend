@@ -24,9 +24,8 @@ import FichaFamiliar from "../FichaFamiliar/FichaFamiliar";
 import FichaEducativa from "../FichaEducativa/FichaEducativa";
 import FichaDesvinculacion from "../FichaDesvinculacion/FichaDesvinculacion";
 import FichaRepresentante from "../FichaRepresentante/FichaRepresentante";
-import Docente from "../Docente/Docente";
-import Encargado from "../Encargado/Encargado";
-import SecretariaContext from "../Secretaria/Secretaria";
+import Usuario from "../Usuario/Usuario";
+
 import Curso from "../Curso/Curso";
 import Reporte from "../Reportes/Reporte";
 import Asistencia from "../Asistencia/Asistencia";
@@ -92,21 +91,9 @@ export const DashboardRouter = () => {
 
     {
       id: "9",
-      label: "Docente",
+      label: "Usuario",
       icon: FcReadingEbook,
-      url: "/docente",
-    },
-    {
-      id: "10",
-      label: "Secretaria",
-      icon: FcBusinesswoman,
-      url: "/secretaria",
-    },
-    {
-      id: "11",
-      label: "Encargado",
-      icon: FcPodiumWithSpeaker,
-      url: "/encargado",
+      url: "/usuario",
     },
     {
       id: "12",
@@ -276,41 +263,11 @@ export const DashboardRouter = () => {
                   <SideBarMenu items={items} card={card} bodyComponent={<Home />} footerComponent={<Footer />} />
                 )}
               </Route>
-              <Route path="/docente">
+              <Route path="/usuario">
                 {rol === 1 ? (
                   <>
-                    <SideBarMenu items={items} card={card} bodyComponent={<Docente />} footerComponent={<Footer />} />
+                    <SideBarMenu items={items} card={card} bodyComponent={<Usuario />} footerComponent={<Footer />} />
                     {/* <Docente /> */}
-                    {/* <Footer /> */}
-                  </>
-                ) : rol === 2 ? (
-                  <>
-                    <SideBarMenu items={items} card={card} bodyComponent={<Home />} footerComponent={<Footer />} />
-                  </>
-                ) : (
-                  <SideBarMenu items={items} card={card} bodyComponent={<Home />} footerComponent={<Footer />} />
-                )}
-              </Route>
-              <Route path="/encargado">
-                {rol === 1 ? (
-                  <>
-                    <SideBarMenu items={items} card={card} bodyComponent={<Encargado />} footerComponent={<Footer />} />
-                    {/* <Encargado /> */}
-                    {/* <Footer /> */}
-                  </>
-                ) : rol === 2 ? (
-                  <>
-                    <SideBarMenu items={items} card={card} bodyComponent={<Home />} footerComponent={<Footer />} />
-                  </>
-                ) : (
-                  <SideBarMenu items={items} card={card} bodyComponent={<Home />} footerComponent={<Footer />} />
-                )}
-              </Route>
-              <Route path="/secretaria">
-                {rol === 1 ? (
-                  <>
-                    <SideBarMenu items={items} card={card} bodyComponent={<SecretariaContext />} footerComponent={<Footer />} />
-                    {/* <SecretariaContext /> */}
                     {/* <Footer /> */}
                   </>
                 ) : rol === 2 ? (

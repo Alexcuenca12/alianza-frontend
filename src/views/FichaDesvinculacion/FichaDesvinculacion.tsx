@@ -55,7 +55,6 @@ function FichaDesvinculacion() {
   const [excelReportData, setExcelReportData] = useState<IExcelReportParams | null>(null);
 
 
-
   const loadData = () => {
     desvinService
       .getAll()
@@ -890,7 +889,7 @@ function FichaDesvinculacion() {
                               <PiFilePdfFill className="icono"></PiFilePdfFill>
                             </div>
                           </div>
-                          <span>Generar Excel</span>
+                          <span>Descargar PDF</span>
                         </button>
 
                       ) : (

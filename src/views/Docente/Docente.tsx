@@ -207,7 +207,7 @@ function DocenteContext() {
             ...editItem,
             persona: {
               ...editItem.persona,
-              ciIdentidadPersona: editItem.persona.ciIdentidadPersona ?? "",
+              ciPasaporte: editItem.persona.ciPasaporte ?? "",
               apellidosPersona: editItem.persona.apellidosPersona ?? "",
               nombresPersona: editItem.persona.nombresPersona ?? "",
             },
@@ -335,15 +335,15 @@ function DocenteContext() {
                       id="nombre"
                       name="nombre"
                       style={{ width: "221px" }}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          persona: {
-                            ...formData.persona,
-                            nombresPersona: e.currentTarget.value,
-                          },
-                        })
-                      }
+                      // onChange={(e) =>
+                      //   setFormData({
+                      //     ...formData,
+                      //     persona: {
+                      //       ...formData.persona,
+                      //       nombresPersona: e.currentTarget.value,
+                      //     },
+                      //   })
+                      // }
                       value={formData.persona?.nombresPersona ?? ""}
                     />
                   </div>
@@ -361,15 +361,15 @@ function DocenteContext() {
                       id="apellidos"
                       name="apellidos"
                       style={{ width: "221px" }}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          persona: {
-                            ...formData.persona,
-                            apellidosPersona: e.currentTarget.value,
-                          },
-                        })
-                      }
+                      // onChange={(e) =>
+                      //   setFormData({
+                      //     ...formData,
+                      //     persona: {
+                      //       ...formData.persona,
+                      //       apellidosPersona: e.currentTarget.value,
+                      //     },
+                      //   })
+                      // }
                       value={formData.persona?.apellidosPersona ?? ""}
                     />
                   </div>
@@ -386,16 +386,16 @@ function DocenteContext() {
                       id="cedula"
                       name="cedula"
                       style={{ width: "221px" }}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          persona: {
-                            ...formData.persona,
-                            ciIdentidadPersona: e.currentTarget.value,
-                          },
-                        })
-                      }
-                      value={formData.persona?.ciIdentidadPersona ?? ""}
+                      // onChange={(e) =>
+                      //   setFormData({
+                      //     ...formData,
+                      //     persona: {
+                      //       ...formData.persona,
+                      //       ciPasaporte: e.currentTarget.value,
+                      //     },
+                      //   })
+                      // }
+                      value={formData.persona?.ciPasaporte ?? ""}
                     />
                   </div>
                 </div>
@@ -409,7 +409,7 @@ function DocenteContext() {
                       className="text-3xl font-medium w-auto min-w-min"
                       style={{ marginLeft: "25px" }}
                     >
-                      Titulo Docente:
+                      Usuario:
                     </label>
                     <InputText
                       className="text-2xl"
@@ -433,7 +433,7 @@ function DocenteContext() {
                       className="text-3xl font-medium w-auto min-w-min"
                       style={{ marginRight: "20px", marginLeft: "25px" }}
                     >
-                      Materia Docente:
+                      Contraseña:
                     </label>
                     <InputText
                       className="text-2xl"
@@ -496,7 +496,7 @@ function DocenteContext() {
               {docentes.map((docente) => (
                 <tr className="text-center" key={docente.idDocente?.toString()}>
                   <td>{docente.idDocente}</td>
-                  <td>{docente.persona?.ciIdentidadPersona}</td>
+                  <td>{docente.persona?.ciPasaporte}</td>
                   <td>
                     {docente.persona?.nombresPersona +
                       " " +

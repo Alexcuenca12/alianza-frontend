@@ -529,7 +529,7 @@ function FichaPersonal() {
             }
         ));
         const headerItems: IHeaderItem[] = [
-            { header: "ID FICHA PERSONAL" },
+            { header: "№ FICHA" },
             { header: "FOTO" },
             { header: "APELLIDOS" },
             { header: "NOMBRES" },
@@ -906,7 +906,7 @@ function FichaPersonal() {
                                                 className="text-2xl"
                                                 id="tiempo_dedicacion"
                                                 name="tiempo_dedicacion"
-                                                style={{ width: "100%", height: "36px" }}
+                                                style={{ width: "100%", height: "36px", alignItems: "center" }}
                                                 options={tipoDocumentoOpc}
                                                 onChange={(e) =>
                                                     setFormData({
@@ -1105,7 +1105,7 @@ function FichaPersonal() {
                                                 className="text-2xl"
                                                 id="tiempo_dedicacion"
                                                 name="tiempo_dedicacion"
-                                                style={{ width: "100%", height: "36px" }}
+                                                style={{ width: "100%", height: "36px", alignItems: "center" }}
                                                 options={listEtnias}
                                                 onChange={(e) =>
                                                     setFormData({
@@ -1179,7 +1179,7 @@ function FichaPersonal() {
                                             className="text-2xl"
                                             id="tiempo_dedicacion"
                                             name="tiempo_dedicacion"
-                                            style={{ width: "100%", height: "36px" }}
+                                            style={{ width: "100%", height: "36px", alignItems: "center" }}
                                             options={listRangoEdades}
                                             onChange={(e) =>
                                                 setFormData({
@@ -1283,7 +1283,7 @@ function FichaPersonal() {
                                                 placeholder="Seleccione una Provincia"
                                                 filter
                                                 className=""
-                                                style={{ width: "100%", height: "36px" }}
+                                                style={{ width: "100%", height: "36px", alignItems: "center" }}
                                             />
                                         </div>
 
@@ -1312,7 +1312,7 @@ function FichaPersonal() {
                                                 placeholder="Seleccione un Canton"
                                                 filter
                                                 className=""
-                                                style={{ width: "100%", height: "36px" }}
+                                                style={{ width: "100%", height: "36px", alignItems: "center" }}
                                             />
                                         </div>
 
@@ -1348,7 +1348,7 @@ function FichaPersonal() {
                                                 placeholder="Seleccione una Parroquia"
                                                 filter
                                                 className="text-2xl"
-                                                style={{ width: "100%", height: "36px" }}
+                                                style={{ width: "100%", height: "36px", alignItems: "center" }}
                                             />
                                         </div>
 
