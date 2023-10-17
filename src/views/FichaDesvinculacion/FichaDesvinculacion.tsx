@@ -138,7 +138,6 @@ function FichaDesvinculacion() {
           resetForm();
           swal("Publicacion", "Datos Guardados Correctamente", "success");
           resetFiltro();
-          resetForm();
         })
         .catch((error) => {
           console.error("Error al enviar el formulario:", error);
@@ -293,7 +292,6 @@ function FichaDesvinculacion() {
     fichaPersonalService
       .getBusquedaRelacion(true, busqueda)
       .then((data: IFichaPersonal[]) => {
-        console.log('Datos cargador:', { data });
         const dataWithLabel = data.map((object) => ({
           ...object,
           label: `${object.ciPasaporte} || ${object.apellidos} ${object.nombres}`,
@@ -330,6 +328,7 @@ function FichaDesvinculacion() {
     const rowData = data.map((item) => (
       {
         idFicha: item.idFichaDesvinculacion,
+        tipoIdentcedula: item.fichaPersonal?.tipoIdentificacion,
         cedula: item.fichaPersonal?.ciPasaporte,
         nombres: item.fichaPersonal?.nombres,
         apellidos: item.fichaPersonal?.apellidos,
@@ -343,7 +342,8 @@ function FichaDesvinculacion() {
     ));
     const headerItems: IHeaderItem[] = [
       { header: "№ FICHA" },
-      { header: "CEDULA" },
+      { header: "TIPO DE IDENTIFICACION" },
+      { header: "CEDULA/PASAPORTE" },
       { header: "NOMBRES" },
       { header: "APELLIDOS" },
       { header: "FECHA DE DESVINCULACIÓN" },
@@ -774,21 +774,30 @@ function FichaDesvinculacion() {
             </form>
           </section>
 
-          <Divider align="left">
+          <Divider align="left" style={{ marginBottom: "0px" }}>
             <div className="inline-flex align-items-center">
               <i className="pi pi-list mr-2"></i>
-              <b>Lista  </b>
+              <b>Lista</b>
             </div>
           </Divider>
-          <div className="">
 
-            <div className="" style={{ flex: 1 }}>
+          <div className="opcTblLayout" >
+            <div className="" style={{ flex: 1, display: "flex", alignItems: "flex-end", justifyContent: "flex-end" }}>
+
+              <div className="opcTbl" style={{ justifyContent: "right" }} >
+                <label className="font-medium w-auto min-w-min" htmlFor='estado'>Cargar todo:</label>
+
+                <Button className="buttonIcon" // Agrega una clase CSS personalizada
+                  icon="pi pi-refresh" style={{ width: "120px", height: "39px" }}
+                  severity="danger" aria-label="Cancel" onClick={() => { loadData(); resetFiltro(); }}
+                />
+
+              </div>
               <ReportBar
                 reportName={excelReportData?.reportName!}
                 headerItems={excelReportData?.headerItems!}
                 rowData={excelReportData?.rowData!}
                 logo={excelReportData?.logo!}
-
               />
             </div>
           </div>

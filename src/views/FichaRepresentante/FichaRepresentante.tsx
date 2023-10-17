@@ -18,7 +18,8 @@ import { IFichaPersonal } from "../../interfaces/IFichaPersonal";
 import { IExcelReportParams, IHeaderItem } from "../../interfaces/IExcelReportParams";
 import { ReportBar } from "../../common/ReportBar";
 import { Calendar, CalendarChangeEvent } from 'primereact/calendar';
-import { Toaster } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
+import { calcularEdad } from "../../services/functions/calcularEdad";
 
 
 
@@ -52,7 +53,6 @@ function FichaInscripcionContext() {
     observacionesRepre: "",
     nivelInstruccionRepre: "",
     parentescoRepre: "",
-    fichaInscripcion: null,
     fichaPersonal: null,
     fechaRegistro: new Date,
     genero: '',
@@ -97,42 +97,28 @@ function FichaInscripcionContext() {
     loadData();
   }, []);
 
-  const validarCampos = () => {
-    if (
-      !formData.nombresRepre ||
-      !formData.apellidosRepre ||
-      !formData.cedulaRepre ||
-      !formData.contactoRepre ||
-      !formData.contactoEmergenciaRepre ||
-      !formData.ocupacionPrimariaRepre ||
-      !formData.lugarTrabajoRepre ||
-      !formData.observacionesRepre ||
-      !formData.nivelInstruccionRepre ||
-      !formData.parentescoRepre ||
-      !formData.fechaNacimientoRepre
-    ) {
-      swal("Advertencia", "Por favor, complete todos los campos", "warning");
-      return false;
-    }
-  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (validaciones()) {
+      repreService
+        .save(formData)
+        .then((response) => {
+          loadDataID(response.fichaPersonal?.idFichaPersonal);
 
-    repreService
-      .save(formData)
-      .then((response) => {
-        resetForm();
-        swal("Publicacion", "Datos Guardados Correctamente", "success");
-        if (fileUploadRef.current) {
-          fileUploadRef.current.clear();
-        }
-        loadData();
-      })
-      .catch((error) => {
-        console.error("Error al enviar el formulario:", error);
-      });
+          resetForm();
+          resetFiltro();
+          swal("Publicacion", "Datos Guardados Correctamente", "success");
+          if (fileUploadRef.current) {
+            fileUploadRef.current.clear();
+          }
+        })
+        .catch((error) => {
+          console.error("Error al enviar el formulario:", error);
+        });
+    }
+
   };
 
   const handleDelete = (id: number | undefined) => {
@@ -186,7 +172,7 @@ function FichaInscripcionContext() {
       );
       if (editItem) {
         setFormData(editItem);
-
+        resetFiltro();
         setEditMode(true);
         setEditItemId(id);
 
@@ -214,44 +200,212 @@ function FichaInscripcionContext() {
     e.preventDefault();
 
     if (editItemId !== undefined) {
-      repreService
-        .update(Number(editItemId), formData as IFichaRepresentante)
-        .then((response) => {
-          swal({
-            title: "Publicaciones",
-            text: "Datos actualizados correctamente",
-            icon: "success",
-          });
-          setFormData({
-            nombresRepre: "",
-            apellidosRepre: "",
-            cedulaRepre: "",
-            contactoRepre: "",
-            contactoEmergenciaRepre: "",
-            fechaNacimientoRepre: "",
-            ocupacionPrimariaRepre: "",
-            ocupacionSecundariaRepre: "",
-            lugarTrabajoRepre: "",
-            observacionesRepre: "",
-            nivelInstruccionRepre: "",
-            parentescoRepre: "",
-            fichaInscripcion: null,
-            fichaPersonal: null,
-            fechaRegistro: new Date,
-            genero: '',
-            nacionalidad: '',
-            tipoIdentificacion: '',
+      if (validaciones()) {
+        repreService
+          .update(Number(editItemId), formData as IFichaRepresentante)
+          .then((response) => {
+            swal({
+              title: "Publicaciones",
+              text: "Datos actualizados correctamente",
+              icon: "success",
+            });
+            setFormData({
+              nombresRepre: "",
+              apellidosRepre: "",
+              cedulaRepre: "",
+              contactoRepre: "",
+              contactoEmergenciaRepre: "",
+              fechaNacimientoRepre: "",
+              ocupacionPrimariaRepre: "",
+              ocupacionSecundariaRepre: "",
+              lugarTrabajoRepre: "",
+              observacionesRepre: "",
+              nivelInstruccionRepre: "",
+              parentescoRepre: "",
+              fichaPersonal: null,
+              fechaRegistro: new Date,
+              genero: '',
+              nacionalidad: '',
+              tipoIdentificacion: '',
 
+            });
+            resetForm();
+            resetFiltro();
+            loadDataID(response.fichaPersonal?.idFichaPersonal);
+            setEditMode(false);
+            setEditItemId(undefined);
+          })
+          .catch((error) => {
+            console.error("Error al actualizar el formulario:", error);
           });
-          loadData();
-          setEditMode(false);
-          setEditItemId(undefined);
-        })
-        .catch((error) => {
-          console.error("Error al actualizar el formulario:", error);
-        });
+      }
+
     }
   };
+
+  function validaciones(): boolean {
+
+    if (!formData.fichaPersonal?.idFichaPersonal) {
+      toast.error("Seleccione al propietario de la ficha", {
+        style: {
+          fontSize: '15px'
+        },
+        duration: 3000,
+      })
+      return false
+    }
+
+    if (!formData.tipoIdentificacion) {
+      toast.error("Seleccione el tipo de identificacion", {
+        style: {
+          fontSize: '15px'
+        },
+        duration: 3000,
+      })
+      return false
+    }
+
+    if (!formData.cedulaRepre) {
+      toast.error("Ingrese su documento de identidad", {
+        style: {
+          fontSize: '15px'
+        },
+        duration: 3000,
+      })
+      return false
+    }
+
+    if (!formData.parentescoRepre) {
+      toast.error("Especifique el parentesco", {
+        style: {
+          fontSize: '15px'
+        },
+        duration: 3000,
+      })
+      return false
+    }
+
+    if (!formData.nombresRepre) {
+      toast.error("Por favor, ingrese los nombres", {
+        style: {
+          fontSize: '15px'
+        },
+        duration: 3000,
+      })
+      return false
+    }
+
+
+    if (!formData.apellidosRepre) {
+      toast.error("Por favor, ingrese los apellidos", {
+        style: {
+          fontSize: '15px'
+        },
+        duration: 3000,
+      })
+      return false
+    }
+
+    if (!formData.fechaNacimientoRepre) {
+      toast.error("Por favor, ingrese la fecha de nacimiento", {
+        style: {
+          fontSize: '15px'
+        },
+        duration: 3000,
+      })
+      return false
+    }
+
+    if (!formData.genero) {
+      toast.error("Por favor, seleccione el genero", {
+        style: {
+          fontSize: '15px'
+        },
+        duration: 3000,
+      })
+      return false
+    }
+
+    if (!formData.nacionalidad) {
+      toast.error("Por favor, ingrese la nacionalidad", {
+        style: {
+          fontSize: '15px'
+        },
+        duration: 3000,
+      })
+      return false
+    }
+
+
+    if (!formData.nivelInstruccionRepre) {
+      toast.error("Por favor, seleccione el nivel de intruccion", {
+        style: {
+          fontSize: '15px'
+        },
+        duration: 3000,
+      })
+      return false
+    }
+
+
+    if (!formData.lugarTrabajoRepre) {
+      toast.error("Introduzca el lugar de trabajo", {
+        style: {
+          fontSize: '15px'
+        },
+        duration: 3000,
+      })
+      return false
+    }
+
+
+    if (!formData.ocupacionPrimariaRepre) {
+
+      toast.error("Ingrese la ocupacion del representante", {
+        style: {
+          fontSize: '15px'
+        },
+        duration: 3000,
+      })
+      return false
+    }
+
+
+    if (!formData.contactoRepre) {
+      toast.error("Por favor, ingrese un número de contacto", {
+        style: {
+          fontSize: '15px'
+        },
+        duration: 3000,
+      })
+      return false
+    }
+
+    if (!formData.contactoEmergenciaRepre) {
+      toast.error("Por favor, ingrese un número de emergencia", {
+        style: {
+          fontSize: '15px'
+        },
+        duration: 3000,
+      })
+      return false
+    }
+
+
+    if (!formData.observacionesRepre) {
+      toast('No ha introducido observaciones', {
+        icon: '⚠️',
+        style: {
+          fontSize: '15px'
+
+        },
+        duration: 4000,
+      });
+    }
+
+    return true
+
+  }
 
   const resetForm = () => {
     setFormData({
@@ -267,7 +421,6 @@ function FichaInscripcionContext() {
       observacionesRepre: "",
       nivelInstruccionRepre: "",
       parentescoRepre: "",
-      fichaInscripcion: null,
       fichaPersonal: null,
       fechaRegistro: new Date,
       genero: '',
@@ -305,7 +458,6 @@ function FichaInscripcionContext() {
       });
 
 
-    console.log('Datos enviados:', { listFperonales });
 
   };
 
@@ -333,23 +485,56 @@ function FichaInscripcionContext() {
 
   function loadExcelReportData(data: IFichaRepresentante[]) {
     const reportName = "Ficha del Representante"
-    const logo = 'G1:K1'
+    const logo = 'G1:I1'
     const rowData = data.map((item) => (
       {
         idFicha: item.idFichaRepresentante,
-        cedula: item.fichaPersonal?.ciPasaporte,
-        nombres: item.fichaPersonal?.nombres,
-        apellidos: item.fichaPersonal?.apellidos,
-
+        tipoIdentificacionNNA: item.fichaPersonal?.tipoIdentificacion,
+        cedulaNNA: item.fichaPersonal?.ciPasaporte,
+        nombresNNA: item.fichaPersonal?.nombres,
+        apellidosNNA: item.fichaPersonal?.apellidos,
+        division: '||',
+        tipoIdentificacion: item.tipoIdentificacion || '',
+        cedula: item.cedulaRepre,
+        nombres: item?.nombresRepre,
+        apellidos: item?.apellidosRepre,
+        parentesco: item.parentescoRepre,
+        nacimiento: item.fechaNacimientoRepre,
+        edad: calcularEdad(item.fechaNacimientoRepre),
+        genero: item.genero,
+        nacionalidad: item.nacionalidad,
+        nivelInstruccion: item.nivelInstruccionRepre,
+        trabajo: item.lugarTrabajoRepre,
+        ocupacion: item.ocupacionPrimariaRepre,
+        ocupacionSec: item.ocupacionSecundariaRepre,
+        contacto: item.contactoRepre,
+        contactoEmerg: item.contactoEmergenciaRepre,
+        observaciones: item.observacionesRepre || 'Ninguna',
       }
     ));
     const headerItems: IHeaderItem[] = [
       { header: "№ FICHA" },
-      { header: "CEDULA" },
+      { header: "TIPO DE IDENTIFICACION (REPRESENTADO)" },
+      { header: "(REPRESENTADO) CEDULA/PASAPORTE" },
+      { header: "(REPRESENTADO) NOMBRES" },
+      { header: "(REPRESENTADO) APELLIDOS" },
+      { header: "||" },
+      { header: "TIPO DE IDENTIFICACION" },
+      { header: "CEDULA/PASAPORTE" },
       { header: "NOMBRES" },
       { header: "APELLIDOS" },
-      { header: "FECHA DE DESVINCULACIÓN" },
-      { header: "MOTIVO" },
+      { header: "PARENTESCO" },
+      { header: "FECHA DE NACIMIENTO" },
+      { header: "EDAD" },
+      { header: "GENERO" },
+      { header: "NACIONALIDAD" },
+      { header: "NIVEL DE INSTRUCCION" },
+      { header: "LUGAR DE TRABAJO" },
+      { header: "OCUPACIÓN" },
+      { header: "OCUPACION SECUNDARIA" },
+      { header: "№ DE CONTACTO" },
+      { header: "№ DE EMERGENCIA" },
+      { header: "OBSERVACIONES" },
 
 
     ]
@@ -456,15 +641,14 @@ function FichaInscripcionContext() {
                           loadRelacion();
                         }}
 
-                        onKeyUp={(e) => {
-                          setListFperonales([]); // Asignar un arreglo vacío para vaciar el estado listFperonales
+                        // onKeyUp={(e) => {
+                        //   setListFperonales([]); // Asignar un arreglo vacío para vaciar el estado listFperonales
 
-                          setBusqueda(e.currentTarget.value);
+                        //   setBusqueda(e.currentTarget.value);
 
-                          // Luego, llamar a loadRelacion después de que se actualice el estado
-                          loadRelacion();
-                          loadRelacion(); // Llama a tu método aquí o realiza las acciones necesarias.
-                        }}
+                        //   // Luego, llamar a loadRelacion después de que se actualice el estado
+                        //   loadRelacion(); // Llama a tu método aquí o realiza las acciones necesarias.
+                        // }}
 
                         value={busqueda}
                       />
@@ -511,7 +695,6 @@ function FichaInscripcionContext() {
                         });
                         cargarFoto(parseInt(e.value))
                         loadDataID(parseInt(e.value))
-                        console.log(formData)
                       }}
                       value={formData.fichaPersonal?.idFichaPersonal}
                       optionLabel="label"
@@ -549,7 +732,9 @@ function FichaInscripcionContext() {
               <div className='column' style={{}}>
                 <div className='column' style={{ width: "30.3%" }}>
                   <div className='input-box' style={{}}>
-                    <label className="font-medium w-auto min-w-min" htmlFor="tipoDocumento">Tipo de documento:</label>
+                    <label className="font-medium w-auto min-w-min" htmlFor="tipoDocumento">
+                      Tipo de documento:
+                    </label>
                     <div className=" " style={{ width: "100%" }}>
                       <Dropdown
                         className="text-2xl"
@@ -577,9 +762,9 @@ function FichaInscripcionContext() {
 
                 <div className='column' style={{ width: "30.3%" }}>
                   <div className='input-box' >
-                    <label className="font-medium w-auto min-w-min" htmlFor="cedula;">
+                    <label className="font-medium w-auto min-w-min" htmlFor="cedula">
                       {!formData.tipoIdentificacion
-                        ? 'Debe seleccionar el tipo de identificaicon'
+                        ? 'Debe seleccionar el tipo de identificaicon:'
                         : formData.tipoIdentificacion === 'Cédula'
                           ? 'Cédula:'
                           : 'Pasaporte:'}
@@ -693,7 +878,7 @@ function FichaInscripcionContext() {
                       name="fechaNacimientoRepre"
                       placeholder="Ingrese la fecha de nacimiento"
                       required
-                      dateFormat="yy-mm-dd"
+                      dateFormat="dd-mm-yy" // Cambiar el formato a ISO 8601
                       showIcon
                       maxDate={new Date()}
                       onChange={(e) => {
@@ -942,7 +1127,6 @@ function FichaInscripcionContext() {
 
               </div>
               <div className='btnSend' style={{ marginTop: "1px" }}>
-
                 <div className="flex align-items-center justify-content-center w-auto min-w-min"
                   style={{ gap: "25px" }}>
                   <Button
@@ -966,24 +1150,58 @@ function FichaInscripcionContext() {
                     onClick={() => {
                       resetForm();
                       resetFiltro();
+                      setEditMode(false);
+
                     }} />
                 </div>
               </div>
             </form>
           </section>
 
+          <Divider align="left" style={{ marginBottom: "0px" }}>
+            <div className="inline-flex align-items-center">
+              <i className="pi pi-list mr-2"></i>
+              <b>Lista</b>
+            </div>
+          </Divider>
+
+          <div className="opcTblLayout" >
+            <div className="" style={{ flex: 1, display: "flex", alignItems: "flex-end", justifyContent: "flex-end" }}>
+
+              <div className="opcTbl" style={{ justifyContent: "right" }} >
+                <label className="font-medium w-auto min-w-min" htmlFor='estado'>Cargar todo:</label>
+
+                <Button className="buttonIcon" // Agrega una clase CSS personalizada
+                  icon="pi pi-refresh" style={{ width: "120px", height: "39px" }}
+                  severity="danger" aria-label="Cancel" onClick={() => { loadData(); resetFiltro(); }}
+                />
+
+              </div>
+              <ReportBar
+                reportName={excelReportData?.reportName!}
+                headerItems={excelReportData?.headerItems!}
+                rowData={excelReportData?.rowData!}
+                logo={excelReportData?.logo!}
+              />
+            </div>
+          </div>
+
           <div className="tblContainer" >
             <table className="tableFichas">
               <thead className="theadTab" >
 
                 <tr style={{ backgroundColor: "#871b1b", color: "white" }}>
-                  <th className="trFichas">Nº de Registro</th>
-                  <th className="trFichas">Centro Educativo</th>
-                  <th className="trFichas">Dirección </th>
-                  <th className="trFichas">Referencia</th>
-                  <th className="trFichas">Jornada de Asistencia</th>
-                  <th className="trFichas">Observaciones</th>
-                  <th className="trFichas">Grado</th>
+                  <th className="trFichas">Nº Ficha</th>
+                  <th className="trFichas">Reprensentado</th>
+                  <th className="trFichas">||</th>
+                  <th className="trFichas">Representante</th>
+                  <th className="trFichas">Cedula/Pasaporte</th>
+                  <th className="trFichas">Parentesco</th>
+                  <th className="trFichas">Edad</th>
+                  <th className="trFichas">Lugar de trabajo</th>
+                  <th className="trFichas">Contacto</th>
+                  <th className="trFichas">Contacto de emergencia</th>
+                  <th className="trFichas">Ocupacion</th>
                   <th className="trFichas">Editar</th>
                   <th className="trFichas">Eliminar</th>
                 </tr>
@@ -995,12 +1213,17 @@ function FichaInscripcionContext() {
                     key={contrato.idFichaRepresentante?.toString()}
                   >
                     <td className="tdFichas">{contrato.idFichaRepresentante}</td>
-                    <td className="tdFichas">{contrato.nombresRepre}</td>
-                    <td className="tdFichas">{contrato.apellidosRepre}</td>
+                    <td className="tdFichas">{`${contrato.fichaPersonal?.nombres} ${contrato.fichaPersonal?.apellidos}`}</td>
+                    <td className="tdFichas">||</td>
+                    <td className="tdFichas">{`${contrato.nombresRepre} ${contrato.apellidosRepre}`}</td>
                     <td className="tdFichas">{contrato.cedulaRepre}</td>
+                    <td className="tdFichas">{contrato.parentescoRepre}</td>
+                    <td className="tdFichas">{calcularEdad(contrato.fechaNacimientoRepre)}</td>
+                    <td className="tdFichas">{contrato.lugarTrabajoRepre}</td>
                     <td className="tdFichas">{contrato.contactoRepre}</td>
                     <td className="tdFichas">{contrato.contactoEmergenciaRepre}</td>
-                    <td className="tdFichas">{contrato.fechaNacimientoRepre}</td>
+                    <td className="tdFichas">{contrato.ocupacionPrimariaRepre}</td>
+
                     <td className="tdFichas">
                       <Button className="buttonIcon"
                         type="button"

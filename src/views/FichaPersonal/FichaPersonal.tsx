@@ -14,15 +14,12 @@ import cardHeader from "../../shared/CardHeader";
 import { Calendar, CalendarChangeEvent } from 'primereact/calendar';
 import { Dropdown, DropdownChangeEvent } from 'primereact/dropdown';
 import { Button } from "primereact/button";
-import { ICalcularEdad } from '../../interfaces/ICalcularEdad';
-import CalcularEdad from "../../common/CalcularEdad";
 import { CantonService } from "../../services/CantonService";
 import { Divider } from 'primereact/divider';
 import { ParroquiaService } from "../../services/ParroquiaService";
 import { ICanton } from "../../interfaces/ICanton";
 import { RangoEdadService } from "../../services/RangoEdadService";
 import { EtniaService } from "../../services/EtniaService";
-import { Toast } from "primereact/toast";
 import { ProvinciaService } from "../../services/ProvinciaService";
 import { IProvincia } from "../../interfaces/IProvincia";
 import { InputText } from "primereact/inputtext";
@@ -402,6 +399,9 @@ function FichaPersonal() {
                             estVinculacion: false,
                             fechaRegistro: new Date()
                         });
+                        if (fileUploadRef.current) {
+                            fileUploadRef.current.clear();
+                        };
                         setSelectedCanton(null);
                         setSelectedProvincia(null);
                         loadData();
@@ -1626,7 +1626,7 @@ function FichaPersonal() {
                         </div>
                     </div>
 
-                    <Divider align="left">
+                    <Divider align="left" style={{ marginBottom: "0px" }}>
                         <div className="inline-flex align-items-center">
                             <i className="pi pi-list mr-2"></i>
                             <b>Lista  </b>
@@ -1645,7 +1645,7 @@ function FichaPersonal() {
 
                                 <tr>
                                     <th className="trFichas">Nº Ficha</th>
-                                    <th className="trFichas">Cedula</th>
+                                    <th className="trFichas">Cedula/Pasaporte</th>
                                     <th className="trFichas">Nombres</th>
                                     <th className="trFichas">Apellidos</th>
                                     <th className="trFichas">Nacionalidad</th>

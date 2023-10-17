@@ -22,8 +22,6 @@ export class FichaRepresentanteService {
   }
   //Metodo para actualizar un horario basado en el id de la misma
   update(id: number, user: any) {
-    user.ocupacionSecundariaRepre = user.ocupacionSecundariaRepre || 'N/A'
-
     return axios
       .put(this.baseUrl + "put/" + id.toString(), user)
       .then((res) => res.data);
