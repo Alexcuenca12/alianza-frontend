@@ -9,11 +9,13 @@ import { FileUpload, FileUploadSelectEvent } from "primereact/fileupload";
 import { Fieldset } from "primereact/fieldset";
 import { Card } from "primereact/card";
 import cardHeader from "../../shared/CardHeader";
-import { Calendar } from "primereact/calendar";
+import { Calendar, CalendarChangeEvent } from 'primereact/calendar';
 import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
 import { InputText } from 'primereact/inputtext';
 
+
+import { Divider } from 'primereact/divider';
 
 import { ICalcularEdad } from '../../interfaces/ICalcularEdad';
 import CalcularEdad from "../../common/CalcularEdad";
@@ -63,7 +65,9 @@ function FichaPersonal() {
         discapacidadIntegrantes: false,
         otrasSituaciones: '',
         tipoFamilia: null,
-        fichaPersonal: null
+        fichaPersonal: null,
+        fechaRegistro: new Date
+
     });
 
     useEffect(() => {
@@ -98,28 +102,50 @@ function FichaPersonal() {
             });
     };
 
+    const validaciones = () => {
+
+        if (!formData.jefaturaFamiliar || (formData.tipoFamilia && formData.tipoFamilia.idTipoFamilia <= 0)) {
+            swal("Alerta", "Debe llenar los campos obligatorios", "warning");
+            return false;
+        } else {
+            if ((formData.numAdultos + formData.numAdultosMayores + formData.numNNA) !== formData.numIntegrantes) {
+                swal("Alerta", "El numero de integrantes no coincide", "warning");
+                return false;
+
+            } else {
+                return true;
+            }
+        }
+
+
+
+    }
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        service
-            .save(formData)
-            .then((response) => {
-                resetForm();
-                swal("Publicacion", "Datos Guardados Correctamente", "success");
+        if (validaciones()) {
+            service
+                .save(formData)
+                .then((response) => {
+                    resetForm();
+                    swal("Perfecto", "Datos Guardados Correctamente", "success");
 
-                service
-                    .getAll()
-                    .then((data) => {
-                        setFichaFamiliar(data);
-                        resetForm();
-                    })
-                    .catch((error) => {
-                        console.error("Error al obtener los datos:", error);
-                    });
+                    service
+                        .getAll()
+                        .then((data) => {
+                            setFichaFamiliar(data);
+                            resetForm();
+                        })
+                        .catch((error) => {
+                            console.error("Error al obtener los datos:", error);
+                        });
 
-            })
-            .catch((error) => {
-                console.error("Error al enviar el formulario:", error);
-            });
+                })
+                .catch((error) => {
+                    console.error("Error al enviar el formulario:", error);
+                });
+        }
+
 
 
         // Aquí puedes enviar los datos del formulario al servidor o realizar otras acciones
@@ -182,7 +208,7 @@ function FichaPersonal() {
                 setEditMode(true);
                 setEditItemId(id);
 
-                setBusqueda(editItem.fichaPersonal?.ciIdentidad ?? "");
+                setBusqueda(editItem.fichaPersonal?.ciPasaporte ?? "");
                 setFoto(editItem.fichaPersonal?.foto ?? '')
 
 
@@ -192,7 +218,7 @@ function FichaPersonal() {
                         ...editItem,
                         fichaPersonal: {
                             ...editItem.fichaPersonal,
-                            label: `${editItem.fichaPersonal.ciIdentidad} || ${editItem.fichaPersonal.apellidos} ${editItem.fichaPersonal.nombres}`,
+                            label: `${editItem.fichaPersonal.ciPasaporte} || ${editItem.fichaPersonal.apellidos} ${editItem.fichaPersonal.nombres}`,
                         },
                     };
                     setListFperonales([editItemWithLabel.fichaPersonal]);
@@ -229,7 +255,9 @@ function FichaPersonal() {
                         discapacidadIntegrantes: false,
                         otrasSituaciones: '',
                         tipoFamilia: null,
-                        fichaPersonal: null
+                        fichaPersonal: null,
+                        fechaRegistro: new Date
+
                     });
                     loadData();
 
@@ -258,7 +286,9 @@ function FichaPersonal() {
             discapacidadIntegrantes: false,
             otrasSituaciones: '',
             tipoFamilia: null,
-            fichaPersonal: null
+            fichaPersonal: null,
+            fechaRegistro: new Date
+
         });
 
     };
@@ -271,7 +301,7 @@ function FichaPersonal() {
             .then((data: IFichaPersonal[]) => {
                 const dataWithLabel = data.map((object) => ({
                     ...object,
-                    label: `${object.ciIdentidad} || ${object.apellidos} ${object.nombres}`,
+                    label: `${object.ciPasaporte} || ${object.apellidos} ${object.nombres}`,
                 }));
 
                 setListFperonales(dataWithLabel); // Establecer los datos procesados en el estado
@@ -322,22 +352,6 @@ function FichaPersonal() {
 
     };
 
-    const generarExcel = () => {
-        const wb = XLSX.utils.book_new();
-
-        // Crear una copia de la lista excluyendo el campo 'foto'
-        // const listSinFoto = listFichaFamiliar.map(({ foto, ...rest }) => rest);
-
-        const ws = XLSX.utils.json_to_sheet(listFichaFamiliar);
-
-        // Resto del código para aplicar estilos y encabezados (como se mostró en tu código original) ...
-
-        XLSX.utils.book_append_sheet(wb, ws, 'FichaFamiliar');
-
-        // Descargar el archivo Excel
-        XLSX.writeFile(wb, 'FichaFamiliar.xlsx');
-    };
-
 
     function loadExcelReportData(data: IFichaFamiliar[]) {
         const reportName = "Ficha Familiar"
@@ -346,7 +360,7 @@ function FichaPersonal() {
         const rowData = data.map((item) => (
             {
                 idFicha: item.idFichaFamiliar,
-                cedula: item.fichaPersonal?.ciIdentidad,
+                cedula: item.fichaPersonal?.ciPasaporte,
                 nombres: item.fichaPersonal?.nombres,
                 apellidos: item.fichaPersonal?.apellidos,
                 jefaturaFamiliar: item.jefaturaFamiliar,
@@ -405,6 +419,23 @@ function FichaPersonal() {
                         Ficha Familiar
                     </h1>
                 </div>
+
+                <div className="" style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "right" }}>
+                    <label className="font-medium w-auto min-w-min" htmlFor="fichaPersonal" style={{ marginRight: "10px" }}>Fecha de Registro:</label>
+                    <Calendar
+                        disabled
+                        style={{ width: "95px", marginRight: "25px", fontWeight: "bold" }}
+                        value={formData.fechaRegistro}
+                        onChange={(e: CalendarChangeEvent) => {
+                            if (e.value !== undefined) {
+                                setFormData({
+                                    ...formData,
+                                    fechaRegistro: e.value,
+                                });
+                            }
+                        }} />
+                </div>
+
                 <section className="flex justify-content-center flex-wrap container">
 
 
@@ -472,7 +503,10 @@ function FichaPersonal() {
                                                     idFichaPersonal: parseInt(e.value), foto: '',
                                                     apellidos: '',
                                                     nombres: '',
-                                                    ciIdentidad: '',
+                                                    ciPasaporte: '',
+                                                    tipoIdentificacion: '',
+                                                    actTrabInfantil: false,
+                                                    detalleActTrabInfantil: '',
                                                     nacionalidad: '',
                                                     fechaNacimiento: '',
                                                     rangoEdad: null,
@@ -485,7 +519,8 @@ function FichaPersonal() {
                                                     referencia: '',
                                                     coordenadaX: 0,
                                                     coordenadaY: 0,
-                                                    estVinculacion: true
+                                                    estVinculacion: true,
+                                                    fechaRegistro: new Date()
                                                 }
                                             });
                                             cargarFoto(parseInt(e.value))
@@ -515,9 +550,9 @@ function FichaPersonal() {
                                 </div>
                             </div>
                         </section>
-
-
                     </Fieldset>
+
+                    <Divider />
 
                     <form onSubmit={editMode ? handleUpdate : handleSubmit} className='form' encType="multipart/form-data">
 
@@ -529,6 +564,7 @@ function FichaPersonal() {
                                         className="input"
                                         type="text"
                                         id="jefaturaFamiliar"
+
                                         value={formData.jefaturaFamiliar}
                                         placeholder='Ingrese el nombre del jefe del hogar'
 
@@ -567,41 +603,39 @@ function FichaPersonal() {
 
 
 
-                                <div className="gender-box">
+                                <div className="input-box">
                                     <label className="font-medium w-auto min-w-min" htmlFor='genero'>Visita Domiciliar:</label>
 
-                                    <div className='gender-option'>
-                                        <div className='gender'>
-                                            <div className="mydict">
-                                                <div>
-                                                    <label>
-                                                        <input
-                                                            className="input"
-                                                            type="radio"
-                                                            id="genSI"
-                                                            name="genSI"
-                                                            value="true"
-                                                            checked={formData.visitaDomiciliaria === true}
-                                                            onChange={(e) => setFormData({ ...formData, visitaDomiciliaria: true })}
-                                                        />
-                                                        <span>SI</span>
-                                                    </label>
-                                                    <label>
-                                                        <input
-                                                            className="input"
-                                                            type="radio"
-                                                            id="genNO"
-                                                            name="genNO"
-                                                            value="false"
-                                                            checked={formData.visitaDomiciliaria === false}
-                                                            onChange={(e) => setFormData({ ...formData, visitaDomiciliaria: false })}
+                                    <div className='gender'>
+                                        <div className="mydict">
+                                            <div>
+                                                <label>
+                                                    <input
+                                                        className="input"
+                                                        type="radio"
+                                                        id="genSI"
+                                                        name="genSI"
+                                                        value="true"
+                                                        checked={formData.visitaDomiciliaria === true}
+                                                        onChange={(e) => setFormData({ ...formData, visitaDomiciliaria: true })}
+                                                    />
+                                                    <span>SI</span>
+                                                </label>
+                                                <label>
+                                                    <input
+                                                        className="input"
+                                                        type="radio"
+                                                        id="genNO"
+                                                        name="genNO"
+                                                        value="false"
+                                                        checked={formData.visitaDomiciliaria === false}
+                                                        onChange={(e) => setFormData({ ...formData, visitaDomiciliaria: false })}
 
-                                                        />
-                                                        <span>NO</span>
-                                                    </label>
+                                                    />
+                                                    <span>NO</span>
+                                                </label>
 
 
-                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -728,41 +762,37 @@ function FichaPersonal() {
 
                         <div className="column">
 
-                            <div className="gender-box">
+                            <div className="input-box">
                                 <label className="font-medium w-auto min-w-min" htmlFor='discapacidadIntegrantes'>¿En su residencia, convive alguna persona con discapacidad?:</label>
 
-                                <div className='gender-option'>
-                                    <div className='gender'>
-                                        <div className="mydict">
-                                            <div>
-                                                <label>
-                                                    <input
-                                                        className="input"
-                                                        type="radio"
-                                                        id="genSiDis"
-                                                        name="genSiDis"
-                                                        value="true"
-                                                        checked={formData.discapacidadIntegrantes === true}
-                                                        onChange={(e) => setFormData({ ...formData, discapacidadIntegrantes: true })}
-                                                    />
-                                                    <span>SI</span>
-                                                </label>
-                                                <label>
-                                                    <input
-                                                        className="input"
-                                                        type="radio"
-                                                        id="genNoDis"
-                                                        name="genNoDis"
-                                                        value="false"
-                                                        checked={formData.discapacidadIntegrantes === false}
-                                                        onChange={(e) => setFormData({ ...formData, discapacidadIntegrantes: false })}
+                                <div className='gender'>
+                                    <div className="mydict">
+                                        <div>
+                                            <label>
+                                                <input
+                                                    className="input"
+                                                    type="radio"
+                                                    id="genSiDis"
+                                                    name="genSiDis"
+                                                    value="true"
+                                                    checked={formData.discapacidadIntegrantes === true}
+                                                    onChange={(e) => setFormData({ ...formData, discapacidadIntegrantes: true })}
+                                                />
+                                                <span>SI</span>
+                                            </label>
+                                            <label>
+                                                <input
+                                                    className="input"
+                                                    type="radio"
+                                                    id="genNoDis"
+                                                    name="genNoDis"
+                                                    value="false"
+                                                    checked={formData.discapacidadIntegrantes === false}
+                                                    onChange={(e) => setFormData({ ...formData, discapacidadIntegrantes: false })}
 
-                                                    />
-                                                    <span>NO</span>
-                                                </label>
-
-
-                                            </div>
+                                                />
+                                                <span>NO</span>
+                                            </label>
                                         </div>
                                     </div>
                                 </div>
@@ -771,13 +801,22 @@ function FichaPersonal() {
 
 
                             <div className='input-box'>
-                                <label className="font-medium w-auto min-w-min" htmlFor="otrasSituaciones">Otras situaciones familiares:</label>
+                                {/* <label className="font-medium w-auto min-w-min" htmlFor="otrasSituaciones">Otras situaciones familiares:</label> */}
+                                <label className="font-medium w-auto min-w-min" htmlFor="otrasSituaciones">
+                                    {formData.discapacidadIntegrantes
+                                        ? 'Brinde mas detalles acerca de la situacion:'
+                                        : 'Otras situaciones:'}
+                                </label>
                                 <input
                                     className="input"
                                     type="text"
                                     id="organizacionBeneficio"
+                                    placeholder={
+                                        formData.discapacidadIntegrantes
+                                            ? 'Proporcione mas detalles acerca de la situacion de su familiar'
+                                            : 'Otras situaciones familiares relacionadas'
+                                    }
                                     value={formData.otrasSituaciones}
-                                    placeholder='Otras situaciones familiares relacionadas'
 
                                     onChange={(e) => setFormData({ ...formData, otrasSituaciones: e.target.value })}
                                     required
@@ -876,7 +915,7 @@ function FichaPersonal() {
                                     <td>{ficha.numAdultosMayores}</td>
                                     <td>{ficha.beneficioAdicional || 'N/A'}</td>
                                     <td>{ficha.organizacionBeneficio || 'N/A'}</td>
-                                    <td>{ficha.otrasSituaciones || 'N/A'}</td>
+                                    <td>{ficha.discapacidadIntegrantes ? "SI" : "NO"}</td>
                                     {/* <td>{ficha.organizacionBeneficio}</td> */}
 
                                     <td style={{ display: "flex", gap: "10px", justifyContent: "center" }}>

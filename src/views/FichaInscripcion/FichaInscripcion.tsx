@@ -3,7 +3,7 @@ import { InputText } from "primereact/inputtext";
 import { FileUpload } from "primereact/fileupload";
 import { Button } from "primereact/button";
 import { MultiSelect, MultiSelectChangeEvent } from "primereact/multiselect";
-import { Calendar } from "primereact/calendar";
+import { Calendar, CalendarChangeEvent } from 'primereact/calendar';
 import { Fieldset } from "primereact/fieldset";
 import { Card } from "primereact/card";
 import { Dropdown } from "primereact/dropdown";
@@ -18,6 +18,7 @@ import swal from "sweetalert";
 import { ReportBar } from "../../common/ReportBar";
 import { IExcelReportParams, IHeaderItem } from "../../interfaces/IExcelReportParams";
 import '../../styles/FiltroFichas.css'
+import { Divider } from 'primereact/divider';
 
 
 function FichaInscripcionContext() {
@@ -47,17 +48,18 @@ function FichaInscripcionContext() {
   const [busquedaCedulaCompleta, setBusquedaCedulaCompleta] = useState(false);
 
   const tipoProyectoOptions = [
+    { label: "APIA", value: "APIA" },
+    { label: "EMAC", value: "EMAC" },
     { label: "MIES", value: "MIES" },
     { label: "MUNICIPIO", value: "MUNICIPIO" },
-    { label: "EMAC", value: "EMAC" },
   ];
   const jornadaOptions = [
     { label: "Matutina", value: "Matutina" },
     { label: "Vespertina", value: "Vespertina" },
   ];
   const diasOptions = [
-    { label: "Lunes a Viernes", value: "Lunes a Viernes" },
-    { label: "Lunes a Sábado", value: "Lunes a Sábado" },
+    { label: "Lun - Mie - Vie", value: "Lun - Mie - Vie" },
+    { label: "Lun a Vie", value: "Lun a Vie" },
   ];
 
   const [contra1, setcontra1] = useState<IFichaInscripcion[]>([]);
@@ -72,6 +74,8 @@ function FichaInscripcionContext() {
     jornadaAsistenciaInscrip: "",
     fichaPersonal: null,
     curso: null,
+    fechaRegistro: new Date
+
   });
 
   useEffect(() => {
@@ -188,7 +192,7 @@ function FichaInscripcionContext() {
         setEditMode(true);
         setEditItemId(id);
 
-        setBusqueda(editItem.fichaPersonal?.ciIdentidad ?? "");
+        setBusqueda(editItem.fichaPersonal?.ciPasaporte ?? "");
         setFoto(editItem.fichaPersonal?.foto ?? '')
 
 
@@ -198,7 +202,7 @@ function FichaInscripcionContext() {
             ...editItem,
             fichaPersonal: {
               ...editItem.fichaPersonal,
-              label: `${editItem.fichaPersonal.ciIdentidad} || ${editItem.fichaPersonal.apellidos} ${editItem.fichaPersonal.nombres}`,
+              label: `${editItem.fichaPersonal.ciPasaporte} || ${editItem.fichaPersonal.apellidos} ${editItem.fichaPersonal.nombres}`,
             },
           };
           setListFperonales([editItemWithLabel.fichaPersonal]);
@@ -231,6 +235,8 @@ function FichaInscripcionContext() {
             jornadaAsistenciaInscrip: "",
             fichaPersonal: null,
             curso: null,
+            fechaRegistro: new Date
+
           });
           loadData();
           setEditMode(false);
@@ -251,6 +257,8 @@ function FichaInscripcionContext() {
       jornadaAsistenciaInscrip: "",
       fichaPersonal: null,
       curso: null,
+      fechaRegistro: new Date
+
     });
     setEditMode(false);
     setEditItemId(undefined);
@@ -270,7 +278,7 @@ function FichaInscripcionContext() {
       .then((data: IFichaPersonal[]) => {
         const dataWithLabel = data.map((object) => ({
           ...object,
-          label: `${object.ciIdentidad} || ${object.apellidos} ${object.nombres}`,
+          label: `${object.ciPasaporte} || ${object.apellidos} ${object.nombres}`,
         }));
 
         setListFperonales(dataWithLabel); // Establecer los datos procesados en el estado
@@ -313,7 +321,7 @@ function FichaInscripcionContext() {
     const rowData = data.map((item) => (
       {
         idFicha: item.idFichaInscripcion,
-        cedula: item.fichaPersonal?.ciIdentidad,
+        cedula: item.fichaPersonal?.ciPasaporte,
         nombres: item.fichaPersonal?.nombres,
         apellidos: item.fichaPersonal?.apellidos,
         fechaInscripcion: new Date(item.fechaIngresoInscrip!).toLocaleDateString("es-ES", {
@@ -375,7 +383,7 @@ function FichaInscripcionContext() {
       <Card
         header={cardHeader}
         className="border-solid border-red-800 border-3 flex-1 flex-wrap"
-        style={{ width: "90%", marginLeft: "7%", height: "100%" }}
+        style={{ width: "90%", marginLeft: "3%", height: "100%" }}
       >
         <div
           className="h1-rem"
@@ -384,6 +392,22 @@ function FichaInscripcionContext() {
           <h1 className="text-5xl font-smibold lg:md-2  w-full h-full max-w-full max-h-full min-w-min">
             Ficha de Inscripción
           </h1>
+        </div>
+
+        <div className="" style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "right" }}>
+          <label className="font-medium w-auto min-w-min" htmlFor="fichaPersonal" style={{ marginRight: "10px" }}>Fecha de Registro:</label>
+          <Calendar
+            disabled
+            style={{ width: "95px", marginRight: "25px", fontWeight: "bold" }}
+            value={formData.fechaRegistro}
+            onChange={(e: CalendarChangeEvent) => {
+              if (e.value !== undefined) {
+                setFormData({
+                  ...formData,
+                  fechaRegistro: e.value,
+                });
+              }
+            }} />
         </div>
 
         <div className="flex justify-content-center flex-wrap">
@@ -449,7 +473,10 @@ function FichaInscripcionContext() {
                           idFichaPersonal: parseInt(e.value), foto: '',
                           apellidos: '',
                           nombres: '',
-                          ciIdentidad: '',
+                          ciPasaporte: '',
+                          tipoIdentificacion: '',
+                          actTrabInfantil: false,
+                          detalleActTrabInfantil: '',
                           nacionalidad: '',
                           fechaNacimiento: '',
                           rangoEdad: null,
@@ -462,7 +489,8 @@ function FichaInscripcionContext() {
                           referencia: '',
                           coordenadaX: 0,
                           coordenadaY: 0,
-                          estVinculacion: true
+                          estVinculacion: true,
+                          fechaRegistro: new Date()
                         }
                       });
                       cargarFoto(parseInt(e.value))
@@ -492,9 +520,10 @@ function FichaInscripcionContext() {
                 </div>
               </div>
             </section>
-
-
           </Fieldset>
+
+          <Divider />
+
           <form
             onSubmit={editMode ? handleUpdate : handleSubmit}
             encType="multipart/form-data"
@@ -556,7 +585,7 @@ function FichaInscripcionContext() {
                       style={{ width: "220px", marginLeft: "15px" }}
                       options={cursos}
                       onChange={(e) =>
-                        setFormData({ ...formData, curso: { idCurso: parseInt(e.value), docente: null, estadoCurso: true, fechaInicio: "0000-00-00", nombreCurso: '', rangoEdad: null } })
+                        setFormData({ ...formData, curso: { idCurso: parseInt(e.value), docente: null, fechaInicio: "0000-00-00", nombreCurso: '', rangoEdad: null } })
                       }
                       value={formData.curso} // Make sure this is correctly bound
                       optionLabel="nombreCurso"

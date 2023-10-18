@@ -3,7 +3,7 @@ import Home from "./home/Home";
 import { Toast } from "primereact/toast";
 import React, { useRef } from "react";
 import Footer from "../../common/Footer";
-import { FcBusinessContact, FcBusinessman, FcBusinesswoman, FcCalendar } from "react-icons/fc";
+import { FcBusinessContact, FcBusinessman, FcBusinesswoman } from "react-icons/fc";
 import { FcHome } from "react-icons/fc";
 import { FcExport } from "react-icons/fc";
 import { FcGraduationCap } from "react-icons/fc";
@@ -24,13 +24,11 @@ import FichaFamiliar from "../FichaFamiliar/FichaFamiliar";
 import FichaEducativa from "../FichaEducativa/FichaEducativa";
 import FichaDesvinculacion from "../FichaDesvinculacion/FichaDesvinculacion";
 import FichaRepresentante from "../FichaRepresentante/FichaRepresentante";
-import Docente from "../Docente/Docente";
-import Encargado from "../Encargado/Encargado";
-import SecretariaContext from "../Secretaria/Secretaria";
+import Usuario from "../Usuario/Usuario";
+
 import Curso from "../Curso/Curso";
 import Reporte from "../Reportes/Reporte";
 import Asistencia from "../Asistencia/Asistencia";
-import Anexo from "../Anexos/Anexos";
 
 export const DashboardRouter = () => {
   //Datos del sessionStorage
@@ -93,21 +91,9 @@ export const DashboardRouter = () => {
 
     {
       id: "9",
-      label: "Docente",
+      label: "Usuario",
       icon: FcReadingEbook,
-      url: "/docente",
-    },
-    {
-      id: "10",
-      label: "Secretaria",
-      icon: FcBusinesswoman,
-      url: "/secretaria",
-    },
-    {
-      id: "11",
-      label: "Encargado",
-      icon: FcPodiumWithSpeaker,
-      url: "/encargado",
+      url: "/usuario",
     },
     {
       id: "12",
@@ -123,13 +109,6 @@ export const DashboardRouter = () => {
     },
     {
       id: "14",
-      label: "Asistencia",
-      icon: FcCalendar,
-      url: "/asistencia",
-    },
-
-      {
-      id: "15",
       label: "Anexos",
       icon: FcInspection,
       url: "/anexo",
@@ -155,250 +134,187 @@ export const DashboardRouter = () => {
               <Route path="/dashboard/home">
                 {rol === 1 ? (
                   <>
-                    <SideBarMenu items={items} card={card} />
-                    <Home />
+                    <SideBarMenu items={items} card={card} bodyComponent={<Home />} footerComponent={<Footer />} />
+                    {/* <Home /> */}
                   </>
                 ) : rol === 2 ? (
                   <>
-                    <SideBarMenu items={items} card={card} />
-                    <Home />
+                    <SideBarMenu items={items} card={card} bodyComponent={<Home />} footerComponent={<Footer />} />
+                    {/* <Home /> */}
                   </>
                 ) : (
                   <>
-                    <SideBarMenu items={items} card={card} />
+                    <SideBarMenu items={items} card={card} bodyComponent={<Home />} footerComponent={<Footer />} />
                   </>
                 )}
               </Route>
               <Route path="/login">
                 {rol === 1 ? (
-                  <SideBarMenu items={items} card={card} />
+                  <SideBarMenu items={items} card={card} bodyComponent={<Home />} footerComponent={<Footer />} />
                 ) : rol === 2 ? (
-                  <SideBarMenu items={items} card={card} />
+                  <SideBarMenu items={items} card={card} bodyComponent={<Home />} footerComponent={<Footer />} />
                 ) : (
-                  <SideBarMenu items={items} card={card} />
+                  <SideBarMenu items={items} card={card} bodyComponent={<Home />} footerComponent={<Footer />} />
                 )}
               </Route>
               <Route path="/inscripción">
                 {rol === 1 ? (
                   <>
-                    <SideBarMenu items={items} card={card} />
-                    <FichaInscripcionContext />
-                    <Footer />
+                    <SideBarMenu items={items} card={card} bodyComponent={<FichaInscripcionContext />} footerComponent={<Footer />} />
+                    {/* <FichaInscripcionContext /> */}
+                    {/* <Footer /> */}
                   </>
                 ) : rol === 2 ? (
                   <>
-                    <SideBarMenu items={items} card={card} />
+                    <SideBarMenu items={items} card={card} bodyComponent={<Home />} footerComponent={<Footer />} />
                   </>
                 ) : (
-                  <SideBarMenu items={items} card={card} />
+                  <SideBarMenu items={items} card={card} bodyComponent={<Home />} footerComponent={<Footer />} />
                 )}
               </Route>
               <Route path="/salud">
                 {rol === 1 ? (
                   <>
-                    <SideBarMenu items={items} card={card} />
-                    <FichaSalud />
-                    <Footer />
+                    <SideBarMenu items={items} card={card} bodyComponent={<FichaSalud />} footerComponent={<Footer />} />
+                    {/* <FichaSalud></FichaSalud> */}
+                    {/* <Asistencia /> */}
+                    {/* <Footer /> */}
                   </>
                 ) : rol === 2 ? (
                   <>
-                    <SideBarMenu items={items} card={card} />
+                    <SideBarMenu items={items} card={card} bodyComponent={<Home />} footerComponent={<Footer />} />
                   </>
                 ) : (
-                  <SideBarMenu items={items} card={card} />
+                  <SideBarMenu items={items} card={card} bodyComponent={<Home />} footerComponent={<Footer />} />
                 )}
               </Route>
               <Route path="/personal">
                 {rol === 1 ? (
                   <>
-                    <div className="estructura">
-                      <SideBarMenu items={items} card={card} />
-                      <FichaPersonal />
-                    </div>
-                    <Footer />
+                    <SideBarMenu items={items} card={card} bodyComponent={<FichaPersonal />} footerComponent={<Footer />} />
+                    {/* <FichaPersonal /> */}
+                    {/* <Footer /> */}
                   </>
                 ) : rol === 2 ? (
                   <>
-                    <SideBarMenu items={items} card={card} />
+                    <SideBarMenu items={items} card={card} bodyComponent={<Home />} footerComponent={<Footer />} />
                   </>
                 ) : (
-                  <SideBarMenu items={items} card={card} />
+                  <SideBarMenu items={items} card={card} bodyComponent={<Home />} footerComponent={<Footer />} />
                 )}
               </Route>
               <Route path="/familiar">
                 {rol === 1 ? (
                   <>
-                    <div className="estructura">
-                      <SideBarMenu items={items} card={card} />
-                      <FichaFamiliar />
-                    </div>
-                    <Footer />
+                    <SideBarMenu items={items} card={card} bodyComponent={<FichaFamiliar />} footerComponent={<Footer />} />
+                    {/* <FichaFamiliar /> */}
+                    {/* <Footer /> */}
                   </>
                 ) : rol === 2 ? (
                   <>
-                    <SideBarMenu items={items} card={card} />
+                    <SideBarMenu items={items} card={card} bodyComponent={<Home />} footerComponent={<Footer />} />
                   </>
                 ) : (
-                  <SideBarMenu items={items} card={card} />
+                  <SideBarMenu items={items} card={card} bodyComponent={<Home />} footerComponent={<Footer />} />
                 )}
               </Route>
               <Route path="/educar">
                 {rol === 1 ? (
                   <>
-                    <SideBarMenu items={items} card={card} />
-                    <FichaEducativa />
-                    <Footer />
+                    <SideBarMenu items={items} card={card} bodyComponent={<FichaEducativa />} footerComponent={<Footer />} />
+                    {/* <FichaEducativa /> */}
+                    {/* <Footer /> */}
                   </>
                 ) : rol === 2 ? (
                   <>
-                    <SideBarMenu items={items} card={card} />
+                    <SideBarMenu items={items} card={card} bodyComponent={<Home />} footerComponent={<Footer />} />
                   </>
                 ) : (
-                  <SideBarMenu items={items} card={card} />
+                  <SideBarMenu items={items} card={card} bodyComponent={<Home />} footerComponent={<Footer />} />
                 )}
               </Route>
               <Route path="/desvinculacion">
                 {rol === 1 ? (
                   <>
-                    <SideBarMenu items={items} card={card} />
-                    <FichaDesvinculacion />
-                    <Footer />
+                    <SideBarMenu items={items} card={card} bodyComponent={<FichaDesvinculacion />} footerComponent={<Footer />} />
+                    {/* <FichaDesvinculacion /> */}
+                    {/* <Footer /> */}
                   </>
                 ) : rol === 2 ? (
                   <>
-                    <SideBarMenu items={items} card={card} />
+                    <SideBarMenu items={items} card={card} bodyComponent={<Home />} footerComponent={<Footer />} />
                   </>
                 ) : (
-                  <SideBarMenu items={items} card={card} />
+                  <SideBarMenu items={items} card={card} bodyComponent={<Home />} footerComponent={<Footer />} />
                 )}
               </Route>
               <Route path="/representante">
                 {rol === 1 ? (
                   <>
-                    <SideBarMenu items={items} card={card} />
-                    <FichaRepresentante />
-                    <Footer />
+                    <SideBarMenu items={items} card={card} bodyComponent={<FichaRepresentante />} footerComponent={<Footer />} />
+                    {/* <FichaRepresentante /> */}
+                    {/* <Footer /> */}
                   </>
                 ) : rol === 2 ? (
                   <>
-                    <SideBarMenu items={items} card={card} />
+                    <SideBarMenu items={items} card={card} bodyComponent={<Home />} footerComponent={<Footer />} />
                   </>
                 ) : (
-                  <SideBarMenu items={items} card={card} />
+                  <SideBarMenu items={items} card={card} bodyComponent={<Home />} footerComponent={<Footer />} />
                 )}
               </Route>
-              <Route path="/docente">
+              <Route path="/usuario">
                 {rol === 1 ? (
                   <>
-                    <SideBarMenu items={items} card={card} />
-                    <Docente />
-                    <Footer />
+                    <SideBarMenu items={items} card={card} bodyComponent={<Usuario />} footerComponent={<Footer />} />
+                    {/* <Docente /> */}
+                    {/* <Footer /> */}
                   </>
                 ) : rol === 2 ? (
                   <>
-                    <SideBarMenu items={items} card={card} />
+                    <SideBarMenu items={items} card={card} bodyComponent={<Home />} footerComponent={<Footer />} />
                   </>
                 ) : (
-                  <SideBarMenu items={items} card={card} />
-                )}
-              </Route>
-              <Route path="/encargado">
-                {rol === 1 ? (
-                  <>
-                    <SideBarMenu items={items} card={card} />
-                    <Encargado />
-                    <Footer />
-                  </>
-                ) : rol === 2 ? (
-                  <>
-                    <SideBarMenu items={items} card={card} />
-                  </>
-                ) : (
-                  <SideBarMenu items={items} card={card} />
-                )}
-              </Route>
-              <Route path="/secretaria">
-                {rol === 1 ? (
-                  <>
-                    <SideBarMenu items={items} card={card} />
-                    <SecretariaContext />
-                    <Footer />
-                  </>
-                ) : rol === 2 ? (
-                  <>
-                    <SideBarMenu items={items} card={card} />
-                  </>
-                ) : (
-                  <SideBarMenu items={items} card={card} />
+                  <SideBarMenu items={items} card={card} bodyComponent={<Home />} footerComponent={<Footer />} />
                 )}
               </Route>
               <Route path="/curso">
                 {rol === 1 ? (
                   <>
-                    <SideBarMenu items={items} card={card} />
-                    <Curso />
-                    <Footer />
+                    <SideBarMenu items={items} card={card} bodyComponent={<Curso />} footerComponent={<Footer />} />
+                    {/* <Curso /> */}
+                    {/* <Footer /> */}
                   </>
                 ) : rol === 2 ? (
                   <>
-                    <SideBarMenu items={items} card={card} />
+                    <SideBarMenu items={items} card={card} bodyComponent={<Home />} footerComponent={<Footer />} />
                   </>
                 ) : (
-                  <SideBarMenu items={items} card={card} />
+                  <SideBarMenu items={items} card={card} bodyComponent={<Home />} footerComponent={<Footer />} />
                 )}
               </Route>
               <Route path="/reporte">
                 {rol === 1 ? (
                   <>
-                    <SideBarMenu items={items} card={card} />
-                    <Reporte />
-                    <Footer />
+                    <SideBarMenu items={items} card={card} bodyComponent={<Reporte />} footerComponent={<Footer />} />
+                    {/* <Reporte /> */}
+                    {/* <Footer /> */}
                   </>
                 ) : rol === 2 ? (
                   <>
-                    <SideBarMenu items={items} card={card} />
+                    <SideBarMenu items={items} card={card} bodyComponent={<Home />} footerComponent={<Footer />} />
                   </>
                 ) : (
-                  <SideBarMenu items={items} card={card} />
-                )}
-              </Route>
-              <Route path="/asistencia">
-                {rol === 1 ? (
-                  <>
-                    <SideBarMenu items={items} card={card} />
-                    <Asistencia />
-                    <Footer />
-                  </>
-                ) : rol === 2 ? (
-                  <>
-                    <SideBarMenu items={items} card={card} />
-                  </>
-                ) : (
-                  <SideBarMenu items={items} card={card} />
-                )}
-              </Route>
-              <Route path="/anexo">
-                {rol === 1 ? (
-                  <>
-                    <SideBarMenu items={items} card={card} />
-                    <Anexo />
-                    <Footer />
-                  </>
-                ) : rol === 2 ? (
-                  <>
-                    <SideBarMenu items={items} card={card} />
-                  </>
-                ) : (
-                  <SideBarMenu items={items} card={card} />
+                  <SideBarMenu items={items} card={card} bodyComponent={<Home />} footerComponent={<Footer />} />
                 )}
               </Route>
               <Route path="*">
                 {rol === 1 ? (
-                  <SideBarMenu items={items} card={card} />
+                  <SideBarMenu items={items} card={card} bodyComponent={<Home />} footerComponent={<Footer />} />
                 ) : rol === 2 ? (
-                  <SideBarMenu items={items} card={card} />
+                  <SideBarMenu items={items} card={card} bodyComponent={<Home />} footerComponent={<Footer />} />
                 ) : (
-                  <SideBarMenu items={items} card={card} />
+                  <SideBarMenu items={items} card={card} bodyComponent={<Home />} footerComponent={<Footer />} />
                 )}
                 <Redirect to="/dashboard/home" />
               </Route>

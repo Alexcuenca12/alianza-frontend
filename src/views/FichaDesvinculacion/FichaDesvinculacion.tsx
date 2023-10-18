@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { InputText } from "primereact/inputtext";
 import { FileUpload, FileUploadSelectEvent } from "primereact/fileupload";
 import { Button } from "primereact/button";
-import { Calendar } from "primereact/calendar";
+import { Calendar, CalendarChangeEvent } from 'primereact/calendar';
 import { Fieldset } from "primereact/fieldset";
 import { Card } from "primereact/card";
 import cardHeader from "../../shared/CardHeader";
@@ -17,6 +17,10 @@ import { PiFileXlsFill } from "react-icons/pi";
 import '../../styles/FiltroFichas.css'
 import { IExcelReportParams, IHeaderItem } from "../../interfaces/IExcelReportParams";
 import { ReportBar } from "../../common/ReportBar";
+import toast, { Toaster } from "react-hot-toast";
+import '../../styles/Fichas.css'
+import { InputTextarea } from "primereact/inputtextarea";
+import { PiFilePdfFill } from "react-icons/pi";
 
 
 
@@ -37,8 +41,8 @@ function FichaDesvinculacion() {
     fechaDesvinculacion: "",
     motivo: "",
     anexosExtras: "",
-    fichaInscripcion: null,
-    fichaPersonal: null
+    fichaPersonal: null,
+    fechaRegistro: new Date
   });
 
   const fileUploadRef = useRef<FileUpload>(null);
@@ -49,7 +53,6 @@ function FichaDesvinculacion() {
   const fichaPersonalService = new FichaPersonalService();
   const [foto, setFoto] = useState<string>('https://cdn-icons-png.flaticon.com/128/666/666201.png');
   const [excelReportData, setExcelReportData] = useState<IExcelReportParams | null>(null);
-
 
 
   const loadData = () => {
@@ -126,37 +129,21 @@ function FichaDesvinculacion() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (
-      !formData.fechaDesvinculacion ||
-      !formData.motivo ||
-      !formData.anexosExtras
-    ) {
-      swal("Advertencia", "Por favor, complete todos los campos", "warning");
-      return;
+    if (validaciones()) {
+      desvinService
+        .save(formData)
+        .then((response) => {
+          loadDataID(response.fichaPersonal?.idFichaPersonal);
+
+          resetForm();
+          swal("Publicacion", "Datos Guardados Correctamente", "success");
+          resetFiltro();
+        })
+        .catch((error) => {
+          console.error("Error al enviar el formulario:", error);
+        });
     }
 
-    desvinService
-      .save(formData)
-      .then((response) => {
-        resetForm();
-        swal("Publicacion", "Datos Guardados Correctamente", "success");
-
-        desvinService
-          .getAll()
-          .then((data) => {
-            setcontra1(data);
-            resetForm();
-            if (fileUploadRef.current) {
-              fileUploadRef.current.clear();
-            }
-          })
-          .catch((error) => {
-            console.error("Error al obtener los datos:", error);
-          });
-      })
-      .catch((error) => {
-        console.error("Error al enviar el formulario:", error);
-      });
   };
 
   const handleDelete = (id: number | undefined) => {
@@ -209,22 +196,43 @@ function FichaDesvinculacion() {
         (contra) => contra.idFichaDesvinculacion === id
       );
       if (editItem) {
-        setFormData(editItem);
+        const editedItem = { ...editItem };
+
+
+        if (typeof editedItem.fechaRegistro === 'string') {
+          const registro = new Date(editedItem.fechaRegistro);
+          registro.setDate(registro.getDate() + 1);
+          const formattedDate = registro
+            ? registro.toISOString().split('T')[0]
+            : '';
+          editedItem.fechaRegistro = formattedDate;
+        }
+
+        if (typeof editedItem.fechaDesvinculacion === 'string') {
+          const nacimiento = new Date(editedItem.fechaDesvinculacion);
+          nacimiento.setDate(nacimiento.getDate() + 1);
+          const formattedDate = nacimiento
+            ? nacimiento.toISOString().split('T')[0]
+            : '';
+          editedItem.fechaDesvinculacion = formattedDate;
+        }
+
+
+        setFormData(editedItem);
 
         setEditMode(true);
         setEditItemId(id);
 
-        setBusqueda(editItem.fichaPersonal?.ciIdentidad ?? "");
-        setFoto(editItem.fichaPersonal?.foto ?? '')
+        setBusqueda(editedItem.fichaPersonal?.ciPasaporte ?? "");
+        setFoto(editedItem.fichaPersonal?.foto ?? '')
 
-
-        if (editItem.fichaPersonal !== null) {
+        if (editedItem.fichaPersonal !== null) {
 
           const editItemWithLabel = {
-            ...editItem,
+            ...editedItem,
             fichaPersonal: {
-              ...editItem.fichaPersonal,
-              label: `${editItem.fichaPersonal.ciIdentidad} || ${editItem.fichaPersonal.apellidos} ${editItem.fichaPersonal.nombres}`,
+              ...editedItem.fichaPersonal,
+              label: `${editedItem.fichaPersonal.ciPasaporte} || ${editedItem.fichaPersonal.apellidos} ${editedItem.fichaPersonal.nombres}`,
             },
           };
           setListFperonales([editItemWithLabel.fichaPersonal]);
@@ -239,25 +247,14 @@ function FichaDesvinculacion() {
       desvinService
         .update(Number(editItemId), formData as IFichaDesvinculacion)
         .then((response) => {
+          loadDataID(response.fichaPersonal?.idFichaPersonal);
           swal({
             title: "Publicaciones",
             text: "Datos actualizados correctamente",
             icon: "success",
           });
-          setFormData({
-            fechaDesvinculacion: "",
-            motivo: "",
-            anexosExtras: "",
-            fichaInscripcion: null,
-            fichaPersonal: null
-
-          });
-          // setcontra1(
-          //   contra1.map((contra) =>
-          //     contra.idFichaDesvinculacion === editItemId ? response : contra
-          //   )
-          // );
-          loadData();
+          resetForm();
+          resetFiltro();
 
           setEditMode(false);
           setEditItemId(undefined);
@@ -273,8 +270,8 @@ function FichaDesvinculacion() {
       fechaDesvinculacion: "",
       motivo: "",
       anexosExtras: "",
-      fichaInscripcion: null,
-      fichaPersonal: null
+      fichaPersonal: null,
+      fechaRegistro: new Date
 
     });
     setEditMode(false);
@@ -283,9 +280,10 @@ function FichaDesvinculacion() {
       fileUploadRef.current.clear(); // Limpiar el campo FileUpload
     }
   };
-  if (!dataLoaded) {
-    return <div>Cargando datos...</div>;
-  }
+
+  // if (!dataLoaded) {
+  //   return <div>Cargando datos...</div>;
+  // }
 
 
   const loadRelacion = () => {
@@ -296,7 +294,7 @@ function FichaDesvinculacion() {
       .then((data: IFichaPersonal[]) => {
         const dataWithLabel = data.map((object) => ({
           ...object,
-          label: `${object.ciIdentidad} || ${object.apellidos} ${object.nombres}`,
+          label: `${object.ciPasaporte} || ${object.apellidos} ${object.nombres}`,
         }));
 
         setListFperonales(dataWithLabel); // Establecer los datos procesados en el estado
@@ -307,20 +305,19 @@ function FichaDesvinculacion() {
       });
 
 
-    console.log('Datos enviados:', { listFperonales });
+    // console.log('Datos enviados:', { listFperonales });
 
   };
 
   const cargarFoto = (id: number) => {
-    const Foto = listFperonales.find((persona) => persona.idFichaPersonal === id);
-
-    if (Foto) {
+    const fPersonal = listFperonales.find((persona) => persona.idFichaPersonal === id);
+    console.log("chucha= " + formData.fichaPersonal?.idFichaPersonal)
+    if (fPersonal) {
       // Actualiza formData con la foto correspondiente
-      setFoto(Foto.foto);
-      if (Foto) {
-        console.log("Foto cargada")
-      }
+      // setFormData({ ...formData, fichaPersonal: fPersonal })
+      setFoto(fPersonal.foto);
 
+      // alert(foto)
     }
 
   }
@@ -331,7 +328,8 @@ function FichaDesvinculacion() {
     const rowData = data.map((item) => (
       {
         idFicha: item.idFichaDesvinculacion,
-        cedula: item.fichaPersonal?.ciIdentidad,
+        tipoIdentcedula: item.fichaPersonal?.tipoIdentificacion,
+        cedula: item.fichaPersonal?.ciPasaporte,
         nombres: item.fichaPersonal?.nombres,
         apellidos: item.fichaPersonal?.apellidos,
         fechaDesvinculacion: new Date(item.fechaDesvinculacion!).toLocaleDateString("es-ES", {
@@ -344,7 +342,8 @@ function FichaDesvinculacion() {
     ));
     const headerItems: IHeaderItem[] = [
       { header: "№ FICHA" },
-      { header: "CEDULA" },
+      { header: "TIPO DE IDENTIFICACION" },
+      { header: "CEDULA/PASAPORTE" },
       { header: "NOMBRES" },
       { header: "APELLIDOS" },
       { header: "FECHA DE DESVINCULACIÓN" },
@@ -352,9 +351,7 @@ function FichaDesvinculacion() {
 
 
     ]
-    console.log(reportName, '  //  ',
-      headerItems, '  //  ',
-      rowData)
+
 
     setExcelReportData({
       reportName,
@@ -365,8 +362,44 @@ function FichaDesvinculacion() {
     )
   }
 
+  function validaciones(): boolean {
+
+
+    if (!formData.fichaPersonal?.idFichaPersonal) {
+      toast.error("Seleccione al propietario de la ficha", {
+        style: {
+          fontSize: '15px'
+        },
+        duration: 3000,
+      })
+      return false
+    }
+
+
+    if (!formData.fechaDesvinculacion) {
+      toast.error("Seleccione la fecha de desvinculacion", {
+        style: {
+          fontSize: '15px'
+        },
+        duration: 3000,
+      })
+      return false
+    }
+
+    if (!formData.motivo) {
+      toast.error("Debe proporcionar detaller de la desvinculacion", {
+        style: {
+          fontSize: '15px'
+        },
+        duration: 3000,
+      })
+      return false
+    }
+
+    return true
+  }
+
   const loadDataID = (id: number) => {
-    setcontra1([]);
     desvinService
       .getBusquedaID(id)
       .then((data) => {
@@ -389,166 +422,189 @@ function FichaDesvinculacion() {
   };
 
   return (
-    <Fieldset className="" style={{ display: 'flex', justifyContent: 'center' }}>
-      <Card
-        header={cardHeader}
-        className="border-solid border-red-800 border-3 flex-1 flex-wrap"
-        style={{ width: "90%", marginLeft: "6%", height: "100%", marginBottom: "35px" }}
+    <>
+      <div>
+        <Toaster position="top-right"
+          reverseOrder={true} />
+      </div>
+      <Fieldset className="fgrid col-fixed " style={{ display: 'flex', justifyContent: 'center' }}>
 
-
-      >
-        <div
-          className="h1-rem"
-          style={{ marginLeft: "40%", marginBottom: "20px" }}
+        <Card
+          header={cardHeader}
+          className="border-solid border-red-800 border-3 flex-1 flex-wrap"
+          style={{ marginBottom: "35px", maxWidth: "1150px" }}
         >
-          <h1 className="text-5xl font-smibold lg:md-2  w-full h-full max-w-full max-h-full min-w-min">
-            Ficha de Desvinculación
-          </h1>
-        </div>
+          <div
+            className="h1-rem"
+            style={{ display: 'flex', justifyContent: 'center' }}
+          >
+            <h1 className="text-5xl font-smibold lg:md-2 h-full max-w-full max-h-full min-w-min">
+              Ficha de Desvinculación
+            </h1>
+          </div>
 
-        <section className="flex justify-content-center flex-wrap container">
-          <Fieldset legend="Filtros de busqueda" style={{ width: "1000px", marginBottom: "35px", position: "relative" }}>
-            <div style={{ position: "absolute", top: "0", right: "5px", marginTop: "-15px" }}>
-              <label className="font-medium w-auto min-w-min" htmlFor="rangoEdad" style={{ marginRight: "10px" }}>Limpiar filtros:</label>
+          <div className="" style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "right" }}>
+            <label className="font-medium w-auto min-w-min" htmlFor="fichaPersonal" style={{ marginRight: "10px" }}>Fecha de Registro:</label>
+            <Calendar
+              disabled
+              dateFormat="dd-mm-yy" // Cambiar el formato a ISO 8601
 
-              <Button icon="pi pi-times" rounded severity="danger" aria-label="Cancel" onClick={() => { resetFiltro(); loadData() }} />
-            </div>
+              style={{ width: "95px", marginRight: "25px", fontWeight: "bold" }}
+              onChange={(e: CalendarChangeEvent) => {
+                if (e.value !== undefined) {
+                  setFormData({
+                    ...formData,
+                    fechaRegistro: e.value,
+                  });
+                }
+              }}
+
+              value={typeof formData.fechaRegistro === 'string' ? new Date(formData.fechaRegistro) : new Date()}
+
+            />
+          </div>
+
+          <section className="flex justify-content-center flex-wrap container">
+            <Divider align="left">
+              <div className="inline-flex align-items-center">
+                <i className="pi pi-filter-fill mr-2"></i>
+                <b>Filtro</b>
+              </div>
+            </Divider>
+            <Fieldset legend="Filtros de busqueda" style={{ width: "1000px", position: "relative" }}>
+              <div style={{ position: "absolute", top: "0", right: "5px", marginTop: "-15px" }}>
+                <label className="font-medium w-auto min-w-min" htmlFor="rangoEdad" style={{ marginRight: "10px" }}>Limpiar filtros:</label>
+
+                <Button icon="pi pi-times" rounded severity="danger" aria-label="Cancel" onClick={() => { resetFiltro(); loadData() }} />
+              </div>
 
 
-            <section className="layout">
-              <div className="grow1 marginLeft">
-                <div input-box>
-                  <label className="font-medium w-auto min-w-min" htmlFor='genero'>Cedula o Nombre:</label>
+              <section className="layout">
+                <div className="">
+                  <div input-box>
+                    <label className="font-medium w-auto min-w-min" htmlFor='genero'>Cedula o Nombre:</label>
 
-                  <div className="flex-1">
-                    <InputText
-                      placeholder="Cedula de identidad"
-                      id="integer"
-                      style={{ width: "75%" }}
-                      // keyfilter="int"
-                      onChange={(e) => {
-                        // Actualizar el estado usando setFormData
-                        setListFperonales([]); // Asignar un arreglo vacío para vaciar el estado listFperonales
+                    <div className="flex-1">
+                      <InputText
+                        placeholder="Cedula de identidad"
+                        id="integer"
+                        style={{ width: "75%" }}
+                        // keyfilter="int"
+                        onChange={(e) => {
+                          // Actualizar el estado usando setFormData
+                          setListFperonales([]); // Asignar un arreglo vacío para vaciar el estado listFperonales
 
-                        setBusqueda(e.currentTarget.value);
+                          setBusqueda(e.currentTarget.value);
 
-                        // Luego, llamar a loadRelacion después de que se actualice el estado
-                        loadRelacion();
-                      }}
+                          // Luego, llamar a loadRelacion después de que se actualice el estado
+                          loadRelacion();
+                        }}
 
-                      onKeyUp={(e) => {
-                        setListFperonales([]); // Asignar un arreglo vacío para vaciar el estado listFperonales
+                        value={busqueda}
+                      />
 
-                        setBusqueda(e.currentTarget.value);
-
-                        // Luego, llamar a loadRelacion después de que se actualice el estado
-                        loadRelacion();
-                        loadRelacion(); // Llama a tu método aquí o realiza las acciones necesarias.
-                      }}
-
-                      value={busqueda}
-                    />
-
-                    <Button icon="pi pi-search" className="p-button-warning" />
+                      <Button icon="pi pi-search" className="p-button-warning" />
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="grow1 shrink0">
+                <div className="grow1 shrink0">
+                  <div>
+                    <label className="font-medium w-auto min-w-min" htmlFor="fichaPersonal">Resultados de la busqueda:</label>
+                    <Dropdown
+                      className="text-2xl"
+                      id="tiempo_dedicacion"
+                      name="tiempo_dedicacion"
+                      style={{ width: "100%" }}
+                      options={listFperonales}
+                      onChange={(e) => {
+                        setFormData({
+                          ...formData,
+                          fichaPersonal: {
+                            idFichaPersonal: parseInt(e.value),
+                            foto: '',
+                            apellidos: '',
+                            nombres: '',
+                            ciPasaporte: '',
+                            tipoIdentificacion: '',
+                            actTrabInfantil: false,
+                            detalleActTrabInfantil: '',
+                            nacionalidad: '',
+                            fechaNacimiento: '',
+                            rangoEdad: null,
+                            genero: '',
+                            etnia: null,
+                            parroquia: null,
+                            zona: '',
+                            barrioSector: '',
+                            direccion: '',
+                            referencia: '',
+                            coordenadaX: 0,
+                            coordenadaY: 0,
+                            estVinculacion: true,
+                            fechaRegistro: new Date()
+                          }
+                        });
+
+
+                        loadDataID(parseInt(e.value))
+                        cargarFoto(parseInt(e.value))
+
+                      }}
+                      value={formData.fichaPersonal?.idFichaPersonal}
+                      optionLabel="label"
+                      optionValue="idFichaPersonal"
+                      placeholder="Seleccione una persona"
+                    />
+                  </div>
+                </div>
                 <div>
-                  <label className="font-medium w-auto min-w-min" htmlFor="fichaPersonal">Resultados de la busqueda:</label>
-                  <Dropdown
-                    className="text-2xl"
-                    id="tiempo_dedicacion"
-                    name="tiempo_dedicacion"
-                    style={{ width: "100%" }}
-                    options={listFperonales}
-                    onChange={(e) => {
-                      setFormData({
-                        ...formData,
-                        fichaPersonal: {
-                          idFichaPersonal: parseInt(e.value), foto: '',
-                          apellidos: '',
-                          nombres: '',
-                          ciIdentidad: '',
-                          nacionalidad: '',
-                          fechaNacimiento: '',
-                          rangoEdad: null,
-                          genero: '',
-                          etnia: null,
-                          parroquia: null,
-                          zona: '',
-                          barrioSector: '',
-                          direccion: '',
-                          referencia: '',
-                          coordenadaX: 0,
-                          coordenadaY: 0,
-                          estVinculacion: true
-                        }
-                      });
-                      cargarFoto(parseInt(e.value))
-                      loadDataID(parseInt(e.value))
-
-                      console.log(formData)
-                    }}
-                    value={formData.fichaPersonal?.idFichaPersonal}
-                    optionLabel="label"
-                    optionValue="idFichaPersonal"
-                    placeholder="Seleccione una persona"
-                  />
+                  <div style={{ display: "grid", placeItems: "center" }}>
+                    <img
+                      src={foto}
+                      alt="FotoNNA"
+                      style={{
+                        // width: "80px",
+                        height: "80px",
+                        borderRadius: "50%", // Borde redondeado
+                        border: "2px solid gray", // Borde gris
+                      }}
+                    />
+                  </div>
                 </div>
-              </div>
-              <div>
-                <div style={{ display: "grid", placeItems: "center" }}>
-                  <img
-                    src={foto}
-                    alt="FotoNNA"
-                    style={{
-                      // width: "80px",
-                      height: "80px",
-                      borderRadius: "50%", // Borde redondeado
-                      border: "2px solid gray", // Borde gris
-                    }}
-                  />
-                </div>
-              </div>
-            </section>
-          </Fieldset>
+              </section>
+            </Fieldset>
 
-          <form
-            onSubmit={editMode ? handleUpdate : handleSubmit}
-            encType="multipart/form-data"
-          >
-            <div className="flex flex-wrap flex-row">
-              <div className="flex align-items-center justify-content-center">
-                <div
-                  className="flex flex-column flex-wrap gap-4"
-                  style={{ marginLeft: "50px" }}
-                >
-                  <div className="flex flex-wrap w-full h-full  justify-content-between">
-                    <label
-                      htmlFor="fechaDesvinculacion"
-                      className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginRight: "20px" }}
-                    >
+
+            <form onSubmit={editMode ? handleUpdate : handleSubmit} className='form' encType="multipart/form-data">
+              <Divider align="left">
+                <div className="inline-flex align-items-center">
+                  <i className="pi pi-book mr-2"></i>
+                  <b>Formulario </b>
+                </div>
+              </Divider>
+
+              <div className='column' style={{}}>
+                <div className='column' style={{ width: "30%", }}>
+
+                  <div className='' style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                    <label htmlFor="fechaDesvinculacion" className="font-medium w-auto min-w-min">
                       Fecha de Desvinculación:
                     </label>
+
                     <Calendar
                       className="text-2xl"
                       id="fechaDesvinculacion"
+                      style={{ width: "100%" }}
                       name="fechaDesvinculacion"
                       placeholder="Ingrese la Fecha de Desvinculación"
                       required
-                      dateFormat="yy-mm-dd"
+                      dateFormat="dd-mm-yy" // Cambiar el formato a ISO 8601
                       showIcon
-                      maxDate={new Date()}
                       onChange={(e) => {
-                        const selectedDate =
-                          e.value instanceof Date ? e.value : null;
+                        const selectedDate = e.value instanceof Date ? e.value : null;
                         if (selectedDate) {
                           selectedDate.setDate(selectedDate.getDate() + 1);
-                          const formattedDate = selectedDate
-                            .toISOString()
-                            .split("T")[0];
+                          const formattedDate = selectedDate.toISOString().split("T")[0];
                           setFormData({
                             ...formData,
                             fechaDesvinculacion: formattedDate,
@@ -566,21 +622,41 @@ function FichaDesvinculacion() {
                           : null
                       }
                     />
+                    <span className="input-border"></span>
                   </div>
-                  <div className="flex flex-wrap w-full h-full  justify-content-between">
+
+                </div>
+
+
+
+                <div className='column' style={{ width: "70%" }}>
+
+                  <div className='' style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', paddingBottom: '35px' }}>
                     <label
                       htmlFor="motivo"
-                      className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginRight: "20px" }}
-                    >
+                      className="font-medium w-auto min-w-min"  >
                       Motivo:
                     </label>
-                    <InputText
+                    <InputTextarea
                       className="text-2xl"
                       placeholder="Ingrese el Motivo"
                       id="motivo"
                       name="motivo"
-                      style={{ width: "221px" }}
+                      style={{ width: '100%', }}
+                      value={formData.motivo}
+                      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setFormData({
+                        ...formData,
+                        motivo: e.currentTarget.value,
+                      })}
+
+                    />
+                    <span className="input-border"></span>
+                    {/* <InputText
+                      className="text-2xl"
+                      placeholder="Ingrese el Motivo"
+                      id="motivo"
+                      name="motivo"
+                      style={{ width: '100%', }}
                       onChange={(e) =>
                         setFormData({
                           ...formData,
@@ -588,54 +664,28 @@ function FichaDesvinculacion() {
                         })
                       }
                       value={formData.motivo}
-                    />
+                    /> */}
+
+
+
                   </div>
                 </div>
               </div>
-              <div
-                className="flex flex-row  w-full h-full justify-content-center  flex-grow-1  row-gap-8 gap-8 flex-wrap mt-6"
-                style={{ marginLeft: "-45px" }}
-              >
-                <div className="flex align-items-center justify-content-center w-auto min-w-min">
-                  <Button
-                    type="submit"
-                    style={{ marginTop: "25px" }}
-                    label={editMode ? "Actualizar" : "Guardar"}
-                    className="w-full text-3xl min-w-min "
-                    rounded
-                    onClick={editMode ? handleUpdate : handleSubmit}
-                  />
+
+              <Divider align="left">
+                <div className="inline-flex align-items-center">
+                  <i className="pi pi-file-pdf mr-2"></i>
+                  <b>Anexos</b>
                 </div>
-                <div className="flex align-items-center justify-content-center w-auto min-w-min">
-                  <Button
-                    type="button"
-                    label="Cancelar"
-                    style={{ marginTop: "25px" }}
-                    className="w-full text-3xl min-w-min"
-                    rounded
-                    onClick={() => {
-                      resetForm();
-                      resetFiltro();
-                      setEditMode(false);
-                    }} />
-                </div>
-              </div>
-              <div style={{ marginLeft: "600px", marginTop: "-185px" }}>
-                <div className="flex flex-column align-items-center justify-content-center ml-4">
-                  <label
-                    htmlFor="pdf"
-                    className="text-3xl font-medium w-auto min-w-min"
-                    style={{
-                      marginRight: "20px",
-                      marginLeft: "169px",
-                      marginTop: "-5px",
-                    }}
-                  >
+              </Divider>
+              <div className='column' style={{}}>
+
+                <div className='input-box'>
+                  <label htmlFor="pdf" className="font-medium w-auto min-w-min"                >
                     Subir Anexos Extra:
                   </label>
                   <FileUpload
                     name="pdf"
-                    style={{ marginLeft: "285px", marginTop: "10px" }}
                     chooseLabel="Escoger"
                     uploadLabel="Cargar"
                     cancelLabel="Cancelar"
@@ -649,115 +699,209 @@ function FichaDesvinculacion() {
                     accept="application/pdf"
                   />
                 </div>
-              </div>
-            </div>
-          </form>
-        </section>
-        <table
-          style={{ minWidth: "40rem" }}
-          className="mt-4  w-full h-full text-3xl font-large"
-        >
-          <thead>
-            <tr >
-              <td colSpan={12} className="tdBtn">
-                <ReportBar
-                  reportName={excelReportData?.reportName!}
-                  headerItems={excelReportData?.headerItems!}
-                  rowData={excelReportData?.rowData!}
-                  logo={excelReportData?.logo!}
 
+                <div className='input-box'>
+                  <label htmlFor="pdf" className="font-medium w-auto min-w-min"                >
+                    Subir Anexos Extra:
+                  </label>
+                  <FileUpload
+                    name="pdf"
+                    chooseLabel="Escoger"
+                    uploadLabel="Cargar"
+                    cancelLabel="Cancelar"
+                    emptyTemplate={
+                      <p className="m-0 p-button-rounded">
+                        Arrastre y suelte los archivos aquí para cargarlos.
+                      </p>
+                    }
+                    customUpload
+                    onSelect={customBytesUploader}
+                    accept="application/pdf"
+                  />
+                </div>
+
+
+                <div className='input-box'>
+                  <label htmlFor="pdf" className="font-medium w-auto min-w-min"                >
+                    Subir Anexos Extra:
+                  </label>
+                  <FileUpload
+                    name="pdf"
+                    chooseLabel="Escoger"
+                    uploadLabel="Cargar"
+                    cancelLabel="Cancelar"
+                    emptyTemplate={
+                      <p className="m-0 p-button-rounded">
+                        Arrastre y suelte los archivos aquí para cargarlos.
+                      </p>
+                    }
+                    customUpload
+                    onSelect={customBytesUploader}
+                    accept="application/pdf"
+                  />
+                </div>
+
+              </div>
+              {/* <Divider style={{ marginTop: "30px" }} /> */}
+              <div className='btnSend'>
+
+                <div className="flex align-items-center justify-content-center w-auto min-w-min"
+                  style={{ gap: "25px" }}>
+                  <Button
+                    type="submit"
+                    label={editMode ? "Actualizar" : "Guardar"}
+                    className="btn"
+                    rounded
+                    style={{
+                      width: "100px",
+                    }}
+                    onClick={editMode ? handleUpdate : handleSubmit}
+                  />
+                  <Button
+                    type="button"
+                    label="Cancelar"
+                    className="btn"
+                    style={{
+                      width: "100px",
+                    }}
+                    rounded
+                    onClick={() => {
+                      resetForm();
+                      resetFiltro();
+                    }} />
+                </div>
+              </div>
+            </form>
+          </section>
+
+          <Divider align="left" style={{ marginBottom: "0px" }}>
+            <div className="inline-flex align-items-center">
+              <i className="pi pi-list mr-2"></i>
+              <b>Lista</b>
+            </div>
+          </Divider>
+
+          <div className="opcTblLayout" >
+            <div className="" style={{ flex: 1, display: "flex", alignItems: "flex-end", justifyContent: "flex-end" }}>
+
+              <div className="opcTbl" style={{ justifyContent: "right" }} >
+                <label className="font-medium w-auto min-w-min" htmlFor='estado'>Cargar todo:</label>
+
+                <Button className="buttonIcon" // Agrega una clase CSS personalizada
+                  icon="pi pi-refresh" style={{ width: "120px", height: "39px" }}
+                  severity="danger" aria-label="Cancel" onClick={() => { loadData(); resetFiltro(); }}
                 />
-              </td>
-            </tr>
-            <tr style={{ backgroundColor: "#871b1b", color: "white" }}>
-              <th>Nº de Registro </th>
-              <th>Fecha de Desvinculación </th>
-              <th>Motvio</th>
-              <th>Operaciones</th>
-              <th>Evidencia</th>
-            </tr>
-          </thead>
-          <tbody>
-            {contra1.map((cargaF) => (
-              <tr
-                className="text-center"
-                key={cargaF.idFichaDesvinculacion?.toString()}
-              >
-                <td>{cargaF.idFichaDesvinculacion}</td>
-                <td>
-                  {cargaF.fechaDesvinculacion
-                    ? new Date(cargaF.fechaDesvinculacion).toLocaleDateString(
-                      "es-ES",
-                      {
-                        year: "numeric",
-                        month: "2-digit",
-                        day: "2-digit",
-                      }
-                    )
-                    : ""}
-                </td>
-                <td>{cargaF.motivo}</td>
-                <td>
-                  <Button
-                    type="button"
-                    className=""
-                    label="✎"
-                    style={{
-                      background: "#ff9800",
-                      borderRadius: "5%",
-                      fontSize: "25px",
-                      width: "50px",
-                      color: "black",
-                      justifyContent: "center",
-                    }}
-                    onClick={() =>
-                      handleEdit(cargaF.idFichaDesvinculacion?.valueOf())
-                    }
-                  // Agrega el evento onClick para la operación de editar
-                  />
-                  <Button
-                    type="button"
-                    className=""
-                    label="✘"
-                    style={{
-                      background: "#ff0000",
-                      borderRadius: "10%",
-                      fontSize: "25px",
-                      width: "50px",
-                      color: "black",
-                      justifyContent: "center",
-                    }}
-                    onClick={() =>
-                      handleDelete(cargaF.idFichaDesvinculacion?.valueOf())
-                    }
-                  // Agrega el evento onClick para la operación de eliminar
-                  />
-                </td>
-                <td>
-                  {cargaF.anexosExtras ? (
-                    <Button
-                      type="button"
-                      className=""
-                      label="Descargar PDF"
-                      style={{
-                        background: "#009688",
-                        borderRadius: "10%",
-                        fontSize: "12px",
-                        color: "black",
-                        justifyContent: "center",
-                      }}
-                      onClick={() => decodeBase64(cargaF.anexosExtras!)}
-                    />
-                  ) : (
-                    <span>Sin evidencia</span>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </Card>
-    </Fieldset>
+
+              </div>
+              <ReportBar
+                reportName={excelReportData?.reportName!}
+                headerItems={excelReportData?.headerItems!}
+                rowData={excelReportData?.rowData!}
+                logo={excelReportData?.logo!}
+              />
+            </div>
+          </div>
+
+          <div className="tblContainer" >
+
+            <table className="tableFichas">
+              <thead className="theadTab" >
+
+                <tr style={{ backgroundColor: "#871b1b", color: "white" }}>
+                  <th className="trFichas">Nº de Registro </th>
+                  <th className="trFichas">Cedula</th>
+                  <th className="trFichas">Nombres</th>
+                  <th className="trFichas">Apellidos</th>
+                  <th className="trFichas">Fecha de Desvinculación </th>
+                  <th className="trFichas">Motvio</th>
+                  <th className="trFichas">Editar</th>
+                  <th className="trFichas">Eliminar</th>
+                  <th className="trFichas">Evidencia</th>
+                </tr>
+              </thead>
+              <tbody>
+                {contra1.map((cargaF) => (
+                  <tr
+                    className="text-center"
+                    key={cargaF.idFichaDesvinculacion?.toString()}
+                  >
+                    <td className="tdFichas">{cargaF.idFichaDesvinculacion}</td>
+                    <td className="tdFichas">{cargaF.fichaPersonal?.ciPasaporte}</td>
+                    <td className="tdFichas">{cargaF.fichaPersonal?.nombres}</td>
+                    <td className="tdFichas">{cargaF.fichaPersonal?.apellidos} </td>
+                    <td className="tdFichas">
+                      {/* {cargaF.fechaDesvinculacion} */}
+                      {cargaF.fechaDesvinculacion && (
+                        <span>
+                          {cargaF.fechaDesvinculacion.split('-')[2]}-
+                          {cargaF.fechaDesvinculacion.split('-')[1]}-
+                          {cargaF.fechaDesvinculacion.split('-')[0]}
+                        </span>
+                      )}
+                    </td>
+                    <td className="tdFichas">{cargaF.motivo}</td>
+                    <td className="tdFichas">
+                      <Button className="buttonIcon"
+                        type="button"
+                        icon="pi pi-file-edit"
+                        style={{
+                          background: "#ff9800",
+                          borderRadius: "5%",
+                          fontSize: "25px",
+                          width: "50px",
+                          color: "black",
+                          justifyContent: "center",
+                        }}
+                        onClick={() =>
+                          handleEdit(cargaF.idFichaDesvinculacion?.valueOf())
+                        }
+                      // Agrega el evento onClick para la operación de editar
+                      />
+
+                    </td>
+
+                    <td className="tdFichas">
+                      <Button className="buttonIcon"
+                        type="button"
+                        icon="pi pi-trash"
+                        style={{
+                          background: "#ff0000",
+                          borderRadius: "10%",
+                          fontSize: "25px",
+                          width: "50px",
+                          color: "black",
+                          justifyContent: "center",
+                        }}
+                        onClick={() =>
+                          handleDelete(cargaF.idFichaDesvinculacion?.valueOf())
+                        }
+                      // Agrega el evento onClick para la operación de eliminar
+                      />
+                    </td>
+                    <td className="tdFichas">
+                      {cargaF.anexosExtras ? (
+
+                        <button className="btnPdf" onClick={() => decodeBase64(cargaF.anexosExtras!)}>
+                          <div className="svg-wrapper-1">
+                            <div className="svg-wrapper">
+                              <PiFilePdfFill className="icono"></PiFilePdfFill>
+                            </div>
+                          </div>
+                          <span>Descargar PDF</span>
+                        </button>
+
+                      ) : (
+                        <span>Sin evidencia</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      </Fieldset >
+    </>
   );
 }
 

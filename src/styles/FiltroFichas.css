@@ -21,15 +21,17 @@
     position: relative
 }
 
-.tdBtn {}
 
 .divEnd {
     width: 100%;
-    /* display: flex;
-    justify-content: flex-end; */
-    padding-right: 15px;
-    padding-bottom: 5px;
 
+
+}
+
+
+.radioLabel :hover {
+    background: #752628;
+    color: #fff;
 }
 
 .btnLimpiar {
@@ -39,7 +41,7 @@
     margin-top: -15px;
 }
 
-.btnPrint {
+.btnExcel {
     font-family: inherit;
     /* font-size: 20px; */
     height: 80%;
@@ -55,7 +57,8 @@
     font-weight: 600;
 }
 
-.btnPrint span {
+
+.btnExcel span {
     display: block;
     margin-left: 0.3em;
     transition: all 0.3s ease-in-out;
@@ -65,31 +68,91 @@
     transform: scale(1.4);
 }
 
-.btnPrint .icono {
+.btnExcel .icono {
     display: block;
     transform-origin: center center;
     transition: transform 0.3s ease-in-out;
 }
 
-.btnPrint:hover {
+.btnExcel:hover {
     background: #178047;
 }
 
-.btnPrint:hover .svg-wrapper {
+.btnExcel:hover .svg-wrapper {
     transform: scale(1.25);
     transition: .5s linear;
 }
 
-.btnPrint:hover .icono {
+.btnExcel:hover .icono {
     transform: translateX(2.4em) scale(1.5);
     fill: #fff;
 }
 
-.btnPrint:hover span {
+.btnExcel:hover span {
     opacity: 0;
     transition: .5s linear;
 }
 
-.btnPrint:active {
+.btnExcel:active {
+    transform: scale(0.95);
+}
+
+
+
+/* PFD */
+
+.btnPdf {
+    font-family: inherit;
+    /* font-size: 20px; */
+    height: 80%;
+    background: #FF281D;
+    color: white;
+    fill: rgb(155, 153, 153);
+    padding: 0.7em 1em;
+    padding-left: 0.9em;
+    display: flex;
+    align-items: center;
+    border: none;
+    border-radius: 15px;
+    font-weight: 600;
+}
+
+
+.btnPdf span {
+    display: block;
+    margin-left: 0.3em;
+    transition: all 0.3s ease-in-out;
+}
+
+.icono {
+    transform: scale(1.4);
+}
+
+.btnPdf .icono {
+    display: block;
+    transform-origin: center center;
+    transition: transform 0.3s ease-in-out;
+}
+
+.btnPdf:hover {
+    background: #B51308;
+}
+
+.btnPdf:hover .svg-wrapper {
+    transform: scale(1.25);
+    transition: .5s linear;
+}
+
+.btnPdf:hover .icono {
+    transform: translateX(2.4em) scale(1.5);
+    fill: #fff;
+}
+
+.btnPdf:hover span {
+    opacity: 0;
+    transition: .5s linear;
+}
+
+.btnPdf:active {
     transform: scale(0.95);
 }

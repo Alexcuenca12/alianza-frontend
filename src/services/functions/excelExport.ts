@@ -86,24 +86,66 @@ export const excelExport = async (params: IExcelReportParams) => {
     worksheet.views = [{ state: "frozen", ySplit: 2 }];
 
     // insert data
-    for (let i = 0; i < params.rowData.length; i++) {
-        const currentCount = i + 1
-        const dataRow = worksheet.getRow(2 + currentCount);
-        dataRow.outlineLevel = 1;
-        dataRow.alignment = { vertical: 'middle', horizontal: 'center' }
-        dataRow.values = Object.values(params.rowData[i]);
-        dataRow.font = {
-            name: "Times New Roman",
-            size: 12,
+    if (params.reportName === 'Ficha Personal') {
+        for (let i = 0; i < params.rowData.length; i++) {
+            const base64Image = params.rowData[i].foto.replace(/^data:.*,/, "");
+            params.rowData[i].foto = '';
+            const currentCount = i + 1
+            const dataRow = worksheet.getRow(2 + currentCount);
+            dataRow.outlineLevel = 1;
+            dataRow.alignment = { vertical: 'middle', horizontal: 'center' }
+            dataRow.values = Object.values(params.rowData[i]);
 
+            dataRow.font = {
+                name: "Times New Roman",
+                size: 12,
+
+            }
+            dataRow.border = {
+                top: { style: 'thin', color: { argb: 'B0252A' } },
+                // left: { style: 'thin', color: { argb: 'B0252A' } },
+                bottom: { style: 'thin', color: { argb: 'B0252A' } },
+                // right: { style: 'thin', color: { argb: 'B0252A' } },
+            }
+            // alert(base64Image)
+            const imageId = workbook.addImage({
+                base64: base64Image,
+                extension: 'jpeg', // Cambia la extensión según el formato de la imagen
+            });
+
+            const position = 'B' + (2 + currentCount) + ':' + 'B' + (2 + currentCount);
+            // alert(position)
+            // worksheet.addImage(imageId, position);
+            worksheet.addImage(imageId, {
+                tl: { col: 1.1, row: 1.1 + currentCount }, // top-left cell
+                ext: { width: 75, height: 80 }, // image dimensions
+            });
+            worksheet.getRow(2 + currentCount).height = 62;
+            worksheet.getColumn('B').width = 12;
         }
-        dataRow.border = {
-            top: { style: 'thin', color: { argb: 'B0252A' } },
-            // left: { style: 'thin', color: { argb: 'B0252A' } },
-            bottom: { style: 'thin', color: { argb: 'B0252A' } },
-            // right: { style: 'thin', color: { argb: 'B0252A' } },
+
+    } else {
+        for (let i = 0; i < params.rowData.length; i++) {
+            const currentCount = i + 1
+            const dataRow = worksheet.getRow(2 + currentCount);
+            dataRow.outlineLevel = 1;
+            dataRow.alignment = { vertical: 'middle', horizontal: 'center' }
+            dataRow.values = Object.values(params.rowData[i]);
+
+            dataRow.font = {
+                name: "Times New Roman",
+                size: 12,
+
+            }
+            dataRow.border = {
+                top: { style: 'thin', color: { argb: 'B0252A' } },
+                // left: { style: 'thin', color: { argb: 'B0252A' } },
+                bottom: { style: 'thin', color: { argb: 'B0252A' } },
+                // right: { style: 'thin', color: { argb: 'B0252A' } },
+            }
         }
     }
+
 
 
     workbook.xlsx.writeBuffer().then(function (buffer) {

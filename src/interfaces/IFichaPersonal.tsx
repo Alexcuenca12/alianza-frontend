@@ -7,9 +7,12 @@ export interface IFichaPersonal {
     foto: string;
     apellidos: string;
     nombres: string;
-    ciIdentidad: string;
+    tipoIdentificacion: string;
+    ciPasaporte: string;
     nacionalidad: string;
-    fechaNacimiento: string;
+    actTrabInfantil: boolean;
+    detalleActTrabInfantil: string;
+    fechaNacimiento: string | Date;
     rangoEdad: IRangoEdad | null;
     genero: string;
     etnia: IEtnia | null;
@@ -21,5 +24,7 @@ export interface IFichaPersonal {
     coordenadaX: number;
     coordenadaY: number;
     estVinculacion: boolean;
+    fechaRegistro: string | Date | Date[] | null;
+
 }
 

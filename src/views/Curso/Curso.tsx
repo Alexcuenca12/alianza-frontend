@@ -23,7 +23,6 @@ function Curso() {
     idCurso: 0,
     nombreCurso: "",
     fechaInicio: "",
-    estadoCurso: false,
     rangoEdad: null,
     docente: null,
   });
@@ -53,6 +52,7 @@ function Curso() {
   const [selectedRango, setSelectedRango] = useState<IRangoEdad | null>(null);
 
   useEffect(() => {
+
     loadDocentes();
   }, []);
 
@@ -106,7 +106,6 @@ function Curso() {
     if (
       !formData.nombreCurso ||
       !formData.fechaInicio ||
-      !formData.estadoCurso ||
       !formData.docente || // Asegúrate de que docente esté seleccionado
       !formData.rangoEdad // Asegúrate de que rangoEdad esté seleccionado
     ) {
@@ -207,7 +206,6 @@ function Curso() {
 
       nombreCurso: "",
       fechaInicio: "",
-      estadoCurso: false,
       rangoEdad: null,
       docente: null,
     });
@@ -303,6 +301,7 @@ function Curso() {
                       }
                     />
                   </div>
+
                 </div>
                 <div
                   className="flex flex-column flex-wrap gap-4"
@@ -323,18 +322,14 @@ function Curso() {
                       id="docente"
                       name="docente"
                       options={opcionesDocente}
-                      onChange={(e) => {
-                        setFormData({
-                          ...formData,
-                          docente: {
-                            idDocente: parseInt(e.value),
-                            materiaDocente: "",
-                            tituloDocente: "",
-                            persona: null,
-                          },
-                        });
-                      }}
-                      value={formData.docente?.idDocente}
+                      // onChange={(e) => {
+                      //   setFormData({
+                      //     ...formData,
+                      //     docente: { idUsuario: parseInt(e.value), persona: null, username: '', password: '', rol: null },
+                      //   });
+
+                      // }}
+                      value={formData.docente?.idUsuario}
                       optionLabel="etiqueta"
                       optionValue="idDocente"
                       placeholder="Seleccione al Docente"
@@ -356,12 +351,8 @@ function Curso() {
                       onChange={(e) => {
                         setFormData({
                           ...formData,
-                          rangoEdad: {
-                            idRangoEdad: parseInt(e.value),
-                            limInferior: 0,
-                            limSuperior: 0,
-                          },
-                        });
+                          rangoEdad: { idRangoEdad: parseInt(e.value), limInferior: 0, limSuperior: 0 },
+                        })
                       }}
                       value={formData.rangoEdad?.idRangoEdad}
                       optionLabel="etiquetaRango"
@@ -370,28 +361,7 @@ function Curso() {
                       style={{ width: "250px" }}
                     />
                   </div>
-                  <div className="flex flex-wrap w-full h-full  justify-content-between">
-                    <label
-                      htmlFor="activo"
-                      className="text-3xl font-medium w-auto min-w-min"
-                    >
-                      Curso Activo:
-                    </label>
-                    <SelectButton
-                      className="text-2xl"
-                      id="activo"
-                      name="activo"
-                      options={options}
-                      style={{ width: "221px", marginTop: "10px" }}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          estadoCurso: e.value === "Si",
-                        })
-                      }
-                      value={formData.estadoCurso ? "Si" : "No"}
-                    />
-                  </div>
+
                 </div>
               </div>
               <div
@@ -432,7 +402,6 @@ function Curso() {
               <th>Curso</th>
               <th>Fecha Inicio</th>
               <th>Fecha Fin</th>
-              <th>Estado</th>
               <th>Operaciones</th>
             </tr>
           </thead>
@@ -444,14 +413,13 @@ function Curso() {
                 <td>
                   {curso.fechaInicio
                     ? new Date(curso.fechaInicio).toLocaleDateString("es-ES", {
-                        year: "numeric",
-                        month: "2-digit",
-                        day: "2-digit",
-                      })
+                      year: "numeric",
+                      month: "2-digit",
+                      day: "2-digit",
+                    })
                     : ""}
                 </td>
 
-                <td>{curso.estadoCurso ? "Activo" : "Inactivo"}</td>
                 <td>
                   <Button
                     type="button"
@@ -466,7 +434,7 @@ function Curso() {
                       justifyContent: "center",
                     }}
                     onClick={() => handleEdit(curso.idCurso?.valueOf())}
-                    // Agrega el evento onClick para la operación de editar
+                  // Agrega el evento onClick para la operación de editar
                   />
                   <Button
                     type="button"
@@ -481,7 +449,7 @@ function Curso() {
                       justifyContent: "center",
                     }}
                     onClick={() => handleDelete(curso.idCurso?.valueOf())}
-                    // Agrega el evento onClick para la operación de eliminar
+                  // Agrega el evento onClick para la operación de eliminar
                   />
                 </td>
               </tr>

@@ -15,7 +15,7 @@ export function ReportBar(props: IExcelReportParams) {
     }
     return (
         <div className="divEnd">
-            <button className="btnPrint" onClick={handleExportExcel}>
+            <button className="btnExcel" onClick={handleExportExcel}>
                 <div className="svg-wrapper-1">
                     <div className="svg-wrapper">
                         <PiFileXlsFill className="icono"></PiFileXlsFill>
