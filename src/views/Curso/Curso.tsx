@@ -17,10 +17,10 @@ import { UserService } from "../../services/UsuarioService";
 
 import swal from "sweetalert";
 import { IUsuario } from "../../interfaces/IUsuario";
-import { Toaster } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import { Divider } from "primereact/divider";
 import { ReportBar } from "../../common/ReportBar";
-import { IExcelReportParams } from "../../interfaces/IExcelReportParams";
+import { IExcelReportParams, IHeaderItem } from "../../interfaces/IExcelReportParams";
 
 
 function Curso() {
@@ -49,7 +49,7 @@ function Curso() {
   const usuarioService = new UserService();
   const [excelReportData, setExcelReportData] = useState<IExcelReportParams | null>(null);
 
-  const [busqueda, setBusqueda] = useState<string>();
+  const [busqueda, setBusqueda] = useState<string>('');
 
   useEffect(() => {
 
@@ -80,6 +80,13 @@ function Curso() {
 
     loadRango();
   }, []);
+  useEffect(() => {
+    loadData();
+  }, []);
+  useEffect(() => {
+    loadBusqueda();
+  }, [busqueda]); // Se ejecutará cuando busqueda cambie
+
 
   const loadRango = () => {
     rangoService
@@ -104,30 +111,125 @@ function Curso() {
       .getAll()
       .then((data) => {
         setContra1(data);
+        loadExcelReportData(data);
         setDataLoaded(true); // Marcar los datos como cargados
       })
       .catch((error) => {
         console.error("Error al obtener los datos:", error);
       });
   };
-  useEffect(() => {
-    loadData();
-  }, []);
+
+
+
+  const loadBusqueda = () => {
+
+    if (busqueda.trim()) {
+      cursoService
+        .busquedaCurso(busqueda)
+        .then((data: ICurso[]) => {
+
+          loadExcelReportData(data);
+          setContra1(data); // Establecer los datos procesados en el estado
+          // setDataLoaded(true); // Puedes marcar los datos como cargados si es necesario
+        })
+        .catch((error) => {
+          console.error("Error al obtener los datos:", error);
+        });
+    } else {
+      loadData()
+    }
+
+
+  };
+
+  function loadExcelReportData(data: ICurso[]) {
+    const reportName = "Cursos"
+    const logo = 'G1:K1'
+
+    const rowData = data.map((item) => (
+      {
+        idFicha: item.idCurso,
+        aula: item.nombreCurso || '',
+        docente: `${item.docente?.persona?.nombresPersona} ${item.docente?.persona?.apellidosPersona}` || '',
+        inicio: item.fechaInicio
+          ? new Date(item.fechaInicio).toLocaleDateString("es-ES", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+          })
+          : "",
+        rango: `${item.rangoEdad?.limInferior} - ${item.rangoEdad?.limSuperior}` || 'Sin rango',
+        registro: typeof item.fechaRegistro === 'string' &&
+          `${item.fechaRegistro.split('-')[2]}/${item.fechaRegistro.split('-')[1]}/${item.fechaRegistro.split('-')[0]}`
+      }
+    ));
+    const headerItems: IHeaderItem[] = [
+      { header: "№ FICHA" },
+      { header: "AULA" },
+      { header: "DOCENTE" },
+      { header: "FECHA DE INICIO" },
+      { header: "RANGO DE EDAD" },
+      { header: "FECHA DE REGISTRO" },
+    ]
+    setExcelReportData({
+      reportName,
+      headerItems,
+      rowData,
+      logo
+    }
+    )
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    cursoService
-      .save(formData)
-      .then((response) => {
-        resetForm();
-        swal("Publicacion", "Datos Guardados Correctamente", "success");
-
-        loadData();
+    if (!formData.nombreCurso) {
+      toast.error("Ingrese un nombre para identificar el aula", {
+        style: {
+          fontSize: '15px'
+        },
+        duration: 3000,
       })
-      .catch((error) => {
-        console.error("Error al enviar el formulario:", error);
-      });
+      return;
+
+    } else {
+      cursoService
+        .existsByNombreCurso(formData.nombreCurso)
+        .then((data: boolean) => {
+          if (data) {
+            toast.error("Ya existe una aula registrada con este nombre", {
+              style: {
+                fontSize: '17px'
+              },
+              duration: 4500,
+            })
+          } else {
+
+            if (validaciones()) {
+              cursoService
+                .save(formData)
+                .then((response) => {
+                  resetForm();
+                  swal("Publicacion", "Datos Guardados Correctamente", "success");
+
+                  // loadData();
+                  setBusqueda(response.nombreCurso)
+
+                  loadBusqueda();
+                })
+                .catch((error) => {
+                  console.error("Error al enviar el formulario:", error);
+                });
+            }
+
+          }
+        })
+        .catch((error) => {
+          console.error("Error al obtener los datos:", error);
+        });
+    }
+
+
+
   };
 
   const handleDelete = (id: number | undefined) => {
@@ -176,7 +278,18 @@ function Curso() {
     if (id !== undefined) {
       const editItem = contra1.find((curso) => curso.idCurso === id);
       if (editItem) {
-        setFormData(editItem);
+        const editedItem = { ...editItem };
+
+        if (typeof editedItem.fechaRegistro === 'string') {
+          const registro = new Date(editedItem.fechaRegistro);
+          registro.setDate(registro.getDate() + 1);
+          const formattedDate = registro
+            ? registro.toISOString().split('T')[0]
+            : '';
+          editedItem.fechaRegistro = formattedDate;
+        }
+
+        setFormData(editedItem);
 
         setEditMode(true);
         setEditItemId(id);
@@ -186,23 +299,82 @@ function Curso() {
 
   const handleUpdate = (e: React.FormEvent) => {
     e.preventDefault();
+
     if (editItemId !== undefined) {
-      cursoService
-        .update(Number(editItemId), formData as ICurso)
-        .then((response) => {
-          swal({
-            title: "Publicaciones",
-            text: "Datos actualizados correctamente",
-            icon: "success",
+
+      if (validaciones()) {
+
+        cursoService
+          .update(Number(editItemId), formData as ICurso)
+          .then((response) => {
+            swal({
+              title: "Publicaciones",
+              text: "Datos actualizados correctamente",
+              icon: "success",
+            });
+            resetForm();
+            // loadData();
+            setBusqueda(response.nombreCurso)
+            loadBusqueda();
+
+          })
+          .catch((error) => {
+            console.error("Error al actualizar el formulario:", error);
           });
-          resetForm();
-          loadData();
-        })
-        .catch((error) => {
-          console.error("Error al actualizar el formulario:", error);
-        });
+      }
+
+
+
     }
   };
+
+  function validaciones(): boolean {
+
+
+
+    if (!formData.nombreCurso) {
+      toast.error("Ingrese un nombre para identificar el aula", {
+        style: {
+          fontSize: '15px'
+        },
+        duration: 3000,
+      })
+      return false
+    }
+
+    if (!formData.fechaInicio) {
+      toast.error("Seleccione la fecha de inicio", {
+        style: {
+          fontSize: '15px'
+        },
+        duration: 3000,
+      })
+      return false
+    }
+
+    if (!formData.docente) {
+      toast.error("Seleccione el docente que estara acargo del aula", {
+        style: {
+          fontSize: '15px'
+        },
+        duration: 3000,
+      })
+      return false
+    }
+
+    if (!formData.rangoEdad) {
+      toast.error("Seleccione en que rango de edad estan los niños del aula", {
+        style: {
+          fontSize: '15px'
+        },
+        duration: 3000,
+      })
+      return false
+    }
+
+    return true
+  }
+
 
   const resetForm = () => {
     setFormData({
@@ -238,7 +410,7 @@ function Curso() {
             style={{ display: 'flex', justifyContent: 'center' }}
           >
             <h1 className="text-5xl font-smibold lg:md-2 h-full max-w-full max-h-full min-w-min">
-              Curso
+              Aula
             </h1>
           </div>
 
@@ -248,15 +420,21 @@ function Curso() {
             <Calendar
               disabled
               style={{ width: "95px", marginRight: "25px", fontWeight: "bold" }}
-              value={formData.fechaRegistro}
-              onChange={(e: CalendarChangeEvent) => {
-                if (e.value !== undefined) {
+              dateFormat="dd-mm-yy" // Cambiar el formato a ISO 8601
+
+              onChange={(e) => {
+                if (e.value !== undefined && e.value !== null && !Array.isArray(e.value)) {
                   setFormData({
                     ...formData,
                     fechaRegistro: e.value,
                   });
                 }
-              }} />
+              }}
+
+              value={typeof formData.fechaRegistro === 'string' ? new Date(formData.fechaRegistro) : new Date()}
+
+
+            />
           </div>
 
           <form onSubmit={editMode ? handleUpdate : handleSubmit} className='form' encType="multipart/form-data">
@@ -272,11 +450,11 @@ function Curso() {
               <div className='column' style={{ width: "50%" }}>
                 <div className='input-box' style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                   <label htmlFor="fechaDesvinculacion" className="font-medium w-auto min-w-min">
-                    Nombre Curso:
+                    Nombre Aula:
                   </label>
                   <InputText
                     className="text-2xl"
-                    placeholder="Ingrese el Nombre del Curso"
+                    placeholder="Ingrese el Nombre del Aula"
                     id="nomCurso"
                     name="nomCurso"
                     style={{ width: "100%" }}
@@ -302,19 +480,20 @@ function Curso() {
                     placeholder="Ingrese la Fecha de Inicio"
                     required
                     style={{ width: "100%" }}
-
-                    dateFormat="yy-mm-dd"
+                    dateFormat="dd-mm-yy" // Cambiar el formato a ISO 8601
                     showIcon
                     onChange={(e) => {
-                      const selectedDate =
-                        e.value instanceof Date ? e.value : null;
-                      const formattedDate = selectedDate
-                        ? selectedDate.toISOString().split("T")[0]
-                        : "";
-                      setFormData({
-                        ...formData,
-                        fechaInicio: formattedDate,
-                      });
+                      const selectedDate = e.value instanceof Date ? e.value : null;
+                      if (selectedDate) {
+                        selectedDate.setDate(selectedDate.getDate() + 1);
+                        const formattedDate = selectedDate.toISOString().split("T")[0];
+
+                        setFormData({
+                          ...formData,
+                          fechaInicio: formattedDate,
+                        });
+                      }
+
                     }}
                     value={
                       formData.fechaInicio
@@ -424,10 +603,8 @@ function Curso() {
                   style={{ width: "75%" }}
 
                   onChange={(e) => {
-                    // Actualizar el estado usando setFormData
-
                     setBusqueda(e.currentTarget.value);
-
+                    loadBusqueda();
 
                   }}
 
@@ -446,7 +623,7 @@ function Curso() {
               <label className="font-medium w-auto min-w-min" htmlFor='estado'>Cargar todo:</label>
 
               <Button className="buttonIcon" // Agrega una clase CSS personalizada
-                icon="pi pi-refresh" style={{ width: "120px", height: "39px" }} severity="danger" aria-label="Cancel" onClick={loadData} />
+                icon="pi pi-refresh" style={{ width: "120px", height: "39px" }} severity="danger" aria-label="Cancel" onClick={() => { loadData(); setBusqueda(''); }} />
 
             </div>
 
@@ -475,6 +652,7 @@ function Curso() {
                   <th className="trFichas">Nº de Registro</th>
                   <th className="trFichas">Aula</th>
                   <th className="trFichas">Docente</th>
+                  <th className="trFichas">Rando de Edad</th>
                   <th className="trFichas">Fecha Inicio</th>
                   <th className="trFichas">Editar</th>
                   <th className="trFichas">Eliminar</th>
@@ -486,6 +664,7 @@ function Curso() {
                     <td className="tdFichas">{curso.idCurso}</td>
                     <td className="tdFichas">{curso.nombreCurso}</td>
                     <td className="tdFichas">{`${curso.docente?.persona?.nombresPersona} ${curso.docente?.persona?.apellidosPersona}`}</td>
+                    <td className="tdFichas">{`${curso.rangoEdad?.limInferior} - ${curso.rangoEdad?.limSuperior}`}</td>
                     <td className="tdFichas">
                       {curso.fechaInicio
                         ? new Date(curso.fechaInicio).toLocaleDateString("es-ES", {

@@ -7,8 +7,20 @@ export class CursoService {
         return axios.get(this.baseUrl + "get").then((res) => res.data);
     }
 
-    getAllDocente(id:number) {
+    getAllDocente(id: number) {
         return axios.get(this.baseUrl + `getCurso/${id}`).then((res) => res.data);
+    }
+
+    busquedaCurso(busqueda: string) {
+        busqueda = busqueda.trim();
+        busqueda = busqueda || "NA";
+
+        return axios.get(this.baseUrl + `busquedaCurso/${busqueda}`).then((res) => res.data);
+    }
+
+    existsByNombreCurso(nombreCurso: string) {
+        //Método para listar todas los Usuarios
+        return axios.get(`${this.baseUrl}existsByNombreCurso/${nombreCurso}`).then((res) => res.data);
     }
 
 

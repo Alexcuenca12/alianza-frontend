@@ -121,7 +121,7 @@ function FichaPersonal() {
     }, []);
 
     useEffect(() => {
-        loadRelacion();
+        loadBusqueda();
     }, [busqueda]); // Se ejecutará cuando busqueda cambie
 
 
@@ -229,7 +229,7 @@ function FichaPersonal() {
                 .cedulaUnicaFP(formData.ciPasaporte)
                 .then((data: boolean) => {
 
-                    if (!data) {
+                    if (data) {
                         toast.error("El numero de identificación que ingreso ya se encuentra registrado", {
                             style: {
                                 fontSize: '17px'
@@ -475,7 +475,7 @@ function FichaPersonal() {
         }
     };
 
-    const loadRelacion = () => {
+    const loadBusqueda = () => {
 
         // alert(busqueda.estado)
         fichaPersonalService
@@ -489,10 +489,7 @@ function FichaPersonal() {
             .catch((error) => {
                 console.error("Error al obtener los datos:", error);
             });
-
-
         // console.log('Datos enviados:', { listFichaPersonal });
-
     };
 
     function loadExcelReportData(data: IFichaPersonal[]) {
@@ -1551,16 +1548,16 @@ function FichaPersonal() {
 
                                             setBusqueda({ ...busqueda, ciNombre: e.currentTarget.value });
 
-                                            // Luego, llamar a loadRelacion después de que se actualice el estado
-                                            loadRelacion();
+                                            // Luego, llamar a loadBusqueda después de que se actualice el estado
+                                            loadBusqueda();
                                         }}
 
                                         // onKeyUp={(e) => {
 
                                         //     setBusqueda({ ...busqueda, ciNombre: e.currentTarget.value });
 
-                                        //     // Luego, llamar a loadRelacion después de que se actualice el estado
-                                        //     loadRelacion(); // Llama a tu método aquí o realiza las acciones necesarias.
+                                        //     // Luego, llamar a loadBusqueda después de que se actualice el estado
+                                        //     loadBusqueda(); // Llama a tu método aquí o realiza las acciones necesarias.
                                         // }}
 
                                         value={busqueda.ciNombre}
@@ -1583,7 +1580,7 @@ function FichaPersonal() {
                                                 name="estAct"
                                                 value="true"
                                                 checked={busqueda.estado === true}
-                                                onChange={(e) => { setBusqueda({ ...busqueda, estado: true }); loadRelacion(); }}
+                                                onChange={(e) => { setBusqueda({ ...busqueda, estado: true }); loadBusqueda(); }}
                                             />
                                             <span>Vinculado</span>
                                         </label>
@@ -1595,7 +1592,7 @@ function FichaPersonal() {
                                                 name="estInact"
                                                 value="false"
                                                 checked={busqueda.estado === false}
-                                                onChange={(e) => { setBusqueda({ ...busqueda, estado: false }); loadRelacion(); }}
+                                                onChange={(e) => { setBusqueda({ ...busqueda, estado: false }); loadBusqueda(); }}
 
                                             />
                                             <span>Desvinculado</span>
