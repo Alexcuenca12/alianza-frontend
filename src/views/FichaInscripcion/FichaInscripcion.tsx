@@ -585,7 +585,7 @@ function FichaInscripcionContext() {
                       style={{ width: "220px", marginLeft: "15px" }}
                       options={cursos}
                       onChange={(e) =>
-                        setFormData({ ...formData, curso: { idCurso: parseInt(e.value), docente: null, fechaInicio: "0000-00-00", nombreCurso: '', rangoEdad: null } })
+                        setFormData({ ...formData, curso: { idCurso: parseInt(e.value), docente: null, fechaInicio: "0000-00-00", nombreCurso: '', rangoEdad: null, fechaRegistro: '' } })
                       }
                       value={formData.curso} // Make sure this is correctly bound
                       optionLabel="nombreCurso"

@@ -18,7 +18,7 @@ import '../../styles/FiltroFichas.css'
 import { Divider } from 'primereact/divider';
 
 import { InputNumber, InputNumberValueChangeEvent } from 'primereact/inputnumber';
-import { Toaster } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import { IExcelReportParams, IHeaderItem } from "../../interfaces/IExcelReportParams";
 import { ReportBar } from "../../common/ReportBar";
 
@@ -82,26 +82,28 @@ function FichaSaludContext() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (validaciones()) {
 
-    saludService
-      .save(formData)
-      .then((response) => {
-        resetForm();
-        swal("Publicacion", "Datos Guardados Correctamente", "success");
+      saludService
+        .save(formData)
+        .then((response) => {
+          resetForm();
+          swal("Publicacion", "Datos Guardados Correctamente", "success");
 
-        loadDataID(response.fichaPersonal?.idFichaPersonal);
-        // setcontra1(data);
-        resetForm();
-        resetFiltro()
+          loadDataID(response.fichaPersonal?.idFichaPersonal);
+          // setcontra1(data);
+          resetForm();
+          resetFiltro()
 
-        if (fileUploadRef.current) {
-          fileUploadRef.current.clear();
-        };
+          if (fileUploadRef.current) {
+            fileUploadRef.current.clear();
+          };
 
-      })
-      .catch((error) => {
-        console.error("Error al enviar el formulario:", error);
-      });
+        })
+        .catch((error) => {
+          console.error("Error al enviar el formulario:", error);
+        });
+    }
   };
 
   const handleDelete = (id: number | undefined) => {
@@ -181,26 +183,29 @@ function FichaSaludContext() {
     e.preventDefault();
 
     if (editItemId !== undefined) {
-      saludService
-        .update(Number(editItemId), formData as IFichaSalud)
-        .then((response) => {
-          swal({
-            title: "Publicaciones",
-            text: "Datos actualizados correctamente",
-            icon: "success",
-          });
-          resetForm()
-          setTempPeso('')
-          setTempTalla('')
-          loadDataID(response.fichaPersonal?.idFichaPersonal);
-          setEditMode(false);
-          setEditItemId(undefined);
-          resetFiltro()
+      if (validaciones()) {
 
-        })
-        .catch((error) => {
-          console.error("Error al actualizar el formulario:", error);
-        });
+        saludService
+          .update(Number(editItemId), formData as IFichaSalud)
+          .then((response) => {
+            swal({
+              title: "Publicaciones",
+              text: "Datos actualizados correctamente",
+              icon: "success",
+            });
+            resetForm()
+            setTempPeso('')
+            setTempTalla('')
+            loadDataID(response.fichaPersonal?.idFichaPersonal);
+            setEditMode(false);
+            setEditItemId(undefined);
+            resetFiltro()
+
+          })
+          .catch((error) => {
+            console.error("Error al actualizar el formulario:", error);
+          });
+      }
     }
   };
 
@@ -238,6 +243,107 @@ function FichaSaludContext() {
     return <div style={{ marginLeft: "50%" }}>Cargando datos...</div>;
   }
 
+  function validaciones(): boolean {
+
+    if (!formData.fichaPersonal?.idFichaPersonal) {
+      toast.error("Seleccione al propietario de la ficha", {
+        style: {
+          fontSize: '15px'
+        },
+        duration: 3000,
+      })
+      return false
+    }
+
+    if (!formData.tallaFichaSalud) {
+      toast('No olvides ingresar la talla más tarde', {
+        icon: '⚠️',
+        style: {
+          fontSize: '15px'
+
+        },
+        duration: 4000,
+      });
+    }
+
+    if (!formData.pesoFichaSalud) {
+      toast('No olvides ingresar el peso más tarde', {
+        icon: '⚠️',
+        style: {
+          fontSize: '15px'
+
+        },
+        duration: 4000,
+      });
+    }
+
+    if (!formData.masaCorporal) {
+      toast('No olvides ingresar el indice de masa corporal mas tarde más tarde', {
+        icon: '⚠️',
+        style: {
+          fontSize: '15px'
+
+        },
+        duration: 4000,
+      });
+    }
+
+    if (formData.discapacidadNNAFichaSalud) {
+      if (!formData.tipoDiscapacidadFichaSalud) {
+        toast.error("Por favor, proporcione informacion acerca de la discapacidad", {
+          style: {
+            fontSize: '15px'
+          },
+          duration: 3000,
+        })
+        return false
+      }
+      if (!formData.porcentajeDiscapacidadFichaSalud) {
+        toast('No olvides ingresar el porcentaje de discapacidad mas tarde más tarde', {
+          icon: '⚠️',
+          style: {
+            fontSize: '15px'
+
+          },
+          duration: 4000,
+        });
+      }
+    }
+
+    if (!formData.situacionPsicoemocional) {
+      toast('No ingresaste ninguna situacion psicoemocional', {
+        icon: '⚠️',
+        style: {
+          fontSize: '15px'
+
+        },
+        duration: 4000,
+      });
+    }
+    if (!formData.enfermedadesPrevalentesFichaSalud) {
+      toast('No ingresaste ninguna enfermedad prevalente', {
+        icon: '⚠️',
+        style: {
+          fontSize: '15px'
+
+        },
+        duration: 4000,
+      });
+    }
+    if (!formData.condicionesMedicas && !formData.condicionesMedicas2 && !formData.condicionesMedicas3 && !formData.condicionesMedicas4 && !formData.condicionesMedicas5 && !formData.condicionesMedicasAdd) {
+      toast('No ingresaste ninguna condicion medica', {
+        icon: '⚠️',
+        style: {
+          fontSize: '15px'
+
+        },
+        duration: 4000,
+      });
+    }
+
+    return true
+
+  }
 
   const loadRelacion = () => {
 
@@ -371,7 +477,7 @@ function FichaSaludContext() {
         <Card
           header={cardHeader}
           className="border-solid border-red-800 border-3 flex-1 flex-wrap"
-          style={{ marginBottom: "35px", maxWidth: "1150px" }}
+          style={{ marginBottom: "35px", maxWidth: "1100px" }}
         >
           <div
             className="h1-rem"
@@ -1003,13 +1109,19 @@ function FichaSaludContext() {
               <thead className="theadTab" >
                 <tr style={{ backgroundColor: "#871b1b", color: "white" }}>
                   <th className="trFichas">Nº de Ficha</th>
-                  <th className="trFichas">Condiciones Médicas</th>
-                  <th className="trFichas">Peso </th>
+                  <th className="trFichas">Cedula/Pasaporte</th>
+                  <th className="trFichas">Nombres</th>
+                  <th className="trFichas">Apellidos</th>
+                  <th className="trFichas">Peso</th>
                   <th className="trFichas">Talla</th>
+                  <th className="trFichas">Masa corporal</th>
                   <th className="trFichas">Discapacidad</th>
-                  <th className="trFichas">Porcentaje de Discapacidad</th>
                   <th className="trFichas">Tipo de Discapacidad</th>
+                  <th className="trFichas">Porcentaje de Discapacidad</th>
                   <th className="trFichas">Enfermedades Prevalentes</th>
+                  <th className="trFichas">Condiciones Médicas</th>
+
+
                   <th className="trFichas">Editar</th>
                   <th className="trFichas">Eliminar</th>
                 </tr>
@@ -1021,13 +1133,17 @@ function FichaSaludContext() {
                     key={contrato.idFichaSalud?.toString()}
                   >
                     <td className="tdFichas">{contrato.idFichaSalud}</td>
-                    <td className="tdFichas">{contrato.condicionesMedicas}</td>
-                    <td className="tdFichas">{contrato.pesoFichaSalud + "kg"}</td>
-                    <td className="tdFichas">{contrato.tallaFichaSalud + "cm"}</td>
+                    <td className="tdFichas">{contrato.fichaPersonal?.ciPasaporte}</td>
+                    <td className="tdFichas">{contrato.fichaPersonal?.nombres}</td>
+                    <td className="tdFichas">{contrato.fichaPersonal?.apellidos} </td>
+                    <td className="tdFichas">{contrato.pesoFichaSalud + " kg" || "0.00 kg"}</td>
+                    <td className="tdFichas">{contrato.tallaFichaSalud + " cm" || "0.00 cm"}</td>
+                    <td className="tdFichas">{contrato.masaCorporal + " %" || "0.00 %"}</td>
                     <td className="tdFichas">{contrato.discapacidadNNAFichaSalud ? "Si" : "No"}</td>
-                    <td className="tdFichas">{contrato.tipoDiscapacidadFichaSalud}</td>
-                    <td className="tdFichas">{contrato.porcentajeDiscapacidadFichaSalud + "%"}</td>
-                    <td className="tdFichas">{contrato.enfermedadesPrevalentesFichaSalud}</td>
+                    <td className="tdFichas">{contrato.tipoDiscapacidadFichaSalud || 'Ninguna'}</td>
+                    <td className="tdFichas">{contrato.porcentajeDiscapacidadFichaSalud + " %" || "0.00 %"}</td>
+                    <td className="tdFichas">{contrato.enfermedadesPrevalentesFichaSalud || 'Ninguna'}</td>
+                    <td className="tdFichas">{contrato.condicionesMedicas || contrato.condicionesMedicas2 || contrato.condicionesMedicas3 || contrato.condicionesMedicas4 || contrato.condicionesMedicas5 || contrato.condicionesMedicasAdd || 'Ninguna'}</td>
                     <td className="tdFichas">
                       <Button className="buttonIcon"
                         type="button"

@@ -101,12 +101,10 @@ function UsuarioContext() {
                 setListUsuarios(data);
                 setDataLoaded(true);
                 loadExcelReportData(data);
-
             })
             .catch((error) => {
                 console.error("Error al obtener los datos:", error);
             });
-
 
     };
 
@@ -124,6 +122,7 @@ function UsuarioContext() {
                             },
                             duration: 3000,
                         })
+                        return;
                     } else {
                         usuarioService
                             .existsUsername(formDataUsu.username)
@@ -135,6 +134,7 @@ function UsuarioContext() {
                                         },
                                         duration: 3000,
                                     })
+                                    return;
                                 } else {
                                     personaService
                                         .save(formDataPer)
@@ -313,6 +313,8 @@ function UsuarioContext() {
         usuarioService
             .filtroUser(busqueda.ciNombre, busqueda.rol.idRol)
             .then((data: IUsuario[]) => {
+                console.log('/////DATA/////')
+                console.log(data)
 
                 loadExcelReportData(data);
                 setListUsuarios(data); // Establecer los datos procesados en el estado
@@ -321,7 +323,9 @@ function UsuarioContext() {
             .catch((error) => {
                 console.error("Error al obtener los datos:", error);
             });
+        console.log('/////LISTA/////')
 
+        console.log(listUsuarios)
     };
 
 

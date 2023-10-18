@@ -34,12 +34,18 @@ export class UserService {
       .then((res) => res.data);
   }
 
-
   filtroUser(busq: string, rol: number) {
     busq = busq || "NA";
     rol = rol || 0;
     return axios
       .get(`${this.baseUrl}filtroUser/${busq}/${rol}`)
+      .then((res) => res.data);
+  }
+
+  userXrol(rol: number) {
+    rol = rol || 0;
+    return axios
+      .get(`${this.baseUrl}userXrol/${rol}`)
       .then((res) => res.data);
   }
 }

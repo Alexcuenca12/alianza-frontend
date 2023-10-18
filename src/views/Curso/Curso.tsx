@@ -3,7 +3,7 @@ import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { SelectButton } from "primereact/selectbutton";
 import { Button } from "primereact/button";
-import { Calendar } from "primereact/calendar";
+import { Calendar, CalendarChangeEvent } from "primereact/calendar";
 import { Fieldset } from "primereact/fieldset";
 import { Card } from "primereact/card";
 import cardHeader from "../../shared/CardHeader";
@@ -12,8 +12,16 @@ import { IDocente } from "../../interfaces/IDocente";
 import { IRangoEdad } from "../../interfaces/IRangoEdad";
 import { CursoService } from "../../services/CursoService";
 import { RangoEdadService } from "../../services/RangoEdadService";
-import { DocenteService } from "../../services/DocenteService";
+// import { DocenteService } from "../../services/DocenteService";
+import { UserService } from "../../services/UsuarioService";
+
 import swal from "sweetalert";
+import { IUsuario } from "../../interfaces/IUsuario";
+import { Toaster } from "react-hot-toast";
+import { Divider } from "primereact/divider";
+import { ReportBar } from "../../common/ReportBar";
+import { IExcelReportParams } from "../../interfaces/IExcelReportParams";
+
 
 function Curso() {
   const options: string[] = ["Si", "No"];
@@ -25,31 +33,23 @@ function Curso() {
     fechaInicio: "",
     rangoEdad: null,
     docente: null,
+    fechaRegistro: new Date(),
+
   });
 
-  const [docentes, setDocentes] = useState<IDocente[]>([]);
+  const [docentes, setDocentes] = useState<IUsuario[]>([]);
   const [rangos, setRangosEdad] = useState<IRangoEdad[]>([]);
-
-  const opcionesRango = rangos.map((rango) => ({
-    ...rango,
-    etiquetaRango: `${rango.limInferior} - ${rango.limSuperior}`,
-  }));
-
-  const opcionesDocente = docentes.map((docente) => ({
-    ...docente,
-    etiqueta: `${docente.persona?.nombresPersona}  ${docente.persona?.apellidosPersona}`,
-  }));
 
   const [dataLoaded, setDataLoaded] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [editItemId, setEditItemId] = useState<number | undefined>(undefined);
 
   const cursoService = new CursoService();
-  const docenteService = new DocenteService();
   const rangoService = new RangoEdadService();
+  const usuarioService = new UserService();
+  const [excelReportData, setExcelReportData] = useState<IExcelReportParams | null>(null);
 
-  // const [selectedDocente, setSelectedDocente] = useState<IDocente | null>(null);
-  const [selectedRango, setSelectedRango] = useState<IRangoEdad | null>(null);
+  const [busqueda, setBusqueda] = useState<string>();
 
   useEffect(() => {
 
@@ -57,33 +57,47 @@ function Curso() {
   }, []);
 
   const loadDocentes = () => {
-    docenteService
-      .getAll()
-      .then((data) => {
-        setDocentes(data);
+    usuarioService
+      .userXrol(3)
+      .then((data: IUsuario[]) => { // Proporciona un tipo explícito para "data"
+
+        const dataWithLabel = data.map((object) => ({
+          ...object,
+          label: `${object.persona?.nombresPersona} ${object.persona?.apellidosPersona}`,
+        }));
+
+        setDocentes(dataWithLabel);
         setDataLoaded(true);
         // setSelectedDocente(null);
       })
       .catch((error) => {
         console.error("Error al obtener los datos:", error);
       });
+
   };
 
   useEffect(() => {
-    const loadRango = () => {
-      rangoService
-        .getAll()
-        .then((data) => {
-          setRangosEdad(data);
-          setDataLoaded(true);
-          setSelectedRango(null);
-        })
-        .catch((error) => {
-          console.error("Error al obtener los datos:", error);
-        });
-    };
+
     loadRango();
   }, []);
+
+  const loadRango = () => {
+    rangoService
+      .getAll()
+      .then((data: IRangoEdad[]) => { // Proporciona un tipo explícito para "data"
+        // Transforma los datos para agregar la propiedad "label"
+        const dataWithLabel = data.map((rangoEdad) => ({
+          ...rangoEdad,
+          label: `${rangoEdad.limInferior} - ${rangoEdad.limSuperior}`,
+        }));
+
+        setRangosEdad(dataWithLabel);
+        setDataLoaded(true);
+      })
+      .catch((error) => {
+        console.error("Error al obtener los datos:", error);
+      });
+  };
 
   const loadData = () => {
     cursoService
@@ -102,16 +116,6 @@ function Curso() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (
-      !formData.nombreCurso ||
-      !formData.fechaInicio ||
-      !formData.docente || // Asegúrate de que docente esté seleccionado
-      !formData.rangoEdad // Asegúrate de que rangoEdad esté seleccionado
-    ) {
-      swal("Advertencia", "Por favor, complete todos los campos", "warning");
-      return;
-    }
 
     cursoService
       .save(formData)
@@ -203,11 +207,11 @@ function Curso() {
   const resetForm = () => {
     setFormData({
       idCurso: 0,
-
       nombreCurso: "",
       fechaInicio: "",
       rangoEdad: null,
       docente: null,
+      fechaRegistro: new Date(),
     });
     setEditMode(false);
     setEditItemId(undefined);
@@ -217,247 +221,325 @@ function Curso() {
     return <div>Cargando datos...</div>;
   }
   return (
-    <Fieldset className="fgrid col-fixed ">
-      <Card
-        header={cardHeader}
-        className="border-solid border-red-800 border-3 flex-1 flex-wrap"
-        style={{ width: "90%", marginLeft: "7%", height: "100%" }}
-      >
-        <div
-          className="h1-rem"
-          style={{ marginLeft: "45%", marginBottom: "20px" }}
+
+    <>
+      <div>
+        <Toaster position="top-right"
+          reverseOrder={true} />
+      </div>
+      <Fieldset className="fgrid col-fixed " style={{ display: 'flex', justifyContent: 'center' }}>
+        <Card
+          header={cardHeader}
+          className="border-solid border-red-800 border-3 flex-1 flex-wrap"
+          style={{ marginBottom: "35px", minWidth: "800px ", maxWidth: "1100px" }}
         >
-          <h1 className="text-5xl font-smibold lg:md-2  w-full h-full max-w-full max-h-full min-w-min">
-            Curso
-          </h1>
-        </div>
-
-        <div className="flex justify-content-center flex-wrap">
-          <form
-            onSubmit={editMode ? handleUpdate : handleSubmit}
-            encType="multipart/form-data"
+          <div
+            className="h1-rem"
+            style={{ display: 'flex', justifyContent: 'center' }}
           >
-            <div className="flex flex-wrap flex-row">
-              <div className="flex align-items-center justify-content-center">
-                <div
-                  className="flex flex-column flex-wrap gap-4"
-                  style={{ marginLeft: "50px" }}
-                >
-                  <div className="flex flex-wrap w-full h-full  justify-content-between">
-                    <label
-                      htmlFor="nomCurso"
-                      className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginRight: "20px" }}
-                    >
-                      Nombre Curso:
-                    </label>
-                    <InputText
-                      className="text-2xl"
-                      placeholder="Ingrese el Nombre del Curso"
-                      id="nomCurso"
-                      name="nomCurso"
-                      style={{ width: "221px" }}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          nombreCurso: e.currentTarget.value,
-                        })
-                      }
-                      value={formData.nombreCurso}
-                    />
-                  </div>
-                  <div className="flex flex-wrap w-full h-full  justify-content-between">
-                    <label
-                      htmlFor="fechaInicio"
-                      className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginRight: "20px" }}
-                    >
-                      Fecha de Inicio:
-                    </label>
-                    <Calendar
-                      className="text-2xl"
-                      id="fechaInicio"
-                      name="fechaInicio"
-                      placeholder="Ingrese la Fecha de Inicio"
-                      required
-                      dateFormat="yy-mm-dd"
-                      showIcon
-                      maxDate={new Date()}
-                      onChange={(e) => {
-                        const selectedDate =
-                          e.value instanceof Date ? e.value : null;
-                        const formattedDate = selectedDate
-                          ? selectedDate.toISOString().split("T")[0]
-                          : "";
-                        setFormData({
-                          ...formData,
-                          fechaInicio: formattedDate,
-                        });
-                      }}
-                      value={
-                        formData.fechaInicio
-                          ? new Date(formData.fechaInicio)
-                          : null
-                      }
-                    />
-                  </div>
+            <h1 className="text-5xl font-smibold lg:md-2 h-full max-w-full max-h-full min-w-min">
+              Curso
+            </h1>
+          </div>
 
-                </div>
-                <div
-                  className="flex flex-column flex-wrap gap-4"
-                  style={{ marginLeft: "50px" }}
-                >
-                  <div
-                    className="flex flex-wrap w-full h-full  justify-content-between"
-                    style={{ marginTop: "25px" }}
-                  >
-                    <label
-                      htmlFor="docente"
-                      className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginRight: "20px" }}
-                    >
-                      Docente:
-                    </label>
-                    <Dropdown
-                      id="docente"
-                      name="docente"
-                      options={opcionesDocente}
-                      // onChange={(e) => {
-                      //   setFormData({
-                      //     ...formData,
-                      //     docente: { idUsuario: parseInt(e.value), persona: null, username: '', password: '', rol: null },
-                      //   });
 
-                      // }}
-                      value={formData.docente?.idUsuario}
-                      optionLabel="etiqueta"
-                      optionValue="idDocente"
-                      placeholder="Seleccione al Docente"
-                      style={{ width: "250px" }}
-                    />
-                  </div>
-                  <div className="flex flex-wrap w-full h-full  justify-content-between">
-                    <label
-                      htmlFor="rangos"
-                      className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginRight: "20px" }}
-                    >
-                      Rango de Edad:
-                    </label>
-                    <Dropdown
-                      id="rangos"
-                      name="rangos"
-                      options={opcionesRango}
-                      onChange={(e) => {
-                        setFormData({
-                          ...formData,
-                          rangoEdad: { idRangoEdad: parseInt(e.value), limInferior: 0, limSuperior: 0 },
-                        })
-                      }}
-                      value={formData.rangoEdad?.idRangoEdad}
-                      optionLabel="etiquetaRango"
-                      optionValue="idRangoEdad"
-                      placeholder="Seleccione el Rango"
-                      style={{ width: "250px" }}
-                    />
-                  </div>
+          <div className="" style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "right" }}>
+            <label className="font-medium w-auto min-w-min" htmlFor="fichaPersonal" style={{ marginRight: "10px" }}>Fecha de Registro:</label>
+            <Calendar
+              disabled
+              style={{ width: "95px", marginRight: "25px", fontWeight: "bold" }}
+              value={formData.fechaRegistro}
+              onChange={(e: CalendarChangeEvent) => {
+                if (e.value !== undefined) {
+                  setFormData({
+                    ...formData,
+                    fechaRegistro: e.value,
+                  });
+                }
+              }} />
+          </div>
 
-                </div>
+          <form onSubmit={editMode ? handleUpdate : handleSubmit} className='form' encType="multipart/form-data">
+
+            <Divider align="left">
+              <div className="inline-flex align-items-center">
+                <i className="pi pi-book mr-2"></i>
+                <b>Formulario </b>
               </div>
-              <div
-                className="flex flex-row  w-full h-full justify-content-center  flex-grow-1  row-gap-8 gap-8 flex-wrap mt-6"
-                style={{ marginLeft: "-45px" }}
-              >
-                <div className="flex align-items-center justify-content-center w-auto min-w-min">
-                  <Button
-                    type="submit"
-                    style={{ marginTop: "25px" }}
-                    label={editMode ? "Actualizar" : "Guardar"}
-                    className="w-full text-3xl min-w-min "
-                    rounded
-                    onClick={editMode ? handleUpdate : handleSubmit}
+            </Divider>
+
+            <div className='column' style={{}}>
+              <div className='column' style={{ width: "50%" }}>
+                <div className='input-box' style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                  <label htmlFor="fechaDesvinculacion" className="font-medium w-auto min-w-min">
+                    Nombre Curso:
+                  </label>
+                  <InputText
+                    className="text-2xl"
+                    placeholder="Ingrese el Nombre del Curso"
+                    id="nomCurso"
+                    name="nomCurso"
+                    style={{ width: "100%" }}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        nombreCurso: e.currentTarget.value,
+                      })
+                    }
+                    value={formData.nombreCurso}
                   />
                 </div>
-                <div className="flex align-items-center justify-content-center w-auto min-w-min">
-                  <Button
-                    type="button"
-                    label="Cancelar"
-                    style={{ marginTop: "25px" }}
-                    className="w-full text-3xl min-w-min"
-                    rounded
-                    onClick={resetForm}
+              </div>
+              <div className='column' style={{ width: "50%" }}>
+                <div className='input-box' style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                  <label htmlFor="fechaDesvinculacion" className="font-medium w-auto min-w-min">
+                    Fecha de Inicio:
+                  </label>
+                  <Calendar
+                    className="text-2xl"
+                    id="fechaInicio"
+                    name="fechaInicio"
+                    placeholder="Ingrese la Fecha de Inicio"
+                    required
+                    style={{ width: "100%" }}
+
+                    dateFormat="yy-mm-dd"
+                    showIcon
+                    onChange={(e) => {
+                      const selectedDate =
+                        e.value instanceof Date ? e.value : null;
+                      const formattedDate = selectedDate
+                        ? selectedDate.toISOString().split("T")[0]
+                        : "";
+                      setFormData({
+                        ...formData,
+                        fechaInicio: formattedDate,
+                      });
+                    }}
+                    value={
+                      formData.fechaInicio
+                        ? new Date(formData.fechaInicio)
+                        : null
+                    }
                   />
                 </div>
               </div>
             </div>
-          </form>
-        </div>
-        <table
-          style={{ minWidth: "40rem" }}
-          className="mt-4  w-full h-full text-3xl font-large"
-        >
-          <thead>
-            <tr style={{ backgroundColor: "#871b1b", color: "white" }}>
-              <th>Nº de Registro</th>
-              <th>Curso</th>
-              <th>Fecha Inicio</th>
-              <th>Fecha Fin</th>
-              <th>Operaciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {contra1.map((curso) => (
-              <tr className="text-center" key={curso.idCurso?.toString()}>
-                <td>{curso.idCurso}</td>
-                <td>{curso.nombreCurso}</td>
-                <td>
-                  {curso.fechaInicio
-                    ? new Date(curso.fechaInicio).toLocaleDateString("es-ES", {
-                      year: "numeric",
-                      month: "2-digit",
-                      day: "2-digit",
-                    })
-                    : ""}
-                </td>
 
-                <td>
-                  <Button
-                    type="button"
-                    className=""
-                    label="✎"
-                    style={{
-                      background: "#ff9800",
-                      borderRadius: "5%",
-                      fontSize: "25px",
-                      width: "50px",
-                      color: "black",
-                      justifyContent: "center",
+            <div className='column' style={{}}>
+              <div className='column' style={{ width: "50%" }}>
+                <div className='input-box' style={{}}>
+                  <label className="font-medium w-auto min-w-min" htmlFor="tipoDocumento">
+                    Docente:
+                  </label>
+                  <Dropdown
+                    id="docente"
+                    name="docente"
+                    options={docentes}
+                    onChange={(e) => {
+                      setFormData({
+                        ...formData,
+                        docente: { idUsuario: parseInt(e.value), persona: null, username: '', password: '', rol: null, fechaRegistro: '' },
+                      });
+
                     }}
-                    onClick={() => handleEdit(curso.idCurso?.valueOf())}
-                  // Agrega el evento onClick para la operación de editar
+                    value={formData.docente?.idUsuario}
+                    optionLabel="label"
+                    optionValue="idUsuario"
+                    placeholder="Seleccione al Docente"
+                    style={{ width: "100%", height: "36px", alignItems: "center" }}
                   />
-                  <Button
-                    type="button"
-                    className=""
-                    label="✘"
-                    style={{
-                      background: "#ff0000",
-                      borderRadius: "10%",
-                      fontSize: "25px",
-                      width: "50px",
-                      color: "black",
-                      justifyContent: "center",
+                </div>
+              </div>
+              <div className='column' style={{ width: "50%" }}>
+                <div className='input-box' style={{}}>
+                  <label className="font-medium w-auto min-w-min" htmlFor="tipoDocumento">
+                    Rango de Edad:
+                  </label>
+                  <Dropdown
+                    id="rangos"
+                    name="rangos"
+                    options={rangos}
+                    onChange={(e) => {
+                      setFormData({
+                        ...formData,
+                        rangoEdad: { idRangoEdad: parseInt(e.value), limInferior: 0, limSuperior: 0 },
+                      })
                     }}
-                    onClick={() => handleDelete(curso.idCurso?.valueOf())}
-                  // Agrega el evento onClick para la operación de eliminar
+                    value={formData.rangoEdad?.idRangoEdad}
+                    optionLabel="label"
+                    optionValue="idRangoEdad"
+                    placeholder="Seleccione el Rango"
+                    style={{ width: "100%", height: "36px", alignItems: "center" }}
                   />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </Card>
-    </Fieldset>
+                </div>
+              </div>
+            </div>
+
+            <div className='btnSend'>
+
+              <div className="flex align-items-center justify-content-center w-auto min-w-min"
+                style={{ gap: "25px" }}>
+                <Button
+                  type="submit"
+                  label={editMode ? "Actualizar" : "Guardar"}
+                  className="btn"
+                  rounded
+                  style={{
+                    width: "100px",
+                  }}
+                  onClick={editMode ? handleUpdate : handleSubmit}
+                />
+                <Button
+                  type="button"
+                  label="Cancelar"
+                  className="btn"
+                  style={{
+                    width: "100px",
+                  }}
+                  rounded
+                  onClick={() => {
+                    resetForm();
+
+                  }} />
+              </div>
+            </div>
+          </form>
+          <Divider align="left">
+            <div className="inline-flex align-items-center">
+              <i className="pi pi-filter-fill mr-2"></i>
+              <b>Filtro</b>
+            </div>
+          </Divider>
+          <div className="opcTblLayout">
+
+            <div className="opcTbl" >
+              <label className="font-medium w-auto min-w-min" htmlFor='genero'>Aula o Docente:</label>
+
+              <div className="flex-1" >
+                <InputText
+                  placeholder="Cedula de identidad"
+                  id="integer"
+                  // keyfilter="int"
+                  style={{ width: "75%" }}
+
+                  onChange={(e) => {
+                    // Actualizar el estado usando setFormData
+
+                    setBusqueda(e.currentTarget.value);
+
+
+                  }}
+
+
+
+                  value={busqueda}
+                />
+
+                <Button icon="pi pi-search" className="p-button-warning" />
+              </div>
+            </div>
+
+
+
+            <div className="opcTbl">
+              <label className="font-medium w-auto min-w-min" htmlFor='estado'>Cargar todo:</label>
+
+              <Button className="buttonIcon" // Agrega una clase CSS personalizada
+                icon="pi pi-refresh" style={{ width: "120px", height: "39px" }} severity="danger" aria-label="Cancel" onClick={loadData} />
+
+            </div>
+
+
+            <div className="" style={{ flex: 1, paddingTop: '24px' }}>
+              <ReportBar
+                reportName={excelReportData?.reportName!}
+                headerItems={excelReportData?.headerItems!}
+                rowData={excelReportData?.rowData!}
+                logo={excelReportData?.logo!}
+              />
+            </div>
+          </div>
+
+          <Divider align="left" style={{ marginBottom: "0px" }}>
+            <div className="inline-flex align-items-center">
+              <i className="pi pi-list mr-2"></i>
+              <b>Lista</b>
+            </div>
+          </Divider>
+
+          <div className="tblContainer" >
+            <table className="tableFichas">
+              <thead className="theadTab" >
+                <tr style={{ backgroundColor: "#871b1b", color: "white" }}>
+                  <th className="trFichas">Nº de Registro</th>
+                  <th className="trFichas">Aula</th>
+                  <th className="trFichas">Docente</th>
+                  <th className="trFichas">Fecha Inicio</th>
+                  <th className="trFichas">Editar</th>
+                  <th className="trFichas">Eliminar</th>
+                </tr>
+              </thead>
+              <tbody>
+                {contra1.map((curso) => (
+                  <tr className="text-center" key={curso.idCurso?.toString()}>
+                    <td className="tdFichas">{curso.idCurso}</td>
+                    <td className="tdFichas">{curso.nombreCurso}</td>
+                    <td className="tdFichas">{`${curso.docente?.persona?.nombresPersona} ${curso.docente?.persona?.apellidosPersona}`}</td>
+                    <td className="tdFichas">
+                      {curso.fechaInicio
+                        ? new Date(curso.fechaInicio).toLocaleDateString("es-ES", {
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
+                        })
+                        : ""}
+                    </td>
+                    <td className="tdFichas">
+                      <Button className="buttonIcon"
+                        type="button"
+                        icon="pi pi-file-edit"
+                        style={{
+                          background: "#ff9800",
+                          borderRadius: "5%",
+                          fontSize: "25px",
+                          width: "50px",
+                          color: "black",
+                          justifyContent: "center",
+                        }}
+                        onClick={() => handleEdit(curso.idCurso?.valueOf())}
+
+                      // Agrega el evento onClick para la operación de editar
+                      />
+
+                    </td>
+
+                    <td className="tdFichas">
+                      <Button className="buttonIcon"
+                        type="button"
+                        icon="pi pi-trash"
+                        style={{
+                          background: "#ff0000",
+                          borderRadius: "10%",
+                          fontSize: "25px",
+                          width: "50px",
+                          color: "black",
+                          justifyContent: "center",
+                        }}
+                        onClick={() => handleDelete(curso.idCurso?.valueOf())}
+
+                      // Agrega el evento onClick para la operación de eliminar
+                      />
+                    </td>
+
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      </Fieldset>
+    </>
   );
 }
 

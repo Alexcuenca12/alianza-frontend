@@ -7,4 +7,6 @@ export interface ICurso {
     fechaInicio: string;
     rangoEdad: IRangoEdad | null;
     docente: IUsuario | null;
+    fechaRegistro: string | Date | Date[] | null;
+
 }

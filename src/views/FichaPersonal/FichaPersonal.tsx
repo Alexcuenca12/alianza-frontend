@@ -854,7 +854,7 @@ function FichaPersonal() {
                 <Card
                     header={cardHeader}
                     className="border-solid border-red-800 border-3 flex-1 flex-wrap"
-                    style={{ marginBottom: "35px", maxWidth: "1150px" }}
+                    style={{ marginBottom: "35px", maxWidth: "1100px" }}
                 >
 
                     <div
