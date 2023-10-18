@@ -579,7 +579,7 @@ function Curso() {
                   rounded
                   onClick={() => {
                     resetForm();
-
+                    setEditMode(false);
                   }} />
               </div>
             </div>

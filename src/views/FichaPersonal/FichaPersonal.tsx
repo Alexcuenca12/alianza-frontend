@@ -326,6 +326,7 @@ function FichaPersonal() {
             const editItem = listFichaPersonal.find(
                 (contra) => contra.idFichaPersonal === id
             );
+
             if (editItem) {
                 // Crear una copia independiente de editItem
                 const editedItem = { ...editItem };
@@ -1033,7 +1034,7 @@ function FichaPersonal() {
 
 
                                         <Calendar
-                                            style={{ width: "60%" }}
+                                            style={{ width: "100%" }}
                                             className="text-2xl"
                                             id="inicio"
                                             name="inicio"
