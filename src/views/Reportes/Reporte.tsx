@@ -204,7 +204,7 @@ function Reporte() {
                                     <div className='gender'>
                                         <div className="mydict">
                                             <div>
-                                                <label>
+                                                <label className="radioLabel">
                                                     <input
                                                         className="input"
                                                         type="radio"
@@ -220,7 +220,7 @@ function Reporte() {
                                                     />
                                                     <span>Masculino</span>
                                                 </label>
-                                                <label>
+                                                <label className="radioLabel">
                                                     <input
                                                         className="input"
                                                         type="radio"
@@ -279,7 +279,7 @@ function Reporte() {
                                     <div className='gender'>
                                         <div className="mydict">
                                             <div>
-                                                <label>
+                                                <label className="radioLabel">
                                                     <input
                                                         className="input"
                                                         type="radio"
@@ -294,7 +294,7 @@ function Reporte() {
                                                     />
                                                     <span>Vinculado</span>
                                                 </label>
-                                                <label>
+                                                <label className="radioLabel">
                                                     <input
                                                         className="input"
                                                         type="radio"

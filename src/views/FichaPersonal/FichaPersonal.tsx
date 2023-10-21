@@ -1134,7 +1134,7 @@ function FichaPersonal() {
 
                                     <div className="mydict">
                                         <div>
-                                            <label>
+                                            <label className="radioLabel">
                                                 <input
                                                     className="input"
                                                     type="radio"
@@ -1147,7 +1147,8 @@ function FichaPersonal() {
                                                 />
                                                 <span>Masculino</span>
                                             </label>
-                                            <label>
+                                            <label className="radioLabel">
+
                                                 <input
                                                     className="input"
                                                     type="radio"
@@ -1207,7 +1208,7 @@ function FichaPersonal() {
                                         <div className='actInf'>
                                             <div className="mydict">
                                                 <div>
-                                                    <label>
+                                                    <label className="radioLabel">
                                                         <input
                                                             className="input"
                                                             type="radio"
@@ -1219,7 +1220,7 @@ function FichaPersonal() {
                                                         />
                                                         <span>SI</span>
                                                     </label>
-                                                    <label>
+                                                    <label className="radioLabel">
                                                         <input
                                                             className="input"
                                                             type="radio"
@@ -1398,7 +1399,7 @@ function FichaPersonal() {
 
                                         <div className="mydict" >
                                             <div>
-                                                <label>
+                                                <label className="radioLabel">
                                                     <input
                                                         className="input"
                                                         type="radio"
@@ -1411,7 +1412,7 @@ function FichaPersonal() {
                                                     />
                                                     <span>Urbana</span>
                                                 </label>
-                                                <label>
+                                                <label className="radioLabel">
                                                     <input
                                                         className="input"
                                                         type="radio"
@@ -1576,7 +1577,7 @@ function FichaPersonal() {
 
                                 <div className="mydict">
                                     <div>
-                                        <label>
+                                        <label className="radioLabel">
                                             <input
                                                 className="input"
                                                 type="radio"
@@ -1588,7 +1589,7 @@ function FichaPersonal() {
                                             />
                                             <span>Vinculado</span>
                                         </label>
-                                        <label>
+                                        <label className="radioLabel">
                                             <input
                                                 className="input"
                                                 type="radio"

@@ -910,7 +910,7 @@ function FichaInscripcionContext() {
 
                     <div className="mydict">
                       <div>
-                        <label>
+                        <label className="radioLabel">
                           <input
                             className="input"
                             type="radio"
@@ -923,7 +923,7 @@ function FichaInscripcionContext() {
                           />
                           <span>Masculino</span>
                         </label>
-                        <label>
+                        <label className="radioLabel">
                           <input
                             className="input"
                             type="radio"
