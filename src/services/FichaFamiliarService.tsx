@@ -14,9 +14,7 @@ export class FichaFamiliarService {
 
     //Crear
     save(publicacion: any) {
-        publicacion.beneficioAdicional = publicacion.beneficioAdicional || 'N/A'
-        publicacion.organizacionBeneficio = publicacion.organizacionBeneficio || 'N/A'
-        publicacion.otrasSituaciones = publicacion.otrasSituaciones || 'N/A'
+
         return axios.post(this.baseUrl + "post", publicacion).then((res) => res.data);
     }
 
@@ -27,9 +25,7 @@ export class FichaFamiliarService {
 
     //Metodo para actualizar un horario basado en el id de la misma
     update(id: number, user: any) {
-        user.beneficioAdicional = user.beneficioAdicional || 'N/A'
-        user.organizacionBeneficio = user.organizacionBeneficio || 'N/A'
-        user.otrasSituaciones = user.otrasSituaciones || 'N/A'
+
         return axios
             .put(this.baseUrl + "put/" + id.toString(), user)
             .then((res) => res.data);

@@ -27,6 +27,7 @@ import { calcularEdad } from "../../services/functions/calcularEdad";
 import { ReportBar } from "../../common/ReportBar";
 import { IExcelReportParams, IHeaderItem } from "../../interfaces/IExcelReportParams";
 import toast, { Toaster } from 'react-hot-toast';
+import { InputTextarea } from "primereact/inputtextarea";
 
 interface busqueda {
     ciNombre: string,
@@ -1243,8 +1244,9 @@ function FichaPersonal() {
                                 <div className='column' style={{ width: "50%" }}>
                                     <div className='input-box'>
                                         <label className="font-medium w-auto min-w-min" htmlFor="direccion">Detalle de la act/trab Infantil:</label>
-                                        <InputText
-                                            className="input"
+                                        <InputTextarea
+                                            className="text-2xl"
+                                            style={{ width: "100%", height: "40px" }}
                                             disabled={!formData.actTrabInfantil}
                                             placeholder='Detalle la actividad/trabajo que realiza el NNA'
                                             id="detActInf"
@@ -1441,8 +1443,9 @@ function FichaPersonal() {
                                     <div className='input-box'>
                                         <label className="font-medium w-auto min-w-min" htmlFor="referencia">Referencia:</label>
 
-                                        <InputText
-                                            className="input"
+                                        <InputTextarea
+                                            className="text-2xl"
+                                            style={{ width: "100%", height: "40px" }}
                                             placeholder=' Ingresar una referencia cercana al hogar'
                                             id="referencia"
                                             keyfilter={/^[A-Za-z\s]*$/} // Solo permitir caracteres alfabeticos

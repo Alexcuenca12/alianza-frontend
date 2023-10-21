@@ -28,6 +28,9 @@ import { TipoFamiliaService } from "../../services/TipoFamiliaService";
 import * as XLSX from 'xlsx';
 import { IExcelReportParams, IHeaderItem } from "../../interfaces/IExcelReportParams";
 import { ReportBar } from "../../common/ReportBar";
+import toast, { Toaster } from "react-hot-toast";
+import { InputNumber, InputNumberValueChangeEvent } from "primereact/inputnumber";
+import { InputTextarea } from "primereact/inputtextarea";
 
 
 function FichaPersonal() {
@@ -63,6 +66,8 @@ function FichaPersonal() {
         beneficioAdicional: '',
         organizacionBeneficio: '',
         discapacidadIntegrantes: false,
+        beneficio: false,
+        detalleDiscapacidad: '',
         otrasSituaciones: '',
         tipoFamilia: null,
         fichaPersonal: null,
@@ -102,22 +107,105 @@ function FichaPersonal() {
             });
     };
 
-    const validaciones = () => {
+    function validaciones(): boolean {
 
-        if (!formData.jefaturaFamiliar || (formData.tipoFamilia && formData.tipoFamilia.idTipoFamilia <= 0)) {
-            swal("Alerta", "Debe llenar los campos obligatorios", "warning");
-            return false;
+        if (!formData.fichaPersonal?.idFichaPersonal) {
+            toast.error("Seleccione al propietario de la ficha", {
+                style: {
+                    fontSize: '15px'
+                },
+                duration: 3000,
+            })
+            return false
+        }
+
+        if (!formData.numIntegrantes) {
+            toast.error("Indique la cantidad de integrantes del hogar", {
+                style: {
+                    fontSize: '15px'
+                },
+                duration: 3000,
+            })
+            return false
         } else {
             if ((formData.numAdultos + formData.numAdultosMayores + formData.numNNA) !== formData.numIntegrantes) {
-                swal("Alerta", "El numero de integrantes no coincide", "warning");
-                return false;
+                toast('La suma de los integrantes no coincide', {
+                    icon: '⚠️',
+                    style: {
+                        fontSize: '15px'
 
-            } else {
-                return true;
+                    },
+                    duration: 4000,
+                });
+                return false;
             }
         }
 
+        if (!formData.jefaturaFamiliar) {
+            toast.error("Ingrese el nombre de la cabeza del hogar", {
+                style: {
+                    fontSize: '15px'
+                },
+                duration: 3000,
+            })
+            return false
+        }
 
+        if (!formData.tipoFamilia) {
+            toast.error("Seleccione el tipo de familia", {
+                style: {
+                    fontSize: '15px'
+                },
+                duration: 3000,
+            })
+            return false
+        }
+
+        if (formData.beneficio) {
+            if (!formData.beneficioAdicional) {
+                toast.error("Especifique cual es el beneficio con el que cuenta", {
+                    style: {
+                        fontSize: '15px'
+                    },
+                    duration: 3000,
+                })
+                return false
+            }
+            if (!formData.organizacionBeneficio) {
+                toast.error("Indique la organizacion que le proporciona el beneficio", {
+                    style: {
+                        fontSize: '15px'
+                    },
+                    duration: 3000,
+                })
+                return false
+            }
+        }
+
+        if (formData.discapacidadIntegrantes) {
+            if (!formData.detalleDiscapacidad) {
+                toast.error("Proporcione detalles hacerca de su situacion familiar", {
+                    style: {
+                        fontSize: '15px'
+                    },
+                    duration: 3000,
+                })
+                return false
+            }
+        }
+
+        if (!formData.otrasSituaciones) {
+            toast('No ha ingresado ninguna otra situación', {
+                icon: '⚠️',
+                style: {
+                    fontSize: '15px'
+
+                },
+                duration: 4000,
+            });
+        }
+
+        return true
 
     }
 
@@ -129,16 +217,9 @@ function FichaPersonal() {
                 .then((response) => {
                     resetForm();
                     swal("Perfecto", "Datos Guardados Correctamente", "success");
-
-                    service
-                        .getAll()
-                        .then((data) => {
-                            setFichaFamiliar(data);
-                            resetForm();
-                        })
-                        .catch((error) => {
-                            console.error("Error al obtener los datos:", error);
-                        });
+                    loadDataID(response.fichaPersonal?.idFichaPersonal);
+                    resetForm();
+                    resetFiltro()
 
                 })
                 .catch((error) => {
@@ -198,13 +279,22 @@ function FichaPersonal() {
 
     const handleEdit = (id: number | undefined) => {
 
-        console.log("ID = " + id)
         if (id !== undefined) {
-            const editItem = listFichaFamiliar.find(
-                (contra) => contra.idFichaFamiliar === id
-            );
+            const editItem = listFichaFamiliar.find((contra) => contra.idFichaFamiliar === id);
             if (editItem) {
-                setFormData(editItem);
+
+                const editedItem = { ...editItem };
+
+                if (typeof editedItem.fechaRegistro === 'string') {
+                    const registro = new Date(editedItem.fechaRegistro);
+                    registro.setDate(registro.getDate() + 1);
+                    const formattedDate = registro
+                        ? registro.toISOString().split('T')[0]
+                        : '';
+                    editedItem.fechaRegistro = formattedDate;
+                }
+
+                setFormData(editedItem);
                 setEditMode(true);
                 setEditItemId(id);
 
@@ -234,39 +324,25 @@ function FichaPersonal() {
 
 
         if (editItemId !== undefined) {
-            service
-                .update(Number(editItemId), formData as IFichaFamiliar)
-                .then((response) => {
-                    swal({
-                        title: "Ficha Personal",
-                        text: "Datos actualizados correctamente",
-                        icon: "success",
+            if (validaciones()) {
+                service
+                    .update(Number(editItemId), formData as IFichaFamiliar)
+                    .then((response) => {
+                        swal({
+                            title: "Ficha Personal",
+                            text: "Datos actualizados correctamente",
+                            icon: "success",
+                        });
+                        resetForm()
+                        loadDataID(response.fichaPersonal?.idFichaPersonal);
+                        resetFiltro()
+                        setEditMode(false);
+                        setEditItemId(undefined);
+                    })
+                    .catch((error) => {
+                        console.error("Error al actualizar el formulario:", error);
                     });
-                    setFormData({
-                        idFichaFamiliar: 0,
-                        visitaDomiciliaria: false,
-                        jefaturaFamiliar: '',
-                        numIntegrantes: 0,
-                        numAdultos: 0,
-                        numNNA: 0,
-                        numAdultosMayores: 0,
-                        beneficioAdicional: '',
-                        organizacionBeneficio: '',
-                        discapacidadIntegrantes: false,
-                        otrasSituaciones: '',
-                        tipoFamilia: null,
-                        fichaPersonal: null,
-                        fechaRegistro: new Date
-
-                    });
-                    loadData();
-
-                    setEditMode(false);
-                    setEditItemId(undefined);
-                })
-                .catch((error) => {
-                    console.error("Error al actualizar el formulario:", error);
-                });
+            }
         }
         console.log('Datos enviados:', { formData });
 
@@ -284,6 +360,8 @@ function FichaPersonal() {
             beneficioAdicional: '',
             organizacionBeneficio: '',
             discapacidadIntegrantes: false,
+            beneficio: false,
+            detalleDiscapacidad: '',
             otrasSituaciones: '',
             tipoFamilia: null,
             fichaPersonal: null,
@@ -360,35 +438,43 @@ function FichaPersonal() {
         const rowData = data.map((item) => (
             {
                 idFicha: item.idFichaFamiliar,
+                tipoIdent: item.fichaPersonal?.tipoIdentificacion,
                 cedula: item.fichaPersonal?.ciPasaporte,
                 nombres: item.fichaPersonal?.nombres,
                 apellidos: item.fichaPersonal?.apellidos,
-                jefaturaFamiliar: item.jefaturaFamiliar,
-                tipoFamilia: item.tipoFamilia?.nombreTipo,
                 numIntegrantes: item.numIntegrantes,
                 numNNA: item.numNNA,
                 numAdultos: item.numAdultos,
                 numAdultosMayores: item.numAdultosMayores,
-                beneficio: item.beneficioAdicional || 'N/A', // Establecer 'N/A' si es una cadena vacía
+                visita: item.visitaDomiciliaria ? 'SI' : 'NO',
+                jefaturaFamiliar: item.jefaturaFamiliar,
+                tipoFamilia: item.tipoFamilia?.nombreTipo,
+                beneficio: item.beneficio ? 'SI' : 'NO', // Establecer 'N/A' si es una cadena vacía
+                beneficioAdicional: item.beneficioAdicional || 'N/A', // Establecer 'N/A' si es una cadena vacía
                 organizacionBenefica: item.organizacionBeneficio || 'N/A',
                 personasDiscapacidad: item.discapacidadIntegrantes ? 'SI' : 'NO', // Corrección aquí
-                otrasSituaciones: item.otrasSituaciones || 'N/A',
+                detallesSituacion: item.detalleDiscapacidad || 'N/A',
+                otrasSituaciones: item.otrasSituaciones || 'Ninguna',
             }
         ));
         const headerItems: IHeaderItem[] = [
             { header: "№ FICHA" },
-            { header: "CEDULA" },
+            { header: "TIPO IDENTIFICACIÓN" },
+            { header: "CI/PASAPORTE" },
             { header: "NOMBRES" },
             { header: "APELLIDOS" },
-            { header: "JEFATURA FAMILIAR" },
-            { header: "TIPO DE FAMILIA" },
             { header: "№ INTEGRANTES" },
             { header: "№ NNA" },
             { header: "№ ADULTOS" },
             { header: "№ ADULTOS MAYORES" },
+            { header: "VISITA DOMICILIAR" },
+            { header: "JEFATURA FAMILIAR" },
+            { header: "TIPO DE FAMILIA" },
             { header: "BENEFICIO ADICIONAL" },
+            { header: "DETALLE DEL BENEFICIO" },
             { header: "ORGANIZACION BENEFICA" },
-            { header: "RESIDEN PERSONAS CON DICAPACIDAD" },
+            { header: "¿RESIDE PERSONAS CON DICAPACIDAD?" },
+            { header: "DETALLES DE LA SITUACION FAMILIAR" },
             { header: "OTRAS SITUACIONES" },
 
         ]
@@ -403,297 +489,234 @@ function FichaPersonal() {
 
 
     return (
-
-        <Fieldset className="" style={{ display: 'flex', justifyContent: 'center' }}>
-            <Card
-                header={cardHeader}
-                className="border-solid border-red-800 border-3 "
-                style={{ width: "1200px", marginBottom: "35px" }}
-            >
-
-                <div
-                    className="h1-rem"
-                    style={{ display: 'flex', justifyContent: 'center' }}
+        <>
+            <div>
+                <Toaster position="top-right"
+                    reverseOrder={true} />
+            </div>
+            <Fieldset className="fgrid col-fixed " style={{ display: 'flex', justifyContent: 'center' }}>
+                <Card
+                    header={cardHeader}
+                    className="border-solid border-red-800 border-3 flex-1 flex-wrap"
+                    style={{ marginBottom: "35px", maxWidth: "1100px" }}
                 >
-                    <h1 className="text-5xl font-smibold lg:md-2 h-full max-w-full max-h-full min-w-min">
-                        Ficha Familiar
-                    </h1>
-                </div>
+                    <div
+                        className="h1-rem"
+                        style={{ display: 'flex', justifyContent: 'center' }}
+                    >
+                        <h1 className="text-5xl font-smibold lg:md-2 h-full max-w-full max-h-full min-w-min">
+                            Ficha Familiar
+                        </h1>
+                    </div>
 
-                <div className="" style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "right" }}>
-                    <label className="font-medium w-auto min-w-min" htmlFor="fichaPersonal" style={{ marginRight: "10px" }}>Fecha de Registro:</label>
-                    <Calendar
-                        disabled
-                        style={{ width: "95px", marginRight: "25px", fontWeight: "bold" }}
-                        value={formData.fechaRegistro}
-                        onChange={(e: CalendarChangeEvent) => {
-                            if (e.value !== undefined) {
-                                setFormData({
-                                    ...formData,
-                                    fechaRegistro: e.value,
-                                });
-                            }
-                        }} />
-                </div>
+                    <div className="" style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "right" }}>
+                        <label className="font-medium w-auto min-w-min" htmlFor="fichaPersonal" style={{ marginRight: "10px" }}>Fecha de Registro:</label>
+                        <Calendar
+                            disabled
+                            dateFormat="dd-mm-yy" // Cambiar el formato a ISO 8601
 
-                <section className="flex justify-content-center flex-wrap container">
+                            style={{ width: "95px", marginRight: "25px", fontWeight: "bold" }}
+                            onChange={(e: CalendarChangeEvent) => {
+                                if (e.value !== undefined) {
+                                    setFormData({
+                                        ...formData,
+                                        fechaRegistro: e.value,
+                                    });
+                                }
+                            }}
 
+                            value={typeof formData.fechaRegistro === 'string' ? new Date(formData.fechaRegistro) : new Date()}
 
-                    <Fieldset legend="Filtros de busqueda" className="filtro">
+                        />
+                    </div>
 
-                        <div className="btnLimpiar" style={{}}>
-                            <label className="font-medium w-auto min-w-min" htmlFor="rangoEdad" style={{ marginRight: "10px" }}>Limpiar filtros:</label>
-
-                            <Button icon="pi pi-times" rounded severity="danger" aria-label="Cancel" onClick={() => { resetFiltro(); loadData() }} />
-                        </div>
-
-
-
-                        <section className="layout">
-                            <div className="">
-                                <div input-box>
-                                    <label className="font-medium w-auto min-w-min" htmlFor='genero'>Cedula o Nombre:</label>
-
-                                    <div className="flex-1">
-                                        <InputText
-                                            placeholder="Cedula de identidad"
-                                            id="integer"
-                                            // keyfilter="int"
-                                            style={{ width: "75%" }}
-
-                                            onChange={(e) => {
-                                                // Actualizar el estado usando setFormData
-                                                setListFperonales([]); // Asignar un arreglo vacío para vaciar el estado listFperonales
-
-                                                setBusqueda(e.currentTarget.value);
-
-                                                // Luego, llamar a loadRelacion después de que se actualice el estado
-                                                loadRelacion();
-                                            }}
-
-                                            onKeyUp={(e) => {
-                                                setListFperonales([]); // Asignar un arreglo vacío para vaciar el estado listFperonales
-
-                                                setBusqueda(e.currentTarget.value);
-
-                                                // Luego, llamar a loadRelacion después de que se actualice el estado
-                                                loadRelacion(); // Llama a tu método aquí o realiza las acciones necesarias.
-                                            }}
-
-                                            value={busqueda}
-                                        />
-
-                                        <Button icon="pi pi-search" className="p-button-warning" />
-                                    </div>
-                                </div>
+                    <section className="flex justify-content-center flex-wrap container">
+                        <Divider align="left">
+                            <div className="inline-flex align-items-center">
+                                <i className="pi pi-filter-fill mr-2"></i>
+                                <b>Filtro</b>
                             </div>
-                            <div className="">
-                                <div>
-                                    <label className="font-medium w-auto min-w-min" htmlFor="fichaPersonal">Resultados de la busqueda:</label>
-                                    <Dropdown
-                                        className="text-2xl"
-                                        id="tiempo_dedicacion"
-                                        name="tiempo_dedicacion"
-                                        style={{ width: "100%" }}
-                                        options={listFperonales}
-                                        onChange={(e) => {
-                                            setFormData({
-                                                ...formData,
-                                                fichaPersonal: {
-                                                    idFichaPersonal: parseInt(e.value), foto: '',
-                                                    apellidos: '',
-                                                    nombres: '',
-                                                    ciPasaporte: '',
-                                                    tipoIdentificacion: '',
-                                                    actTrabInfantil: false,
-                                                    detalleActTrabInfantil: '',
-                                                    nacionalidad: '',
-                                                    fechaNacimiento: '',
-                                                    rangoEdad: null,
-                                                    genero: '',
-                                                    etnia: null,
-                                                    parroquia: null,
-                                                    zona: '',
-                                                    barrioSector: '',
-                                                    direccion: '',
-                                                    referencia: '',
-                                                    coordenadaX: 0,
-                                                    coordenadaY: 0,
-                                                    estVinculacion: true,
-                                                    fechaRegistro: new Date()
-                                                }
-                                            });
-                                            cargarFoto(parseInt(e.value))
-                                            loadDataID(parseInt(e.value))
-                                            console.log(formData)
-                                        }}
-                                        value={formData.fichaPersonal?.idFichaPersonal}
+                        </Divider>
+                        <Fieldset legend="Filtros de busqueda" style={{ width: "1000px", position: "relative" }}>
+                            <div style={{ position: "absolute", top: "0", right: "5px", marginTop: "-15px" }}>
+                                <label className="font-medium w-auto min-w-min" htmlFor="rangoEdad" style={{ marginRight: "10px" }}>Limpiar filtros:</label>
 
-                                        optionLabel="label"
-                                        optionValue="idFichaPersonal"
-                                        placeholder="Seleccione una persona"
-                                    />
-                                </div>
-                            </div>
-                            <div>
-                                <div style={{ display: "grid", placeItems: "center" }}>
-                                    <img
-                                        src={foto}
-                                        alt="FotoNNA"
-                                        style={{
-                                            // width: "80px",
-                                            height: "80px",
-                                            borderRadius: "50%", // Borde redondeado
-                                            border: "2px solid gray", // Borde gris
-                                        }}
-                                    />
-                                </div>
-                            </div>
-                        </section>
-                    </Fieldset>
-
-                    <Divider />
-
-                    <form onSubmit={editMode ? handleUpdate : handleSubmit} className='form' encType="multipart/form-data">
-
-                        <div className="column">
-                            <div className='column' style={{ width: "50%" }}>
-                                <div className='input-box'>
-                                    <label className="font-medium w-auto min-w-min" htmlFor="jefaturaFamiliar">Jefatura familiar:</label>
-                                    <input
-                                        className="input"
-                                        type="text"
-                                        id="jefaturaFamiliar"
-
-                                        value={formData.jefaturaFamiliar}
-                                        placeholder='Ingrese el nombre del jefe del hogar'
-
-                                        onChange={(e) => setFormData({ ...formData, jefaturaFamiliar: e.target.value })}
-                                        required
-                                    />
-                                    <span className="input-border"></span>
-
-                                </div>
+                                <Button icon="pi pi-times" rounded severity="danger" aria-label="Cancel" onClick={() => { resetFiltro(); loadData() }} />
                             </div>
 
-                            <div className='column' style={{ width: "50%" }}>
-                                <div className='input-box'>
-                                    <label className="font-medium w-auto min-w-min" htmlFor="etnia">Tipo de familia:</label>
-                                    <div className="select-box" style={{ width: "100%" }}>
-                                        <Dropdown
-                                            className="text-2xl"
-                                            id="parroquia"
-                                            name="parroquia"
-                                            style={{ width: "100%" }}
-                                            options={listTipoFamilia}
-                                            onChange={(e) =>
-                                                setFormData({
-                                                    ...formData,
-                                                    tipoFamilia: { idTipoFamilia: parseInt(e.value), nombreTipo: '' },
-                                                })
-                                            }
-                                            value={formData.tipoFamilia?.idTipoFamilia}
-                                            optionLabel="nombreTipo"
-                                            optionValue="idTipoFamilia"
-                                            placeholder="Seleccione el tipo de familia"
-                                        />
-
-                                    </div>
-                                </div>
 
 
+                            <section className="layout">
+                                <div className="">
+                                    <div input-box>
+                                        <label className="font-medium w-auto min-w-min" htmlFor='genero'>Cedula o Nombre:</label>
 
-                                <div className="input-box">
-                                    <label className="font-medium w-auto min-w-min" htmlFor='genero'>Visita Domiciliar:</label>
+                                        <div className="flex-1">
+                                            <InputText
+                                                placeholder="Cedula de identidad"
+                                                id="integer"
+                                                // keyfilter="int"
+                                                style={{ width: "75%" }}
 
-                                    <div className='gender'>
-                                        <div className="mydict">
-                                            <div>
-                                                <label>
-                                                    <input
-                                                        className="input"
-                                                        type="radio"
-                                                        id="genSI"
-                                                        name="genSI"
-                                                        value="true"
-                                                        checked={formData.visitaDomiciliaria === true}
-                                                        onChange={(e) => setFormData({ ...formData, visitaDomiciliaria: true })}
-                                                    />
-                                                    <span>SI</span>
-                                                </label>
-                                                <label>
-                                                    <input
-                                                        className="input"
-                                                        type="radio"
-                                                        id="genNO"
-                                                        name="genNO"
-                                                        value="false"
-                                                        checked={formData.visitaDomiciliaria === false}
-                                                        onChange={(e) => setFormData({ ...formData, visitaDomiciliaria: false })}
+                                                onChange={(e) => {
+                                                    // Actualizar el estado usando setFormData
+                                                    setListFperonales([]); // Asignar un arreglo vacío para vaciar el estado listFperonales
 
-                                                    />
-                                                    <span>NO</span>
-                                                </label>
+                                                    setBusqueda(e.currentTarget.value);
 
+                                                    // Luego, llamar a loadRelacion después de que se actualice el estado
+                                                    loadRelacion();
+                                                }}
 
-                                            </div>
+                                                // onKeyUp={(e) => {
+                                                //     setListFperonales([]); // Asignar un arreglo vacío para vaciar el estado listFperonales
+
+                                                //     setBusqueda(e.currentTarget.value);
+
+                                                //     // Luego, llamar a loadRelacion después de que se actualice el estado
+                                                //     loadRelacion(); // Llama a tu método aquí o realiza las acciones necesarias.
+                                                // }}
+
+                                                value={busqueda}
+                                            />
+
+                                            <Button icon="pi pi-search" className="p-button-warning" />
                                         </div>
                                     </div>
+                                </div>
+                                <div className="">
+                                    <div>
+                                        <label className="font-medium w-auto min-w-min" htmlFor="fichaPersonal">Resultados de la busqueda:</label>
+                                        <Dropdown
+                                            className="text-2xl"
+                                            id="tiempo_dedicacion"
+                                            name="tiempo_dedicacion"
+                                            style={{ width: "100%" }}
+                                            options={listFperonales}
+                                            onChange={(e) => {
+                                                setFormData({
+                                                    ...formData,
+                                                    fichaPersonal: {
+                                                        idFichaPersonal: parseInt(e.value), foto: '',
+                                                        apellidos: '',
+                                                        nombres: '',
+                                                        ciPasaporte: '',
+                                                        tipoIdentificacion: '',
+                                                        actTrabInfantil: false,
+                                                        detalleActTrabInfantil: '',
+                                                        nacionalidad: '',
+                                                        fechaNacimiento: '',
+                                                        rangoEdad: null,
+                                                        genero: '',
+                                                        etnia: null,
+                                                        parroquia: null,
+                                                        zona: '',
+                                                        barrioSector: '',
+                                                        direccion: '',
+                                                        referencia: '',
+                                                        coordenadaX: 0,
+                                                        coordenadaY: 0,
+                                                        estVinculacion: true,
+                                                        fechaRegistro: new Date()
+                                                    }
+                                                });
+                                                cargarFoto(parseInt(e.value))
+                                                loadDataID(parseInt(e.value))
+                                            }}
+                                            value={formData.fichaPersonal?.idFichaPersonal}
 
-                                </div >
+                                            optionLabel="label"
+                                            optionValue="idFichaPersonal"
+                                            placeholder="Seleccione una persona"
+                                        />
+                                    </div>
+                                </div>
+                                <div>
+                                    <div style={{ display: "grid", placeItems: "center" }}>
+                                        <img
+                                            src={foto}
+                                            alt="FotoNNA"
+                                            style={{
+                                                // width: "80px",
+                                                height: "80px",
+                                                borderRadius: "50%", // Borde redondeado
+                                                border: "2px solid gray", // Borde gris
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            </section>
+                        </Fieldset>
 
-                            </div>
-                        </div>
 
+                        <form onSubmit={editMode ? handleUpdate : handleSubmit} className='form' encType="multipart/form-data">
 
-                        <div className='column'>
-                            <div className='column' style={{ width: "50%" }}>
+                            <Divider align="left">
+                                <div className="inline-flex align-items-center">
+                                    <i className="pi pi-book mr-2"></i>
+                                    <b>Formulario </b>
+                                </div>
+                            </Divider>
+
+                            <div className='column'>
                                 <div className='input-box'>
                                     <label className="font-medium w-auto min-w-min" htmlFor="numIntegrantes">Numero de integrantes:</label>
-                                    <input
+
+                                    <InputNumber
                                         className="input"
-                                        type="number"
-                                        min="1"
                                         id="numIntegrantes"
+                                        inputId="minmax-buttons"
                                         value={formData.numIntegrantes}
+                                        onValueChange={(e: InputNumberValueChangeEvent) => setFormData({ ...formData, numIntegrantes: e.value || 0 })}
+                                        mode="decimal"
                                         placeholder='Ingrese el numero de integrantes del hogar'
-                                        onChange={(e) => setFormData({ ...formData, numIntegrantes: parseInt(e.target.value) })}
-                                        required
+                                        style={{ width: "100%", height: "35px" }}
+                                        showButtons
+                                        min={0}
+                                    // max={100}
                                     />
+
                                     <span className="input-border"></span>
 
                                 </div>
                                 <div className='input-box'>
-                                    <label className="font-medium w-auto min-w-min" htmlFor="numNNA">Numero de NNA:</label>
-                                    <input
+                                    <label className="font-medium w-auto min-w-min" htmlFor="numNNA">
+                                        Numero de NNA:</label>
+                                    <InputNumber
                                         className="input"
-                                        type="number"
-                                        min="1"
                                         id="numNNA"
+                                        inputId="minmax-buttons"
                                         value={formData.numNNA}
-                                        placeholder='Ingrese el numero de adultos del hogar'
-                                        onChange={(e) => setFormData({ ...formData, numNNA: parseInt(e.target.value) })}
-                                        required
+                                        onValueChange={(e: InputNumberValueChangeEvent) => setFormData({ ...formData, numNNA: e.value || 0 })}
+                                        mode="decimal"
+                                        placeholder='Ingrese el numero de NNA del hogar'
+                                        style={{ width: "100%", height: "35px" }}
+                                        showButtons
+                                        min={0}
+                                    // max={100}
                                     />
+
                                     <span className="input-border"></span>
 
                                 </div>
 
-                            </div>
-                            <div className='column' style={{ width: "50%" }}>
 
                                 <div className='input-box'>
                                     <label className="font-medium w-auto min-w-min" htmlFor="numAdultos">Numero de adultos:</label>
-                                    <input
+                                    <InputNumber
                                         className="input"
-                                        type="number"
-                                        min="1"
                                         id="numAdultos"
+                                        inputId="minmax-buttons"
                                         value={formData.numAdultos}
+                                        onValueChange={(e: InputNumberValueChangeEvent) => setFormData({ ...formData, numAdultos: e.value || 0 })}
+                                        mode="decimal"
                                         placeholder='Ingrese el numero de adultos del hogar'
-                                        onChange={(e) => setFormData({ ...formData, numAdultos: parseInt(e.target.value) })}
-                                        required
+                                        style={{ width: "100%", height: "35px" }}
+                                        showButtons
+                                        min={0}
+                                    // max={100}
                                     />
+
                                     <span className="input-border"></span>
 
                                 </div>
@@ -701,74 +724,203 @@ function FichaPersonal() {
 
                                 <div className='input-box'>
                                     <label className="font-medium w-auto min-w-min" htmlFor="numAdultosMayores">Numero adultos mayores:</label>
-                                    <input
+                                    <InputNumber
                                         className="input"
-                                        type="number"
-                                        min="1"
                                         id="numAdultosMayores"
+                                        inputId="minmax-buttons"
                                         value={formData.numAdultosMayores}
-                                        placeholder='Ingrese el numero de adultos del hogar'
-                                        onChange={(e) => setFormData({ ...formData, numAdultosMayores: parseInt(e.target.value) })}
-                                        required
+                                        onValueChange={(e: InputNumberValueChangeEvent) => setFormData({ ...formData, numAdultosMayores: e.value || 0 })}
+                                        mode="decimal"
+                                        placeholder='Ingrese el numero de adultos mayores del hogar'
+                                        style={{ width: "100%", height: "35px" }}
+                                        showButtons
+                                        min={0}
+                                    // max={100}
                                     />
+
                                     <span className="input-border"></span>
 
                                 </div>
                             </div>
-                        </div>
 
 
-                        <div className="column">
+                            <div className="column">
+                                <div className="input-box">
+                                    <label className="font-medium w-auto min-w-min" htmlFor='genero'>Visita Domiciliar:</label>
 
-
-
-                        </div>
-
-
-                        <div className="column">
-
-                            <div className='input-box'>
-                                <label className="font-medium w-auto min-w-min" htmlFor="beneficioAdicional">Beneficio adicional:</label>
-                                <input
-                                    className="input"
-                                    type="text"
-                                    id="beneficioAdicional"
-                                    value={formData.beneficioAdicional}
-                                    placeholder='En caso de contar con ayuda adicional'
-
-                                    onChange={(e) => setFormData({ ...formData, beneficioAdicional: e.target.value })}
-                                    required
-                                />
-                                <span className="input-border"></span>
-
-                            </div>
-
-                            <div className='input-box'>
-                                <label className="font-medium w-auto min-w-min" htmlFor="organizacionBeneficio">Organizacion benefica:</label>
-                                <input
-                                    className="input"
-                                    type="text"
-                                    id="organizacionBeneficio"
-                                    value={formData.organizacionBeneficio}
-                                    placeholder='Nombre de la organizacion que brinda el beneficio'
-
-                                    onChange={(e) => setFormData({ ...formData, organizacionBeneficio: e.target.value })}
-                                    required
-                                />
-                                <span className="input-border"></span>
-
-                            </div>
-                        </div>
-
-                        <div className="column">
-
-                            <div className="input-box">
-                                <label className="font-medium w-auto min-w-min" htmlFor='discapacidadIntegrantes'>¿En su residencia, convive alguna persona con discapacidad?:</label>
-
-                                <div className='gender'>
                                     <div className="mydict">
                                         <div>
-                                            <label>
+                                            <label className="radioLabel">
+                                                <input
+                                                    className="input"
+                                                    type="radio"
+                                                    id="genSI"
+                                                    name="genSI"
+                                                    value="true"
+                                                    checked={formData.visitaDomiciliaria === true}
+                                                    onChange={(e) => setFormData({ ...formData, visitaDomiciliaria: true })}
+                                                />
+                                                <span>SI</span>
+                                            </label>
+                                            <label className="radioLabel">
+                                                <input
+                                                    className="input"
+                                                    type="radio"
+                                                    id="genNO"
+                                                    name="genNO"
+                                                    value="false"
+                                                    checked={formData.visitaDomiciliaria === false}
+                                                    onChange={(e) => setFormData({ ...formData, visitaDomiciliaria: false })}
+
+                                                />
+                                                <span>NO</span>
+                                            </label>
+
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className='input-box'>
+                                    <label className="font-medium w-auto min-w-min" htmlFor="jefaturaFamiliar">Jefatura familiar:</label>
+
+                                    <InputText
+                                        className="input"
+                                        id="jefaturaFamiliar"
+                                        name="jefaturaFamiliar"
+                                        keyfilter={/^[A-Za-z\s]*$/} // Solo permitir caracteres 
+                                        placeholder='Ingrese el nombre del jefe del hogar'
+                                        required
+                                        onChange={(e) => setFormData({ ...formData, jefaturaFamiliar: e.target.value })}
+
+                                        value={formData.jefaturaFamiliar}
+                                    />
+                                    <span className="input-border"></span>
+
+                                </div>
+
+                                <div className='input-box'>
+                                    <label className="font-medium w-auto min-w-min" htmlFor="etnia">Tipo de familia:</label>
+                                    <Dropdown
+                                        className="text-2xl"
+                                        id="parroquia"
+                                        name="parroquia"
+                                        style={{ width: "100%", height: "35px", alignItems: "center" }}
+                                        options={listTipoFamilia}
+                                        onChange={(e) =>
+                                            setFormData({
+                                                ...formData,
+                                                tipoFamilia: { idTipoFamilia: parseInt(e.value), nombreTipo: '' },
+                                            })
+                                        }
+                                        value={formData.tipoFamilia?.idTipoFamilia}
+                                        optionLabel="nombreTipo"
+                                        optionValue="idTipoFamilia"
+                                        placeholder="Seleccione el tipo de familia"
+                                    />
+
+                                </div>
+
+                            </div>
+
+                            <div className="column">
+
+                                <div className='input-box' style={{}}>
+                                    <label className="font-medium w-auto min-w-min" htmlFor="tipoDocumento">
+                                        ¿Cuenta con algun beneficio adicional?:
+                                    </label>
+
+                                    <div className="mydict" >
+                                        <div>
+                                            <label className="radioLabel">
+                                                <input
+                                                    className="input"
+                                                    type="radio"
+                                                    id="discapacidadTrue"
+                                                    name="discapacidad"
+                                                    value="true"
+                                                    checked={formData.beneficio === true}
+                                                    onChange={() =>
+                                                        setFormData({
+                                                            ...formData,
+                                                            beneficio: true,
+                                                        })
+                                                    }
+                                                />
+                                                <span>SI</span>
+                                            </label>
+                                            <label className="radioLabel">
+                                                <input
+                                                    className="input"
+                                                    type="radio"
+                                                    id="discapacidadFalse"
+                                                    name="discapacidad"
+                                                    value="false"
+                                                    checked={formData.beneficio === false}
+                                                    onChange={() =>
+                                                        setFormData({
+                                                            ...formData,
+                                                            beneficio: false, beneficioAdicional: '', organizacionBeneficio: ''
+                                                        })
+                                                    }
+                                                />
+                                                <span>NO</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className='input-box'>
+                                    <label className="font-medium w-auto min-w-min" htmlFor="beneficioAdicional">Beneficio adicional:</label>
+                                    <InputText
+                                        className="text-2xl"
+                                        id="beneficioAdicional"
+                                        name="beneficioAdicional"
+                                        disabled={!formData.beneficio}
+                                        placeholder='En caso de contar con ayuda adicional'
+                                        required
+                                        onChange={(e) =>
+                                            setFormData({
+                                                ...formData,
+                                                beneficioAdicional: e.currentTarget.value,
+                                            })
+                                        }
+                                        value={formData.beneficioAdicional}
+                                    />
+
+                                    <span className="input-border"></span>
+
+                                </div>
+
+                                <div className='input-box'>
+                                    <label className="font-medium w-auto min-w-min" htmlFor="organizacionBeneficio">Organizacion benefica:</label>
+                                    <InputText
+                                        className="text-2xl"
+                                        id="organizacionBeneficio"
+                                        name="organizacionBeneficio"
+                                        disabled={!formData.beneficio}
+                                        placeholder='Nombre de la organizacion que brinda el beneficio'
+                                        required
+                                        onChange={(e) =>
+                                            setFormData({
+                                                ...formData,
+                                                organizacionBeneficio: e.currentTarget.value,
+                                            })
+                                        }
+                                        value={formData.organizacionBeneficio}
+                                    />
+                                    <span className="input-border"></span>
+                                </div>
+                            </div>
+
+                            <div className="column">
+
+                                <div className="input-box">
+                                    <label className="font-medium w-auto min-w-min" htmlFor='discapacidadIntegrantes'>¿Convive alguna persona con discapacidad?:</label>
+
+                                    <div className="mydict">
+                                        <div>
+                                            <label className="radioLabel">
                                                 <input
                                                     className="input"
                                                     type="radio"
@@ -780,7 +932,7 @@ function FichaPersonal() {
                                                 />
                                                 <span>SI</span>
                                             </label>
-                                            <label>
+                                            <label className="radioLabel">
                                                 <input
                                                     className="input"
                                                     type="radio"
@@ -788,185 +940,214 @@ function FichaPersonal() {
                                                     name="genNoDis"
                                                     value="false"
                                                     checked={formData.discapacidadIntegrantes === false}
-                                                    onChange={(e) => setFormData({ ...formData, discapacidadIntegrantes: false })}
+                                                    onChange={(e) => setFormData({ ...formData, discapacidadIntegrantes: false, detalleDiscapacidad: '' })}
 
                                                 />
                                                 <span>NO</span>
                                             </label>
                                         </div>
                                     </div>
+
+                                </div >
+
+                                <div className='input-box' style={{}}>
+                                    <label className="font-medium w-auto min-w-min" htmlFor="nacionalidad">
+                                        Brinde mas detalles acerca de la situacion:
+                                    </label>
+
+                                    <InputTextarea
+                                        className="text-2xl"
+                                        disabled={!formData.discapacidadIntegrantes}
+                                        placeholder='Proporcione mas detalles acerca de la situacion de su familiar'
+                                        id="nacionalidad"
+                                        style={{ width: "100%" }}
+                                        onChange={(e) => setFormData({ ...formData, detalleDiscapacidad: e.target.value })}
+                                        title="Proporcionar detalles de su situacion"
+                                        value={formData.detalleDiscapacidad}
+                                    />
+                                    <span className="input-border"></span>
+
                                 </div>
 
-                            </div >
 
-
-                            <div className='input-box'>
-                                {/* <label className="font-medium w-auto min-w-min" htmlFor="otrasSituaciones">Otras situaciones familiares:</label> */}
-                                <label className="font-medium w-auto min-w-min" htmlFor="otrasSituaciones">
-                                    {formData.discapacidadIntegrantes
-                                        ? 'Brinde mas detalles acerca de la situacion:'
-                                        : 'Otras situaciones:'}
-                                </label>
-                                <input
-                                    className="input"
-                                    type="text"
-                                    id="organizacionBeneficio"
-                                    placeholder={
-                                        formData.discapacidadIntegrantes
-                                            ? 'Proporcione mas detalles acerca de la situacion de su familiar'
-                                            : 'Otras situaciones familiares relacionadas'
-                                    }
-                                    value={formData.otrasSituaciones}
-
-                                    onChange={(e) => setFormData({ ...formData, otrasSituaciones: e.target.value })}
-                                    required
-                                />
-                                <span className="input-border"></span>
-
-                            </div>
-
-
-                        </div>
-
-                        <div className='btnSend'>
-                            {/* <button type="submit"
-                                    className='btn' >Registrarse</button> */}
-                            <div className="flex align-items-center justify-content-center w-auto min-w-min"
-                                style={{ gap: "25px" }}>
-                                <Button
-                                    type="submit"
-                                    label={editMode ? "Actualizar" : "Guardar"}
-                                    className="btn"
-                                    rounded
-                                    style={{
-                                        width: "100px",
-                                    }}
-                                    onClick={editMode ? handleUpdate : handleSubmit}
-                                />
-                                <Button
-                                    type="button"
-                                    label="Cancelar"
-                                    className="btn"
-                                    style={{
-                                        width: "100px",
-                                    }}
-                                    rounded
-                                    onClick={() => {
-                                        resetForm();
-                                        resetFiltro();
-                                        setEditMode(false);
-                                    }}
-                                />
-                            </div>
-                        </div>
-
-                    </form>
-                    {/* </div> */}
-                </section >
-
-
-                <div style={{ marginTop: "50px" }}>
-                    <table
-                        style={{ minWidth: "40rem" }}
-                        className="mt-4  w-full h-full text-3xl font-large"
-                    >
-                        <thead>
-                            <tr >
-
-                                <td colSpan={12} className="tdBtn">
-                                    <ReportBar
-                                        reportName={excelReportData?.reportName!}
-                                        headerItems={excelReportData?.headerItems!}
-                                        rowData={excelReportData?.rowData!}
-                                        logo={excelReportData?.logo!}
+                                <div className='input-box'>
+                                    {/* <label className="font-medium w-auto min-w-min" htmlFor="otrasSituaciones">Otras situaciones familiares:</label> */}
+                                    <label className="font-medium w-auto min-w-min" htmlFor="otrasSituaciones">
+                                        Otras situaciones:
+                                    </label>
+                                    <InputTextarea
+                                        className="text-2xl"
+                                        placeholder='Otras situaciones familiares relacionadas'
+                                        id="otrasSituaciones"
+                                        style={{ width: "100%" }}
+                                        onChange={(e) => setFormData({ ...formData, otrasSituaciones: e.target.value })}
+                                        title="Ingresar la nacionalidad del NNA"
+                                        value={formData.otrasSituaciones}
                                     />
-                                </td>
+                                    <span className="input-border"></span>
 
-                            </tr>
-                            <tr style={{ backgroundColor: "#871b1b", color: "white" }}>
-                                <th>Nº Ficha</th>
-                                <th>Visita Domi.</th>
-                                <th>Jefatira Fam.</th>
-                                <th>Tipo de Fam.</th>
-                                <th>Integrantes</th>
-                                <th># Adultos</th>
-                                <th># NNA</th>
-                                <th># Adultos Mayores</th>
-                                <th>Beneficio Ad.</th>
-                                <th>Org. Benefica</th>
-                                <th>Discapacidad Fam.</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-
-                            {listFichaFamiliar.map((ficha) => (
-                                <tr
-                                    className="text-center"
-                                    key={ficha.idFichaFamiliar?.toString()}
-                                >
-                                    <td>{ficha.idFichaFamiliar}</td>
-                                    <td>{ficha.visitaDomiciliaria ? "SI" : "NO"}</td>
-                                    <td>{ficha.jefaturaFamiliar}</td>
-                                    <td>{ficha.tipoFamilia?.nombreTipo}</td>
-                                    <td>{ficha.numIntegrantes}</td>
-                                    <td>{ficha.numAdultos}</td>
-                                    <td>{ficha.numNNA}</td>
-                                    <td>{ficha.numAdultosMayores}</td>
-                                    <td>{ficha.beneficioAdicional || 'N/A'}</td>
-                                    <td>{ficha.organizacionBeneficio || 'N/A'}</td>
-                                    <td>{ficha.discapacidadIntegrantes ? "SI" : "NO"}</td>
-                                    {/* <td>{ficha.organizacionBeneficio}</td> */}
-
-                                    <td style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
-                                        <Button
-                                            type="button"
-                                            className=""
-                                            label="✎"
-                                            style={{
-                                                background: "#ff0000",
-                                                borderRadius: "10%",
-                                                fontSize: "25px",
-                                                width: "50px",
-                                                color: "black",
-                                                justifyContent: "center",
-                                            }}
-                                            onClick={() =>
-                                                handleEdit(ficha.idFichaFamiliar?.valueOf())
-                                            }
-                                        // Agrega el evento onClick para la operación de editar
-                                        />
-                                        <Button
-                                            type="button"
-                                            className=""
-                                            label="✘"
-                                            style={{
-                                                background: "#ff0000",
-                                                borderRadius: "10%",
-                                                fontSize: "25px",
-                                                width: "50px",
-                                                color: "black",
-                                                justifyContent: "center",
-                                            }}
-                                            onClick={() =>
-                                                handleDelete(ficha.idFichaFamiliar?.valueOf())
-                                            }
-                                        />
-                                    </td>
+                                </div>
 
 
+                            </div>
+
+                            <div className='btnSend' style={{ marginTop: "25px" }}>
+                                <div className="flex align-items-center justify-content-center w-auto min-w-min"
+                                    style={{ gap: "25px" }}>
+                                    <Button
+                                        type="submit"
+                                        label={editMode ? "Actualizar" : "Guardar"}
+                                        className="btn"
+                                        rounded
+                                        style={{
+                                            width: "100px",
+                                        }}
+                                        onClick={editMode ? handleUpdate : handleSubmit}
+                                    />
+                                    <Button
+                                        type="button"
+                                        label="Cancelar"
+                                        className="btn"
+                                        style={{
+                                            width: "100px",
+                                        }}
+                                        rounded
+                                        onClick={() => {
+                                            resetForm();
+                                            resetFiltro();
+                                            setEditMode(false);
+                                        }} />
+                                </div>
+                            </div>
+
+                        </form>
+                    </section >
+
+                    <Divider align="left" style={{ marginBottom: "0px" }}>
+                        <div className="inline-flex align-items-center">
+                            <i className="pi pi-list mr-2"></i>
+                            <b>Lista</b>
+                        </div>
+                    </Divider>
+
+                    <div className="opcTblLayout" >
+                        <div className="" style={{ flex: 1, display: "flex", alignItems: "flex-end", justifyContent: "flex-end" }}>
+
+                            <div className="opcTbl" style={{ justifyContent: "right" }} >
+                                <label className="font-medium w-auto min-w-min" htmlFor='estado'>Cargar todo:</label>
+
+                                <Button className="buttonIcon" // Agrega una clase CSS personalizada
+                                    icon="pi pi-refresh" style={{ width: "120px", height: "39px" }}
+                                    severity="danger" aria-label="Cancel" onClick={() => { loadData(); resetFiltro(); }}
+                                />
+
+                            </div>
+                            <ReportBar
+                                reportName={excelReportData?.reportName!}
+                                headerItems={excelReportData?.headerItems!}
+                                rowData={excelReportData?.rowData!}
+                                logo={excelReportData?.logo!}
+                            />
+                        </div>
+                    </div>
+
+
+                    <div className="tblContainer" >
+                        <table className="tableFichas">
+                            <thead className="theadTab" >
+                                <tr style={{ backgroundColor: "#871b1b", color: "white" }}>
+                                    <th className="trFichas">Nº Ficha</th>
+                                    <th className="trFichas">Cedula/Pasaporte</th>
+                                    <th className="trFichas">Nombres</th>
+                                    <th className="trFichas">Apellidos</th>
+                                    <th className="trFichas">Integrantes</th>
+                                    {/* <th className="trFichas"># Adultos</th>
+                                    <th className="trFichas"># NNA</th>
+                                    <th className="trFichas"># Adultos Mayores</th> */}
+                                    <th className="trFichas">Visita Domiciliar</th>
+                                    <th className="trFichas">Jefatira Familiar</th>
+                                    <th className="trFichas">Tipo de Familia</th>
+                                    <th className="trFichas">Beneficio Adicional</th>
+                                    <th className="trFichas">Detalles del beneficio</th>
+                                    <th className="trFichas">Org. Benefica</th>
+                                    <th className="trFichas">Discapacidad en la familia</th>
+                                    <th className="trFichas">Editar</th>
+                                    <th className="trFichas">Eliminar</th>
                                 </tr>
+                            </thead>
+                            <tbody>
+
+                                {listFichaFamiliar.map((ficha) => (
+                                    <tr
+                                        className="text-center"
+                                        key={ficha.idFichaFamiliar?.toString()}
+                                    >
+                                        <td className="tdFichas">{ficha.idFichaFamiliar}</td>
+                                        <td className="tdFichas">{ficha.fichaPersonal?.ciPasaporte}</td>
+                                        <td className="tdFichas">{ficha.fichaPersonal?.nombres}</td>
+                                        <td className="tdFichas">{ficha.fichaPersonal?.apellidos} </td>
+                                        <td className="tdFichas">{ficha.numIntegrantes}</td>
+                                        {/* <td className="tdFichas">{ficha.numAdultos}</td>
+                                        <td className="tdFichas">{ficha.numNNA}</td>
+                                        <td className="tdFichas">{ficha.numAdultosMayores}</td> */}
+                                        <td className="tdFichas">{ficha.visitaDomiciliaria ? "SI" : "NO"}</td>
+                                        <td className="tdFichas">{ficha.jefaturaFamiliar}</td>
+                                        <td className="tdFichas">{ficha.tipoFamilia?.nombreTipo}</td>
+                                        <td className="tdFichas">{ficha.beneficio ? "SI" : "NO"}</td>
+                                        <td className="tdFichas">{ficha.beneficioAdicional || 'N/A'}</td>
+                                        <td className="tdFichas">{ficha.organizacionBeneficio || 'N/A'}</td>
+                                        <td className="tdFichas">{ficha.discapacidadIntegrantes ? "SI" : "NO"}</td>
+                                        {/* <td className="tdFichas">{ficha.organizacionBeneficio}</td> */}
+                                        <td className="tdFichas">
+                                            <Button className="buttonIcon"
+                                                type="button"
+                                                icon="pi pi-file-edit"
+                                                style={{
+                                                    background: "#ff9800",
+                                                    borderRadius: "5%",
+                                                    fontSize: "25px",
+                                                    width: "50px",
+                                                    color: "black",
+                                                    justifyContent: "center",
+                                                }}
+                                                onClick={() =>
+                                                    handleEdit(ficha.idFichaFamiliar?.valueOf())
+                                                }
+                                            // Agrega el evento onClick para la operación de editar
+                                            />
+
+                                        </td>
+
+                                        <td className="tdFichas">
+                                            <Button className="buttonIcon"
+                                                type="button"
+                                                icon="pi pi-trash"
+                                                style={{
+                                                    background: "#ff0000",
+                                                    borderRadius: "10%",
+                                                    fontSize: "25px",
+                                                    width: "50px",
+                                                    color: "black",
+                                                    justifyContent: "center",
+                                                }}
+                                                onClick={() =>
+                                                    handleDelete(ficha.idFichaFamiliar?.valueOf())
+                                                }
+                                            // Agrega el evento onClick para la operación de eliminar
+                                            />
+                                        </td>
+                                    </tr>
 
 
 
-                            ))}
+                                ))}
 
-                        </tbody>
-                    </table>
-                </div>
-            </Card>
-        </Fieldset >
-
+                            </tbody>
+                        </table>
+                    </div>
+                </Card>
+            </Fieldset >
+        </>
     );
 };
 

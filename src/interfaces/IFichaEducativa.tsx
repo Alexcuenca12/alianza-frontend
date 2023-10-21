@@ -5,6 +5,9 @@ export interface IFichaEducativa {
   centroEducativo: string;
   direccionEducativa: string;
   referenciaEducativa: string;
+  repitente: boolean;
+  detalleRepitente: string;
+  situacionPsicopedagogica: string;
   jornadaEducativa: string;
   observacionesEducativa: string;
   gradoEducativo: string;

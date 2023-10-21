@@ -12,6 +12,8 @@ export interface IFichaFamiliar {
     beneficioAdicional: string;
     organizacionBeneficio: string;
     discapacidadIntegrantes: boolean;
+    beneficio: boolean;
+    detalleDiscapacidad: string;
     otrasSituaciones: string;
     tipoFamilia: ITipoFamilia | null;
     fichaPersonal: IFichaPersonal | null;

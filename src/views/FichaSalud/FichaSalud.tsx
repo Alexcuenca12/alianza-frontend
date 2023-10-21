@@ -154,7 +154,20 @@ function FichaSaludContext() {
     if (id !== undefined) {
       const editItem = contra1.find((contra) => contra.idFichaSalud === id);
       if (editItem) {
-        setFormData(editItem);
+
+        const editedItem = { ...editItem };
+
+
+        if (typeof editedItem.fechaRegistro === 'string') {
+          const registro = new Date(editedItem.fechaRegistro);
+          registro.setDate(registro.getDate() + 1);
+          const formattedDate = registro
+            ? registro.toISOString().split('T')[0]
+            : '';
+          editedItem.fechaRegistro = formattedDate;
+        }
+
+        setFormData(editedItem);
 
         setEditMode(true);
         setEditItemId(id);
@@ -492,8 +505,9 @@ function FichaSaludContext() {
             <label className="font-medium w-auto min-w-min" htmlFor="fichaPersonal" style={{ marginRight: "10px" }}>Fecha de Registro:</label>
             <Calendar
               disabled
+              dateFormat="dd-mm-yy" // Cambiar el formato a ISO 8601
+
               style={{ width: "95px", marginRight: "25px", fontWeight: "bold" }}
-              value={formData.fechaRegistro}
               onChange={(e: CalendarChangeEvent) => {
                 if (e.value !== undefined) {
                   setFormData({
@@ -501,7 +515,11 @@ function FichaSaludContext() {
                     fechaRegistro: e.value,
                   });
                 }
-              }} />
+              }}
+
+              value={typeof formData.fechaRegistro === 'string' ? new Date(formData.fechaRegistro) : new Date()}
+
+            />
           </div>
 
           <section className="flex justify-content-center flex-wrap container">
@@ -1120,8 +1138,6 @@ function FichaSaludContext() {
                   <th className="trFichas">Porcentaje de Discapacidad</th>
                   <th className="trFichas">Enfermedades Prevalentes</th>
                   <th className="trFichas">Condiciones Médicas</th>
-
-
                   <th className="trFichas">Editar</th>
                   <th className="trFichas">Eliminar</th>
                 </tr>

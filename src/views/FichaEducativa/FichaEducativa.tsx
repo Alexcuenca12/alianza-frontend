@@ -17,6 +17,7 @@ import { IExcelReportParams, IHeaderItem } from "../../interfaces/IExcelReportPa
 import { ReportBar } from "../../common/ReportBar";
 import { Divider } from 'primereact/divider';
 import '../../styles/FiltroFichas.css'
+import toast, { Toaster } from "react-hot-toast";
 
 function FichaInscripcionContext() {
   const [idPersona, setIDPersona] = useState<number>(0);
@@ -31,7 +32,7 @@ function FichaInscripcionContext() {
   const [listFperonales, setListFperonales] = useState<IFichaPersonal[]>([]);
 
 
-  const [listJornadas, setListJornadas] = useState<string[]>(['Matutina', 'Vespertina']);
+  const [listJornadas, setListJornadas] = useState<string[]>(['Matutina', 'Vespertina', 'Nocturna']);
 
 
   const [contra1, setcontra1] = useState<IFichaEducativa[]>([]);
@@ -43,6 +44,9 @@ function FichaInscripcionContext() {
     jornadaEducativa: "",
     observacionesEducativa: "",
     gradoEducativo: "",
+    detalleRepitente: '',
+    repitente: false,
+    situacionPsicopedagogica: '',
     fichaPersonal: null,
     fechaRegistro: new Date
 
@@ -72,32 +76,24 @@ function FichaInscripcionContext() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (validaciones()) {
 
-    if (
-      !formData.centroEducativo ||
-      !formData.direccionEducativa ||
-      !formData.referenciaEducativa ||
-      !formData.jornadaEducativa ||
-      !formData.gradoEducativo
-    ) {
-      swal("Advertencia", "Por favor, complete todos los campos", "warning");
-      return;
+      educaService
+        .save(formData)
+        .then((response) => {
+          swal("Publicacion", "Datos Guardados Correctamente", "success");
+          loadDataID(response.fichaPersonal?.idFichaPersonal);
+
+          resetForm();
+          resetFiltro();
+          if (fileUploadRef.current) {
+            fileUploadRef.current.clear();
+          }
+        })
+        .catch((error) => {
+          console.error("Error al enviar el formulario:", error);
+        });
     }
-
-    educaService
-      .save(formData)
-      .then((response) => {
-        resetForm();
-        swal("Publicacion", "Datos Guardados Correctamente", "success");
-        resetForm();
-        if (fileUploadRef.current) {
-          fileUploadRef.current.clear();
-        }
-        loadData()
-      })
-      .catch((error) => {
-        console.error("Error al enviar el formulario:", error);
-      });
   };
 
   const handleDelete = (id: number | undefined) => {
@@ -148,7 +144,20 @@ function FichaInscripcionContext() {
     if (id !== undefined) {
       const editItem = contra1.find((contra) => contra.idFichaEducativa === id);
       if (editItem) {
-        setFormData(editItem);
+
+        const editedItem = { ...editItem };
+
+        if (typeof editedItem.fechaRegistro === 'string') {
+          const registro = new Date(editedItem.fechaRegistro);
+          registro.setDate(registro.getDate() + 1);
+          const formattedDate = registro
+            ? registro.toISOString().split('T')[0]
+            : '';
+          editedItem.fechaRegistro = formattedDate;
+        }
+
+
+        setFormData(editedItem);
 
         setEditMode(true);
         setEditItemId(id);
@@ -176,41 +185,130 @@ function FichaInscripcionContext() {
     e.preventDefault();
 
     if (editItemId !== undefined) {
-      educaService
-        .update(Number(editItemId), formData as IFichaEducativa)
-        .then((response) => {
-          swal({
-            title: "Publicaciones",
-            text: "Datos actualizados correctamente",
-            icon: "success",
+      if (validaciones()) {
+        educaService
+          .update(Number(editItemId), formData as IFichaEducativa)
+          .then((response) => {
+            swal({
+              title: "Publicaciones",
+              text: "Datos actualizados correctamente",
+              icon: "success",
+            });
+            resetForm()
+            resetFiltro()
+            loadDataID(response.fichaPersonal?.idFichaPersonal);
+
+            setEditMode(false);
+            setEditItemId(undefined);
+
+          })
+          .catch((error) => {
+            console.error("Error al actualizar el formulario:", error);
           });
-          setFormData({
-            centroEducativo: "",
-            direccionEducativa: "",
-            referenciaEducativa: "",
-            jornadaEducativa: "",
-            observacionesEducativa: "",
-            gradoEducativo: "",
-            fichaPersonal: null,
-            fechaRegistro: new Date
-
-          });
-          setcontra1(
-            contra1.map((contra) =>
-              contra.idFichaEducativa === editItemId ? response : contra
-            )
-          );
-          setEditMode(false);
-          setEditItemId(undefined);
-          loadData();
-
-        })
-        .catch((error) => {
-          console.error("Error al actualizar el formulario:", error);
-        });
-
+      }
     }
   };
+
+  function validaciones(): boolean {
+
+    if (!formData.fichaPersonal?.idFichaPersonal) {
+      toast.error("Seleccione al propietario de la ficha", {
+        style: {
+          fontSize: '15px'
+        },
+        duration: 3000,
+      })
+      return false
+    }
+
+    if (!formData.centroEducativo) {
+      toast.error("Ingrese el centro educativo", {
+        style: {
+          fontSize: '15px'
+        },
+        duration: 3000,
+      })
+      return false
+    }
+
+    if (!formData.direccionEducativa) {
+      toast.error("Por favor, ingrese la direccion del centro educativo", {
+        style: {
+          fontSize: '15px'
+        },
+        duration: 3000,
+      })
+      return false
+    }
+
+    if (!formData.jornadaEducativa) {
+      toast.error("Seleccione la jornada en la que estudia", {
+        style: {
+          fontSize: '15px'
+        },
+        duration: 3000,
+      })
+      return false
+    }
+
+    if (!formData.gradoEducativo) {
+      toast.error("Ingrese el grado por el que esta cursando", {
+        style: {
+          fontSize: '15px'
+        },
+        duration: 3000,
+      })
+      return false
+    }
+
+    if (formData.repitente) {
+      if (!formData.detalleRepitente) {
+        toast.error("Por favor, proporcione detalles acerca del repitente", {
+          style: {
+            fontSize: '15px'
+          },
+          duration: 3000,
+        })
+        return false
+      }
+    }
+
+    if (!formData.referenciaEducativa) {
+      toast('No olvides proporcionar una referencia del centro educativo', {
+        icon: '⚠️',
+        style: {
+          fontSize: '15px'
+
+        },
+        duration: 4000,
+      });
+    }
+
+    if (!formData.situacionPsicopedagogica) {
+      toast('No ha ingresado ninguna situación psicopedagogíca', {
+        icon: '⚠️',
+        style: {
+          fontSize: '15px'
+
+        },
+        duration: 4000,
+      });
+    }
+
+    if (!formData.observacionesEducativa) {
+      toast('No ha ingresado ninguna ob servacion', {
+        icon: '⚠️',
+        style: {
+          fontSize: '15px'
+
+        },
+        duration: 4000,
+      });
+    }
+
+    return true
+
+  }
 
   const resetForm = () => {
     setFormData({
@@ -220,6 +318,9 @@ function FichaInscripcionContext() {
       jornadaEducativa: "",
       observacionesEducativa: "",
       gradoEducativo: "",
+      detalleRepitente: '',
+      repitente: false,
+      situacionPsicopedagogica: '',
       fichaPersonal: null,
       fechaRegistro: new Date
 
@@ -286,7 +387,14 @@ function FichaInscripcionContext() {
         centro: item.centroEducativo,
         direccion: item.direccionEducativa,
         referencia: item.referenciaEducativa,
+
+        situacionPsico: item.situacionPsicopedagogica || 'Ningula',
+        repitente: item.repitente ? 'SI' : 'NO',
+
+        detallePsico: item.detalleRepitente,
+
         observacion: item.observacionesEducativa,
+        registro: item.fechaRegistro || 'Ningula',
       }
     ));
     const headerItems: IHeaderItem[] = [
@@ -299,7 +407,11 @@ function FichaInscripcionContext() {
       { header: "CENTRO EDUCATIVO" },
       { header: "DIRECCION" },
       { header: "REFERENCIA" },
+      { header: "SITUACIÓN PSICOPEDAGOGICA:" },
+      { header: "¿ES REPITENTE?" },
+      { header: "DETALLES DEL REPITENTE" },
       { header: "OBSERVACION" },
+      { header: "FECHA DE REGISTRO" },
     ]
     console.log(reportName, '  //  ',
       headerItems, '  //  ',
@@ -337,167 +449,178 @@ function FichaInscripcionContext() {
 
 
   return (
-    <Fieldset className="fgrid col-fixed ">
-      <Card
-        header={cardHeader}
-        className="border-solid border-red-800 border-3 flex-1 flex-wrap"
-        style={{ width: "90%", marginLeft: "7%", height: "100%" }}
-      >
-        <div
-          className="h1-rem"
-          style={{ display: 'flex', justifyContent: 'center' }}
+    <>
+      <div>
+        <Toaster position="top-right"
+          reverseOrder={true} />
+      </div>
+      <Fieldset className="fgrid col-fixed " style={{ display: 'flex', justifyContent: 'center' }}>
+        <Card
+          header={cardHeader}
+          className="border-solid border-red-800 border-3 flex-1 flex-wrap"
+          style={{ marginBottom: "35px", maxWidth: "1000px" }}
         >
-          <h1 className="text-5xl font-smibold lg:md-2 h-full max-w-full max-h-full min-w-min">
-            Ficha Educativa
-          </h1>
-        </div>
+          <div
+            className="h1-rem"
+            style={{ display: 'flex', justifyContent: 'center' }}
+          >
+            <h1 className="text-5xl font-smibold lg:md-2 h-full max-w-full max-h-full min-w-min">
+              Ficha Educativa
+            </h1>
+          </div>
 
-        <div className="" style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "right" }}>
-          <label className="font-medium w-auto min-w-min" htmlFor="fichaPersonal" style={{ marginRight: "10px" }}>Fecha de Registro:</label>
-          <Calendar
-            disabled
-            style={{ width: "95px", marginRight: "25px", fontWeight: "bold" }}
-            value={formData.fechaRegistro}
-            onChange={(e: CalendarChangeEvent) => {
-              if (e.value !== undefined) {
-                setFormData({
-                  ...formData,
-                  fechaRegistro: e.value,
-                });
-              }
-            }} />
-        </div>
+          <div className="" style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "right" }}>
+            <label className="font-medium w-auto min-w-min" htmlFor="fichaPersonal" style={{ marginRight: "10px" }}>Fecha de Registro:</label>
+            <Calendar
+              disabled
+              dateFormat="dd-mm-yy" // Cambiar el formato a ISO 8601
 
-        <section className="flex justify-content-center flex-wrap container">
-          <Fieldset legend="Filtros de busqueda" style={{ width: "1000px", marginBottom: "45px", position: "relative" }}>
-            <div style={{ position: "absolute", top: "0", right: "5px", marginTop: "-15px" }}>
-              <label className="font-medium w-auto min-w-min" htmlFor="rangoEdad" style={{ marginRight: "10px" }}>Limpiar filtros:</label>
+              style={{ width: "95px", marginRight: "25px", fontWeight: "bold" }}
+              onChange={(e: CalendarChangeEvent) => {
+                if (e.value !== undefined) {
+                  setFormData({
+                    ...formData,
+                    fechaRegistro: e.value,
+                  });
+                }
+              }}
 
-              <Button icon="pi pi-times" rounded severity="danger" aria-label="Cancel" onClick={() => resetFiltro()} />
-            </div>
+              value={typeof formData.fechaRegistro === 'string' ? new Date(formData.fechaRegistro) : new Date()}
 
-            <section className="layout">
-              <div className="">
-                <div input-box>
-                  <label className="font-medium w-auto min-w-min" htmlFor='genero'>Cedula o Nombre:</label>
+            />
+          </div>
 
-                  <div className="flex-1">
-                    <InputText
-                      placeholder="Cedula de identidad"
-                      id="integer"
-                      // keyfilter="int"
-                      style={{ width: "75%" }}
+          <section className="flex justify-content-center flex-wrap container">
+            <Divider align="left">
+              <div className="inline-flex align-items-center">
+                <i className="pi pi-filter-fill mr-2"></i>
+                <b>Filtro</b>
+              </div>
+            </Divider>
+            <Fieldset legend="Filtros de busqueda" style={{ width: "1000px", position: "relative" }}>
+              <div style={{ position: "absolute", top: "0", right: "5px", marginTop: "-15px" }}>
+                <label className="font-medium w-auto min-w-min" htmlFor="rangoEdad" style={{ marginRight: "10px" }}>Limpiar filtros:</label>
 
-                      onChange={(e) => {
-                        // Actualizar el estado usando setFormData
-                        setListFperonales([]); // Asignar un arreglo vacío para vaciar el estado listFperonales
+                <Button icon="pi pi-times" rounded severity="danger" aria-label="Cancel" onClick={() => resetFiltro()} />
+              </div>
+              <section className="layout">
+                <div className="">
+                  <div input-box>
+                    <label className="font-medium w-auto min-w-min" htmlFor='genero'>Cedula o Nombre:</label>
 
-                        setBusqueda(e.currentTarget.value);
+                    <div className="flex-1">
+                      <InputText
+                        placeholder="Cedula de identidad"
+                        id="integer"
+                        // keyfilter="int"
+                        style={{ width: "75%" }}
 
-                        // Luego, llamar a loadRelacion después de que se actualice el estado
-                        loadRelacion();
-                      }}
+                        onChange={(e) => {
+                          // Actualizar el estado usando setFormData
+                          setListFperonales([]); // Asignar un arreglo vacío para vaciar el estado listFperonales
 
-                      onKeyUp={(e) => {
-                        setListFperonales([]); // Asignar un arreglo vacío para vaciar el estado listFperonales
+                          setBusqueda(e.currentTarget.value);
 
-                        setBusqueda(e.currentTarget.value);
+                          // Luego, llamar a loadRelacion después de que se actualice el estado
+                          loadRelacion();
+                        }}
 
-                        // Luego, llamar a loadRelacion después de que se actualice el estado
-                        loadRelacion();
-                        loadRelacion(); // Llama a tu método aquí o realiza las acciones necesarias.
-                      }}
+                        // onKeyUp={(e) => {
+                        //   setListFperonales([]); // Asignar un arreglo vacío para vaciar el estado listFperonales
 
-                      value={busqueda}
-                    />
+                        //   setBusqueda(e.currentTarget.value);
 
-                    <Button icon="pi pi-search" className="p-button-warning" />
+                        //   // Luego, llamar a loadRelacion después de que se actualice el estado
+                        //   loadRelacion();
+                        //   loadRelacion(); // Llama a tu método aquí o realiza las acciones necesarias.
+                        // }}
+
+                        value={busqueda}
+                      />
+
+                      <Button icon="pi pi-search" className="p-button-warning" />
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="">
+                <div className="">
+                  <div>
+                    <label className="font-medium w-auto min-w-min" htmlFor="fichaPersonal">Resultados de la busqueda:</label>
+                    <Dropdown
+                      className="text-2xl"
+                      id="tiempo_dedicacion"
+                      name="tiempo_dedicacion"
+                      style={{ width: "100%" }}
+                      options={listFperonales}
+                      onChange={(e) => {
+                        setFormData({
+                          ...formData,
+                          fichaPersonal: {
+                            idFichaPersonal: parseInt(e.value), foto: '',
+                            apellidos: '',
+                            nombres: '',
+                            ciPasaporte: '',
+                            tipoIdentificacion: '',
+                            actTrabInfantil: false,
+                            detalleActTrabInfantil: '',
+                            nacionalidad: '',
+                            fechaNacimiento: '',
+                            rangoEdad: null,
+                            genero: '',
+                            etnia: null,
+                            parroquia: null,
+                            zona: '',
+                            barrioSector: '',
+                            direccion: '',
+                            referencia: '',
+                            coordenadaX: 0,
+                            coordenadaY: 0,
+                            estVinculacion: true,
+                            fechaRegistro: new Date()
+                          }
+                        });
+                        cargarFoto(parseInt(e.value))
+                        loadDataID(parseInt(e.value))
+                      }}
+                      value={formData.fichaPersonal?.idFichaPersonal}
+
+                      optionLabel="label"
+                      optionValue="idFichaPersonal"
+                      placeholder="Seleccione una persona"
+                    />
+                  </div>
+                </div>
                 <div>
-                  <label className="font-medium w-auto min-w-min" htmlFor="fichaPersonal">Resultados de la busqueda:</label>
-                  <Dropdown
-                    className="text-2xl"
-                    id="tiempo_dedicacion"
-                    name="tiempo_dedicacion"
-                    style={{ width: "100%" }}
-                    options={listFperonales}
-                    onChange={(e) => {
-                      setFormData({
-                        ...formData,
-                        fichaPersonal: {
-                          idFichaPersonal: parseInt(e.value), foto: '',
-                          apellidos: '',
-                          nombres: '',
-                          ciPasaporte: '',
-                          tipoIdentificacion: '',
-                          actTrabInfantil: false,
-                          detalleActTrabInfantil: '',
-                          nacionalidad: '',
-                          fechaNacimiento: '',
-                          rangoEdad: null,
-                          genero: '',
-                          etnia: null,
-                          parroquia: null,
-                          zona: '',
-                          barrioSector: '',
-                          direccion: '',
-                          referencia: '',
-                          coordenadaX: 0,
-                          coordenadaY: 0,
-                          estVinculacion: true,
-                          fechaRegistro: new Date()
-                        }
-                      });
-                      cargarFoto(parseInt(e.value))
-                      loadDataID(parseInt(e.value))
-                      console.log(formData)
-                    }}
-                    value={formData.fichaPersonal?.idFichaPersonal}
-
-                    optionLabel="label"
-                    optionValue="idFichaPersonal"
-                    placeholder="Seleccione una persona"
-                  />
+                  <div style={{ display: "grid", placeItems: "center" }}>
+                    <img
+                      src={foto}
+                      alt="FotoNNA"
+                      style={{
+                        // width: "80px",
+                        height: "80px",
+                        borderRadius: "50%", // Borde redondeado
+                        border: "2px solid gray", // Borde gris
+                      }}
+                    />
+                  </div>
                 </div>
-              </div>
-              <div>
-                <div style={{ display: "grid", placeItems: "center" }}>
-                  <img
-                    src={foto}
-                    alt="FotoNNA"
-                    style={{
-                      // width: "80px",
-                      height: "80px",
-                      borderRadius: "50%", // Borde redondeado
-                      border: "2px solid gray", // Borde gris
-                    }}
-                  />
+              </section>
+
+            </Fieldset>
+
+
+            <form onSubmit={editMode ? handleUpdate : handleSubmit} className='form' encType="multipart/form-data">
+
+              <Divider align="left">
+                <div className="inline-flex align-items-center">
+                  <i className="pi pi-book mr-2"></i>
+                  <b>Formulario </b>
                 </div>
-              </div>
-            </section>
+              </Divider>
 
-          </Fieldset>
-          <Divider />
-
-          <form
-            onSubmit={editMode ? handleUpdate : handleSubmit}
-            encType="multipart/form-data"
-          >
-            <div className="flex flex-wrap flex-row" style={{ justifyContent: "center", alignItems: "center" }}>
-              <div className="flex align-items-center justify-content-center" style={{ margin: "20px" }}>
-                <div
-                  className="flex flex-column flex-wrap gap-4"
-                  style={{ paddingRight: "25px" }}
-                >
-                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
-                    <label
-                      htmlFor="centro"
-                      className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginRight: "20px" }}
-                    >
+              <div className='column' style={{}}>
+                <div className='column' style={{ width: "33.3%" }}>
+                  <div className='input-box' style={{}}>
+                    <label className="font-medium w-auto min-w-min" htmlFor="tipoDocumento">
                       Centro Educativo:
                     </label>
                     <InputText
@@ -515,12 +638,10 @@ function FichaInscripcionContext() {
                       value={formData.centroEducativo}
                     />
                   </div>
-                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
-                    <label
-                      htmlFor="inicio"
-                      className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginRight: "20px" }}
-                    >
+                </div>
+                <div className='column' style={{ width: "33.3%" }}>
+                  <div className='input-box' style={{}}>
+                    <label className="font-medium w-auto min-w-min" htmlFor="tipoDocumento">
                       Dirección del Centro:
                     </label>
                     <InputText
@@ -538,12 +659,10 @@ function FichaInscripcionContext() {
                       value={formData.direccionEducativa}
                     />
                   </div>
-                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
-                    <label
-                      htmlFor="tiempo_dedicacion"
-                      className="text-3xl font-medium w-auto min-w-min"
-                      style={{ paddingRight: "20px" }}
-                    >
+                </div>
+                <div className='column' style={{ width: "33.3%" }}>
+                  <div className='input-box' style={{}}>
+                    <label className="font-medium w-auto min-w-min" htmlFor="tipoDocumento">
                       Referencia de la Ubicación:
                     </label>
                     <InputText
@@ -562,46 +681,19 @@ function FichaInscripcionContext() {
                     />
                   </div>
                 </div>
-                <div
-                  className="flex flex-column flex-wrap gap-4"
-                  style={{ marginTop: "5px", marginLeft: "25px" }}
-                >
-                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
-                    <label
-                      htmlFor="tiempo_dedicacion"
-                      className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginRight: "20px", marginLeft: "25px" }}
-                    >
-                      Grado Actual:
-                    </label>
-                    <InputText
-                      className="text-2xl"
-                      placeholder="Ingrese el Grado"
-                      id="doi"
-                      name="doi"
-                      style={{ width: "221px" }}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          gradoEducativo: e.currentTarget.value,
-                        })
-                      }
-                      value={formData.gradoEducativo}
-                    />
-                  </div>
-                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
-                    <label
-                      htmlFor="doi"
-                      className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginRight: "20px", marginLeft: "25px" }}
-                    >
+              </div>
+
+              <div className='column' style={{}}>
+                <div className='column' style={{ width: "33.3%" }}>
+                  <div className='input-box' style={{}}>
+                    <label className="font-medium w-auto min-w-min" htmlFor="tipoDocumento">
                       Jornada:
                     </label>
                     <Dropdown
                       className="text-2xl"
                       id="doi"
                       name="doi"
-                      style={{ width: "221px", height: "40px" }}
+                      style={{ width: "100%", height: "36px", alignItems: "center" }}
                       options={listJornadas.map((jornada) => ({ label: jornada, value: jornada }))}
                       onChange={(e) =>
                         setFormData({
@@ -614,15 +706,125 @@ function FichaInscripcionContext() {
                       optionValue="value" // Usamos "value" para el valor seleccionado
                       placeholder="Ingrese la Jornada de Estudio"
                     />
-
-
                   </div>
-                  <div className="flex flex-wrap w-full h-full " style={{ justifyContent: "right" }}>
-                    <label
-                      htmlFor="filiacion"
-                      className="text-3xl font-medium w-auto min-w-min"
-                      style={{ marginRight: "20px", marginLeft: "25px" }}
-                    >
+                </div>
+                <div className='column' style={{ width: "33.3%" }}>
+                  <div className='input-box' style={{}}>
+                    <label className="font-medium w-auto min-w-min" htmlFor="tipoDocumento">
+                      Grado Actual:
+                    </label>
+                    <InputText
+                      className="text-2xl"
+                      placeholder="Ingrese el Grado"
+                      id="doi"
+                      name="doi"
+                      style={{ width: "100%" }}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          gradoEducativo: e.currentTarget.value,
+                        })
+                      }
+                      value={formData.gradoEducativo}
+                    />
+                  </div>
+                </div>
+                <div className='column' style={{ width: "33.3%" }}>
+                  <div className='input-box' style={{}}>
+                    <label className="font-medium w-auto min-w-min" htmlFor="tipoDocumento">
+                      Situación Psicopedagogica:
+                    </label>
+                    <InputTextarea
+                      className="text-2xl"
+                      placeholder="Ingrese la situación psicopedagogía"
+                      id="situacionPsicopedagogica"
+                      name="situacionPsicopedagogica"
+                      style={{ width: "100%", height: '40px' }}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          situacionPsicopedagogica: e.currentTarget.value,
+                        })
+                      }
+                      value={formData.situacionPsicopedagogica}
+                    />
+                  </div>
+                </div>
+
+              </div>
+
+              <div className='column' style={{}}>
+                <div className='column' style={{ width: "12%" }}>
+                  <div className='input-box' style={{}}>
+                    <label className="font-medium w-auto min-w-min" htmlFor="repitente">
+                      ¿Es repitente?:
+                    </label>
+
+                    <div className="mydict" >
+                      <div>
+                        <label className="radioLabel">
+                          <input
+                            className="input"
+                            type="radio"
+                            id="repitenteTrue"
+                            name="repitente"
+                            value="true"
+                            checked={formData.repitente === true}
+                            onChange={() =>
+                              setFormData({
+                                ...formData,
+                                repitente: true,
+                              })
+                            }
+                          />
+                          <span>Si</span>
+                        </label>
+                        <label className="radioLabel">
+                          <input
+                            className="input"
+                            type="radio"
+                            id="repitenteFalse"
+                            name="repitente"
+                            value="false"
+                            checked={formData.repitente === false}
+                            onChange={() =>
+                              setFormData({
+                                ...formData,
+                                repitente: false, detalleRepitente: '',
+                              })
+                            }
+                          />
+                          <span>No</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className='column' style={{ width: "44%" }}>
+                  <div className='input-box' style={{}}>
+                    <label className="font-medium w-auto min-w-min" htmlFor="tipoDocumento">
+                      Detalles  del repitente:
+                    </label>
+                    <InputTextarea
+                      className="text-2xl"
+                      placeholder="Describa las causas, razones o detalles de la repetición de año"
+                      id="repitente"
+                      disabled={!formData.repitente}
+                      name="repitente"
+                      style={{ width: "100%", height: '40px' }}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          detalleRepitente: e.currentTarget.value,
+                        })
+                      }
+                      value={formData.detalleRepitente}
+                    />
+                  </div>
+                </div>
+                <div className='column' style={{ width: "44%" }}>
+                  <div className='input-box' style={{}}>
+                    <label className="font-medium w-auto min-w-min" htmlFor="tipoDocumento">
                       Observaciones:
                     </label>
                     <InputTextarea
@@ -630,7 +832,7 @@ function FichaInscripcionContext() {
                       placeholder="Ingrese las Observaciones"
                       id="filiacion"
                       name="filiacion"
-                      style={{ width: "221px" }}
+                      style={{ width: "100%", height: '40px' }}
                       onChange={(e) =>
                         setFormData({
                           ...formData,
@@ -640,27 +842,29 @@ function FichaInscripcionContext() {
                       value={formData.observacionesEducativa}
                     />
                   </div>
-
                 </div>
               </div>
-              <div
-                className="flex flex-row  w-full h-full justify-content-center  flex-grow-1  row-gap-8 gap-8 flex-wrap mt-6"
-                style={{ marginLeft: "-45px" }}
-              >
-                <div className="flex align-items-center justify-content-center w-auto min-w-min">
+
+              <div className='btnSend' style={{ marginTop: "25px" }}>
+                <div className="flex align-items-center justify-content-center w-auto min-w-min"
+                  style={{ gap: "25px" }}>
                   <Button
                     type="submit"
                     label={editMode ? "Actualizar" : "Guardar"}
-                    className="w-full text-3xl min-w-min "
+                    className="btn"
                     rounded
+                    style={{
+                      width: "100px",
+                    }}
                     onClick={editMode ? handleUpdate : handleSubmit}
                   />
-                </div>
-                <div className="flex align-items-center justify-content-center w-auto min-w-min">
                   <Button
                     type="button"
                     label="Cancelar"
-                    className="w-full text-3xl min-w-min"
+                    className="btn"
+                    style={{
+                      width: "100px",
+                    }}
                     rounded
                     onClick={() => {
                       resetForm();
@@ -669,92 +873,117 @@ function FichaInscripcionContext() {
                     }} />
                 </div>
               </div>
-            </div>
-          </form>
-        </section>
-        <div style={{ marginTop: "50px" }}>
-          <table
-            style={{ minWidth: "40rem" }}
-            className="mt-4  w-full h-full text-3xl font-large"
-          >
-            <thead>
-              <tr >
-                <td colSpan={12} className="tdBtn">
-                  <ReportBar
-                    reportName={excelReportData?.reportName!}
-                    headerItems={excelReportData?.headerItems!}
-                    rowData={excelReportData?.rowData!}
-                    logo={excelReportData?.logo!}
+            </form>
+          </section>
 
-                  />
-                </td>
-              </tr>
-              <tr style={{ backgroundColor: "#871b1b", color: "white" }}>
-                <th>Nº de Registro</th>
-                <th>Centro Educativo</th>
-                <th>Dirección </th>
-                <th>Referencia</th>
-                <th>Jornada de Asistencia</th>
-                <th>Observaciones</th>
-                <th>Grado</th>
-                <th>Operaciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {contra1.map((contrato) => (
-                <tr
-                  className="text-center"
-                  key={contrato.idFichaEducativa?.toString()}
-                >
-                  <td>{contrato.idFichaEducativa}</td>
-                  <td>{contrato.centroEducativo}</td>
-                  <td>{contrato.direccionEducativa}</td>
-                  <td>{contrato.referenciaEducativa}</td>
-                  <td>{contrato.jornadaEducativa}</td>
-                  <td>{contrato.observacionesEducativa}</td>
-                  <td>{contrato.gradoEducativo}</td>
-                  <td>
-                    <Button
-                      type="button"
-                      className=""
-                      label="✎"
-                      style={{
-                        background: "#ff9800",
-                        borderRadius: "5%",
-                        fontSize: "25px",
-                        width: "50px",
-                        color: "black",
-                        justifyContent: "center",
-                      }}
-                      onClick={() =>
-                        handleEdit(contrato.idFichaEducativa?.valueOf())
-                      }
-                    // Agrega el evento onClick para la operación de editar
-                    />
-                    <Button
-                      type="button"
-                      className=""
-                      label="✘"
-                      style={{
-                        background: "#ff0000",
-                        borderRadius: "10%",
-                        fontSize: "25px",
-                        width: "50px",
-                        color: "black",
-                        justifyContent: "center",
-                      }}
-                      onClick={() =>
-                        handleDelete(contrato.idFichaEducativa?.valueOf())
-                      }
-                    />
-                  </td>
+          <Divider align="left" style={{ marginBottom: "0px" }}>
+            <div className="inline-flex align-items-center">
+              <i className="pi pi-list mr-2"></i>
+              <b>Lista</b>
+            </div>
+          </Divider>
+
+          <div className="opcTblLayout" >
+            <div className="" style={{ flex: 1, display: "flex", alignItems: "flex-end", justifyContent: "flex-end" }}>
+
+              <div className="opcTbl" style={{ justifyContent: "right" }} >
+                <label className="font-medium w-auto min-w-min" htmlFor='estado'>Cargar todo:</label>
+
+                <Button className="buttonIcon" // Agrega una clase CSS personalizada
+                  icon="pi pi-refresh" style={{ width: "120px", height: "39px" }}
+                  severity="danger" aria-label="Cancel" onClick={() => { loadData(); resetFiltro(); }}
+                />
+
+              </div>
+              <ReportBar
+                reportName={excelReportData?.reportName!}
+                headerItems={excelReportData?.headerItems!}
+                rowData={excelReportData?.rowData!}
+                logo={excelReportData?.logo!}
+              />
+            </div>
+          </div>
+
+          <div className="tblContainer" >
+            <table className="tableFichas">
+              <thead className="theadTab" >
+                <tr style={{ backgroundColor: "#871b1b", color: "white" }}>
+                  <th className="trFichas">Nº de Registro</th>
+                  <th className="trFichas">Cedula/Pasaporte</th>
+                  <th className="trFichas">Nombres</th>
+                  <th className="trFichas">Apellidos</th>
+                  <th className="trFichas">Centro Educativo</th>
+                  <th className="trFichas">Dirección </th>
+                  <th className="trFichas">Jornada de Asistencia</th>
+                  <th className="trFichas">Grado</th>
+                  <th className="trFichas">Repitente</th>
+                  <th className="trFichas">Observaciones</th>
+                  <th className="trFichas">Editar</th>
+                  <th className="trFichas">Eliminar</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Card>
-    </Fieldset>
+              </thead>
+              <tbody>
+                {contra1.map((contrato) => (
+                  <tr
+                    className="text-center"
+                    key={contrato.idFichaEducativa?.toString()}
+                  >
+                    <td className="tdFichas">{contrato.idFichaEducativa}</td>
+                    <td className="tdFichas">{contrato.fichaPersonal?.ciPasaporte}</td>
+                    <td className="tdFichas">{contrato.fichaPersonal?.nombres}</td>
+                    <td className="tdFichas">{contrato.fichaPersonal?.apellidos} </td>
+                    <td className="tdFichas">{contrato.centroEducativo}</td>
+                    <td className="tdFichas">{contrato.direccionEducativa}</td>
+                    <td className="tdFichas">{contrato.jornadaEducativa}</td>
+                    <td className="tdFichas">{contrato.gradoEducativo}</td>
+                    <td className="tdFichas">{contrato.repitente ? 'Si' : 'No'}</td>
+                    <td className="tdFichas">{contrato.observacionesEducativa}</td>
+                    <td className="tdFichas">
+                      <Button className="buttonIcon"
+                        type="button"
+                        icon="pi pi-file-edit"
+                        style={{
+                          background: "#ff9800",
+                          borderRadius: "5%",
+                          fontSize: "25px",
+                          width: "50px",
+                          color: "black",
+                          justifyContent: "center",
+                        }}
+                        onClick={() =>
+                          handleEdit(contrato.idFichaEducativa?.valueOf())
+                        }
+                      // Agrega el evento onClick para la operación de editar
+                      />
+
+                    </td>
+
+                    <td className="tdFichas">
+                      <Button className="buttonIcon"
+                        type="button"
+                        icon="pi pi-trash"
+                        style={{
+                          background: "#ff0000",
+                          borderRadius: "10%",
+                          fontSize: "25px",
+                          width: "50px",
+                          color: "black",
+                          justifyContent: "center",
+                        }}
+                        onClick={() =>
+                          handleDelete(contrato.idFichaEducativa?.valueOf())
+                        }
+                      // Agrega el evento onClick para la operación de eliminar
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      </Fieldset>
+    </>
   );
 }
 
