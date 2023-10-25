@@ -20,7 +20,7 @@ export class PersonaService {
 
   existsDNI(dni: string) {
     //Método para listar todas los Usuarios
-    return this.api.get(`exists-identificacion/${dni}`).then((res) => res.data);
+    return this.api.get(`existsDNI?dni=${dni}`).then((res) => res.data);
   }
 
   delete(id: number) {

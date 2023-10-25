@@ -55,9 +55,9 @@ function FichaInscripcionContext() {
     parentescoRepre: "",
     fichaPersonal: null,
     fechaRegistro: new Date,
-    genero: '',
-    nacionalidad: '',
-    tipoIdentificacion: '',
+    generoRepre: '',
+    nacionalidadRepre: '',
+    tipoIdentificacionRepre: '',
 
   });
 
@@ -224,9 +224,9 @@ function FichaInscripcionContext() {
               parentescoRepre: "",
               fichaPersonal: null,
               fechaRegistro: new Date,
-              genero: '',
-              nacionalidad: '',
-              tipoIdentificacion: '',
+              generoRepre: '',
+              nacionalidadRepre: '',
+              tipoIdentificacionRepre: '',
 
             });
             resetForm();
@@ -255,7 +255,7 @@ function FichaInscripcionContext() {
       return false
     }
 
-    if (!formData.tipoIdentificacion) {
+    if (!formData.tipoIdentificacionRepre) {
       toast.error("Seleccione el tipo de identificacion", {
         style: {
           fontSize: '15px'
@@ -316,7 +316,7 @@ function FichaInscripcionContext() {
       return false
     }
 
-    if (!formData.genero) {
+    if (!formData.generoRepre) {
       toast.error("Por favor, seleccione el genero", {
         style: {
           fontSize: '15px'
@@ -326,7 +326,7 @@ function FichaInscripcionContext() {
       return false
     }
 
-    if (!formData.nacionalidad) {
+    if (!formData.nacionalidadRepre) {
       toast.error("Por favor, ingrese la nacionalidad", {
         style: {
           fontSize: '15px'
@@ -423,9 +423,9 @@ function FichaInscripcionContext() {
       parentescoRepre: "",
       fichaPersonal: null,
       fechaRegistro: new Date,
-      genero: '',
-      nacionalidad: '',
-      tipoIdentificacion: '',
+      generoRepre: '',
+      nacionalidadRepre: '',
+      tipoIdentificacionRepre: '',
 
     });
     setEditMode(false);
@@ -494,15 +494,15 @@ function FichaInscripcionContext() {
         nombresNNA: item.fichaPersonal?.nombres,
         apellidosNNA: item.fichaPersonal?.apellidos,
         division: '||',
-        tipoIdentificacion: item.tipoIdentificacion || '',
+        tipoIdentificacion: item.tipoIdentificacionRepre || '',
         cedula: item.cedulaRepre,
         nombres: item?.nombresRepre,
         apellidos: item?.apellidosRepre,
         parentesco: item.parentescoRepre,
         nacimiento: item.fechaNacimientoRepre,
         edad: calcularEdad(item.fechaNacimientoRepre),
-        genero: item.genero,
-        nacionalidad: item.nacionalidad,
+        genero: item.generoRepre,
+        nacionalidad: item.nacionalidadRepre,
         nivelInstruccion: item.nivelInstruccionRepre,
         trabajo: item.lugarTrabajoRepre,
         ocupacion: item.ocupacionPrimariaRepre,
@@ -745,10 +745,10 @@ function FichaInscripcionContext() {
                         onChange={(e) =>
                           setFormData({
                             ...formData,
-                            tipoIdentificacion: e.value, cedulaRepre: ''
+                            tipoIdentificacionRepre: e.value, cedulaRepre: ''
                           })
                         }
-                        value={formData.tipoIdentificacion}
+                        value={formData.tipoIdentificacionRepre}
                         optionLabel="label"
                         optionValue="value"
                         placeholder="Seleccione el tipo de documento de identificación"
@@ -763,22 +763,22 @@ function FichaInscripcionContext() {
                 <div className='column' style={{ width: "30.3%" }}>
                   <div className='input-box' >
                     <label className="font-medium w-auto min-w-min" htmlFor="cedula">
-                      {!formData.tipoIdentificacion
+                      {!formData.tipoIdentificacionRepre
                         ? 'Debe seleccionar el tipo de identificaicon:'
-                        : formData.tipoIdentificacion === 'Cédula'
+                        : formData.tipoIdentificacionRepre === 'Cédula'
                           ? 'Cédula:'
                           : 'Pasaporte:'}
                     </label>
 
                     <InputText
-                      placeholder={!formData.tipoIdentificacion
+                      placeholder={!formData.tipoIdentificacionRepre
                         ? 'Se habilitara cuando seleccione el tipo de identificaicon'
-                        : formData.tipoIdentificacion === 'Cédula'
+                        : formData.tipoIdentificacionRepre === 'Cédula'
                           ? 'Ingrese el numero de cédula:'
                           : 'Ingrese el numero de pasaporte:'}
                       id="cedula"
-                      disabled={!formData.tipoIdentificacion}
-                      maxLength={formData.tipoIdentificacion === 'Cédula'
+                      disabled={!formData.tipoIdentificacionRepre}
+                      maxLength={formData.tipoIdentificacionRepre === 'Cédula'
                         ? 10
                         : 1000} // Establecer el máximo de 10 caracteres
                       keyfilter="pint" // Solo permitir dígitos enteros positivos
@@ -917,8 +917,8 @@ function FichaInscripcionContext() {
                             id="genMasculino"
                             name="masculino"
                             value="Masculino"
-                            checked={formData.genero === 'Masculino'}
-                            onChange={(e) => setFormData({ ...formData, genero: e.target.value })}
+                            checked={formData.generoRepre === 'Masculino'}
+                            onChange={(e) => setFormData({ ...formData, generoRepre: e.target.value })}
 
                           />
                           <span>Masculino</span>
@@ -930,8 +930,8 @@ function FichaInscripcionContext() {
                             id="genFemenino"
                             name="femenino"
                             value="Femenino"
-                            checked={formData.genero === 'Femenino'}
-                            onChange={(e) => setFormData({ ...formData, genero: e.target.value })}
+                            checked={formData.generoRepre === 'Femenino'}
+                            onChange={(e) => setFormData({ ...formData, generoRepre: e.target.value })}
 
                           />
                           <span>Femenino</span>
@@ -951,9 +951,9 @@ function FichaInscripcionContext() {
                       placeholder=' Ingresar la nacionalidad'
                       id="nacionalidad"
                       keyfilter="alpha" // Solo permitir caracteres alfabeticos
-                      onChange={(e) => setFormData({ ...formData, nacionalidad: e.target.value })}
+                      onChange={(e) => setFormData({ ...formData, nacionalidadRepre: e.target.value })}
                       title="Ingresar la nacionalidad del NNA"
-                      value={formData.nacionalidad}
+                      value={formData.nacionalidadRepre}
                     />
                     <span className="input-border"></span>
 

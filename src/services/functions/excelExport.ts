@@ -20,6 +20,7 @@ export const excelExport = async (params: IExcelReportParams) => {
     worksheet.getRow(1).height = 70;
     worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' }
 
+
     const customCell = worksheet.getCell("A1");
     customCell.font = {
         name: "Times New Roman",
@@ -86,7 +87,7 @@ export const excelExport = async (params: IExcelReportParams) => {
     worksheet.views = [{ state: "frozen", ySplit: 2 }];
 
     // insert data
-    if (params.reportName === 'Ficha Personal') {
+    if (params.reportName === 'Ficha Personal' || params.reportName === 'Reporte General') {
         for (let i = 0; i < params.rowData.length; i++) {
             const base64Image = params.rowData[i].foto.replace(/^data:.*,/, "");
             params.rowData[i].foto = '';
@@ -113,7 +114,7 @@ export const excelExport = async (params: IExcelReportParams) => {
                 extension: 'jpeg', // Cambia la extensión según el formato de la imagen
             });
 
-            const position = 'B' + (2 + currentCount) + ':' + 'B' + (2 + currentCount);
+            // const position = 'B' + (2 + currentCount) + ':' + 'B' + (2 + currentCount);
             // alert(position)
             // worksheet.addImage(imageId, position);
             worksheet.addImage(imageId, {

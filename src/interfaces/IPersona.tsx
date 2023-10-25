@@ -1,7 +1,7 @@
 import { IUsuario } from "./IUsuario";
 
 export interface IPersona {
-  idPersona: number;
+  idPersona?: number;
   apellidosPersona: string;
   nombresPersona: string;
   tipoIdentificacion: string;

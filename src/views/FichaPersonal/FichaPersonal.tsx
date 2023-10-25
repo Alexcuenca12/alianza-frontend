@@ -377,30 +377,7 @@ function FichaPersonal() {
                             text: "Datos actualizados correctamente",
                             icon: "success",
                         });
-                        setFormData({
-                            idFichaPersonal: 0,
-                            foto: foto64,
-                            apellidos: '',
-                            nombres: '',
-                            ciPasaporte: '',
-                            tipoIdentificacion: '',
-                            actTrabInfantil: false,
-                            detalleActTrabInfantil: '',
-                            nacionalidad: '',
-                            fechaNacimiento: '',
-                            rangoEdad: null,
-                            genero: '',
-                            etnia: null,
-                            parroquia: null,
-                            zona: '',
-                            barrioSector: '',
-                            direccion: '',
-                            referencia: '',
-                            coordenadaX: 0,
-                            coordenadaY: 0,
-                            estVinculacion: false,
-                            fechaRegistro: new Date()
-                        });
+                        resetForm();
                         if (fileUploadRef.current) {
                             fileUploadRef.current.clear();
                         };
@@ -508,7 +485,7 @@ function FichaPersonal() {
                 ciPasaporte: item.ciPasaporte || '',
                 nacionalidad: item.nacionalidad || '',
                 actTrabInfantil: item.actTrabInfantil ? 'SI' : 'NO',
-                detalleActTrabInfantil: item.detalleActTrabInfantil || '',
+                detalleActTrabInfantil: item.detalleActTrabInfantil || 'N/A',
                 fechaNacimiento: item.fechaNacimiento || '',
                 edad: `${calcularEdad(item.fechaNacimiento)} años`,
                 rangoEdad: `${item.rangoEdad?.limInferior} - ${item.rangoEdad?.limSuperior}`,
@@ -521,8 +498,8 @@ function FichaPersonal() {
                 barrioSector: item.barrioSector || '',
                 direccion: item.direccion || '',
                 referencia: item.referencia || '',
-                coordenadaX: item.coordenadaX || '',
-                coordenadaY: item.coordenadaY || '',
+                coordenadaX: item.coordenadaX || 'Pendiente',
+                coordenadaY: item.coordenadaY || 'Pendiente',
                 estVinculacion: item.estVinculacion ? 'VINCULADO' : 'DESVINCULADO',
                 fechaRegistro: item.fechaRegistro || ''
             }
@@ -1623,6 +1600,9 @@ function FichaPersonal() {
                                     headerItems={excelReportData?.headerItems!}
                                     rowData={excelReportData?.rowData!}
                                     logo={excelReportData?.logo!}
+                                    onButtonClick={() => {
+                                        loadBusqueda();
+                                    }}
                                 />
                             </div>
                         </div>

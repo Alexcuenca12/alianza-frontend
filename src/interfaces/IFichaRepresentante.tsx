@@ -16,9 +16,9 @@ export interface IFichaRepresentante {
   parentescoRepre: string;
   fichaPersonal: IFichaPersonal | null;
   fechaRegistro: string | Date | Date[] | null;
-  nacionalidad: string;
-  genero: string;
-  tipoIdentificacion: string;
+  nacionalidadRepre: string;
+  generoRepre: string;
+  tipoIdentificacionRepre: string;
 
 
 }

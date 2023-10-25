@@ -8,4 +8,5 @@ export interface IExcelReportParams {
     headerItems: IHeaderItem[];
     rowData: any[];
     logo: string;
+    onButtonClick?: () => void;
 }

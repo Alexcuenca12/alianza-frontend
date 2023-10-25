@@ -9,6 +9,9 @@ export function ReportBar(props: IExcelReportParams) {
     const handleExportExcel = () => {
         excelExport(props).then(() => {
             console.log('Generated report');
+            if (props.onButtonClick) {
+                props.onButtonClick(); // Llama al evento onClick opcional si se proporciona.
+            }
         }).catch(err => {
             console.error(err);
         });

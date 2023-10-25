@@ -110,82 +110,107 @@ function UsuarioContext() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (validaciones()) {
-            personaService
-                .existsDNI(formDataPer.ciPasaporte)
-                .then((resP) => {
 
-                    if (resP) {
-                        toast.error("El número de identificacion que ingreso ya se encuentra registrado", {
-                            style: {
-                                fontSize: '15px'
-                            },
-                            duration: 3000,
-                        })
-                        return;
-                    } else {
-                        usuarioService
-                            .existsUsername(formDataUsu.username)
-                            .then((res) => {
-                                if (res) {
-                                    toast.error("El nombre de usuario ya existe, por favor ingrese uno nuevo", {
-                                        style: {
-                                            fontSize: '15px'
-                                        },
-                                        duration: 3000,
-                                    })
-                                    return;
-                                } else {
-                                    personaService
-                                        .save(formDataPer)
-                                        .then((personaResponse) => {
+        if (!formDataPer.ciPasaporte) {
+            toast.error("Ingrese el documento de identidad", {
+                style: {
+                    fontSize: '15px'
+                },
+                duration: 3000,
+            })
+        } else {
 
-                                            const userData = { ...formDataUsu, persona: { idPersona: personaResponse.idPersona } };
+            if (!formDataUsu.username) {
+                toast.error("Ingrese un nombre de usuario", {
+                    style: {
+                        fontSize: '15px'
+                    },
+                    duration: 3000,
+                })
+            } else {
+                personaService
+                    .existsDNI(formDataPer.ciPasaporte)
+                    .then((resP) => {
 
 
-                                            usuarioService
-                                                .save(userData)
-                                                .then((userResponse) => {
-                                                    loadData();
-                                                    resetForm();
-                                                    swal("Usuario", "Registrado correctamente", "success");
+                        if (resP) {
+                            toast.error("El número de identificacion que ingreso ya se encuentra registrado", {
+                                style: {
+                                    fontSize: '15px'
+                                },
+                                duration: 3000,
+                            })
+                        } else {
+                            usuarioService
+                                .existsUsername(formDataUsu.username)
+                                .then((res) => {
+
+                                    if (res) {
+                                        toast.error("El nombre de usuario ya existe, por favor ingrese uno nuevo", {
+                                            style: {
+                                                fontSize: '15px'
+                                            },
+                                            duration: 3000,
+                                        })
+                                    } else {
+                                        if (validaciones()) {
+
+                                            personaService
+                                                .save(formDataPer)
+                                                .then((personaResponse) => {
+                                                    const userData = { ...formDataUsu, persona: { idPersona: personaResponse.idPersona } };
+
+
+                                                    usuarioService
+                                                        .save(userData)
+                                                        .then((userResponse) => {
+                                                            loadData();
+                                                            resetForm();
+                                                            swal("Usuario", "Registrado correctamente", "success");
+                                                        })
+                                                        .catch((userResponse) => {
+                                                            console.error(
+                                                                "Error al enviar el formulario del docente:",
+                                                                userResponse
+                                                            );
+                                                        });
                                                 })
-                                                .catch((userResponse) => {
+                                                .catch((personaError) => {
                                                     console.error(
-                                                        "Error al enviar el formulario del docente:",
-                                                        userResponse
+                                                        "Error al enviar el formulario de la persona:",
+                                                        personaError
                                                     );
                                                 });
-                                        })
-                                        .catch((personaError) => {
-                                            console.error(
-                                                "Error al enviar el formulario de la persona:",
-                                                personaError
-                                            );
-                                        });
-                                }
+                                        }
+                                    }
 
 
-                            })
-                            .catch((personaError) => {
-                                console.error(
-                                    "Error al enviar el formulario de la persona:",
-                                    personaError
-                                );
-                            });
+                                })
+                                .catch((personaError) => {
+                                    console.error(
+                                        "Error al enviar el formulario de la persona:",
+                                        personaError
+                                    );
+                                });
 
-                    }
-                })
-                .catch((personaError) => {
-                    console.error(
-                        "Error al enviar el formulario de la persona:",
-                        personaError
-                    );
-                });
+                        }
+                    })
+                    .catch((personaError) => {
+                        console.error(
+                            "Error al enviar el formulario de la persona:",
+                            personaError
+                        );
+                    });
+
+            }
 
 
 
         }
+
+
+
+
     }
 
     const handleEdit = (id: number | undefined) => {
@@ -309,12 +334,10 @@ function UsuarioContext() {
 
     const loadRelacion = () => {
 
-        // alert(busqueda.estado)
         usuarioService
             .filtroUser(busqueda.ciNombre, busqueda.rol.idRol)
             .then((data: IUsuario[]) => {
-                console.log('/////DATA/////')
-                console.log(data)
+
 
                 loadExcelReportData(data);
                 setListUsuarios(data); // Establecer los datos procesados en el estado
@@ -323,9 +346,6 @@ function UsuarioContext() {
             .catch((error) => {
                 console.error("Error al obtener los datos:", error);
             });
-        console.log('/////LISTA/////')
-
-        console.log(listUsuarios)
     };
 
 
@@ -907,7 +927,7 @@ function UsuarioContext() {
                                                     justifyContent: "center",
                                                 }}
                                                 onClick={() =>
-                                                    handleDelete(user.persona?.idPersona.valueOf())
+                                                    handleDelete(user.persona?.idPersona?.valueOf())
                                                 }
                                             />
                                         </td>
