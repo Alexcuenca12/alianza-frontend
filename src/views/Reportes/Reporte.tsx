@@ -471,15 +471,7 @@ function Reporte() {
                                     rowData={excelReportData?.rowData!}
                                     logo={excelReportData?.logo!}
                                     onButtonClick={() => {
-                                        toast('No olvides ingresar las coordenadas del domicilio más tarde', {
-                                            icon: '⚠️',
-                                            style: {
-                                                fontSize: '17px'
 
-                                            },
-                                            duration: 8000,
-                                            position: "top-center"
-                                        });
                                         loadReporte();
 
                                     }}

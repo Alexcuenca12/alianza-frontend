@@ -48,8 +48,8 @@
             // @include transition(width);
 
             .icon {
-                width: 32px;
-                height: 32px;
+                width: 38px;
+                height: 38px;
                 margin-right: 5px;
             }
         }
@@ -74,10 +74,13 @@
         position: absolute;
         background-color: black;
         left: 70px;
+        // width: 100%;
+        min-width: 115px;
         padding: 7px;
         border-radius: 4px;
         text-transform: capitalize;
         display: none;
+        font-size: 13px;
     }
 }
 

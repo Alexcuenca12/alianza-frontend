@@ -3,17 +3,8 @@ import Home from "./home/Home";
 import { Toast } from "primereact/toast";
 import React, { useRef } from "react";
 import Footer from "../../common/Footer";
-import { FcBusinessContact, FcBusinessman, FcBusinesswoman } from "react-icons/fc";
-import { FcHome } from "react-icons/fc";
-import { FcExport } from "react-icons/fc";
-import { FcGraduationCap } from "react-icons/fc";
-import { FcViewDetails } from "react-icons/fc";
-import { FcPodiumWithSpeaker } from "react-icons/fc";
-import { FcReadingEbook } from "react-icons/fc";
-import { FcConferenceCall } from "react-icons/fc";
-import { FcLike } from "react-icons/fc";
-import { FcElectricalThreshold } from "react-icons/fc";
-import { FcInspection } from "react-icons/fc";
+import { FcHome, FcBusinessman, FcExport, FcGraduationCap, FcViewDetails, FcPodiumWithSpeaker, FcLike, FcElectricalThreshold, FcInspection } from "react-icons/fc";
+import { FaUserCircle, FaChalkboardTeacher } from "react-icons/fa";
 import { MdFamilyRestroom } from "react-icons/md";
 import { SideBarMenuCard, SideBarMenuItem } from "../../interfaces/types";
 import { SideBarMenu } from "../../common/SideBar/SideBarMenu";
@@ -73,7 +64,7 @@ export const DashboardRouter = () => {
     {
       id: "6",
       label: "Ficha del Representante",
-      icon: FcConferenceCall,
+      icon: FcPodiumWithSpeaker,
       url: "/representante",
     },
     {
@@ -88,31 +79,32 @@ export const DashboardRouter = () => {
       icon: FcExport,
       url: "/desvinculacion",
     },
-
     {
       id: "9",
-      label: "Usuario",
-      icon: FcReadingEbook,
-      url: "/usuario",
-    },
-    {
-      id: "12",
-      label: "Aula",
-      icon: FcBusinessContact,
-      url: "/aula",
-    },
-    {
-      id: "13",
-      label: "Reportes",
-      icon: FcElectricalThreshold,
-      url: "/reporte",
-    },
-    {
-      id: "14",
       label: "Asistencia",
       icon: FcInspection,
       url: "/asistencia",
     },
+    {
+      id: "10",
+      label: "Aula",
+      icon: FaChalkboardTeacher,
+      url: "/aula",
+    },
+    {
+      id: "11",
+      label: "Usuario",
+      icon: FaUserCircle,
+      url: "/usuario",
+    },
+
+    {
+      id: "12",
+      label: "Reportes",
+      icon: FcElectricalThreshold,
+      url: "/reporte",
+    },
+
   ];
 
   const card: SideBarMenuCard = {

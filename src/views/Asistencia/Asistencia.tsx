@@ -17,7 +17,7 @@ import { IAsistencia } from "../../interfaces/IAsistencia";
 import CardHeader from "../../shared/CardHeader";
 import cardHeader from "../../shared/CardHeader";
 import { Avatar } from 'primereact/avatar';
-import { Toaster } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import { Divider } from "primereact/divider";
 import { ReportBar } from "../../common/ReportBar";
 import { IExcelReportParams, IHeaderItem } from "../../interfaces/IExcelReportParams";
@@ -210,7 +210,6 @@ function Asistencia() {
           setEditMode(true)
         } else {
 
-          console.log('hola')
           inscripcionService
             .listaEstudiantes(id)
             .then((dataEst) => {
@@ -235,52 +234,79 @@ function Asistencia() {
 
   const handleSubmit = () => {
 
-    // if (validaciones()) {
-    console.log(listEstudiantes)
+    if (validaciones()) {
 
-    // console.log(fechaAsistencia)
-    asistenciaService
-      .saveAll(listEstudiantes)
-      .then((response) => {
-        swal("Asistencia", "La asistencia se registro exitosamente", "success");
-        if (fechaAsistencia && curso.idCurso) {
-          loadListEstudiantes(formatDate(fechaAsistencia.toString()), curso.idCurso);
-        }
-        setEditMode(true);
-      })
+      asistenciaService
+        .saveAll(listEstudiantes)
+        .then((response) => {
+          swal("Asistencia", "La asistencia se registro exitosamente", "success");
+          if (fechaAsistencia && curso.idCurso) {
+            loadListEstudiantes(formatDate(fechaAsistencia.toString()), curso.idCurso);
+          }
+          setEditMode(true);
+        })
 
-      .catch((error) => {
-        console.error("Error al enviar el formulario:", error);
-      });
-    // }  
+        .catch((error) => {
+          console.error("Error al enviar el formulario:", error);
+        });
+    }
 
 
   }
 
   const handleUpdate = () => {
     if (editMode) {
-      const asistenciaList: IAsistencia[] = listEstudiantes.map((estudiante: IAsistencia) =>
-        convertirFechas(estudiante)
-      );
-      console.log(asistenciaList)
-      asistenciaService
-        .updateAll(listEstudiantes)
-        .then((response) => {
-          swal({
-            title: "Asistencia",
-            text: "La asistencia se actualizo exitosamente",
-            icon: "success",
+      if (validaciones()) {
+
+        const asistenciaList: IAsistencia[] = listEstudiantes.map((estudiante: IAsistencia) =>
+          convertirFechas(estudiante)
+        );
+        asistenciaService
+          .updateAll(listEstudiantes)
+          .then((response) => {
+            swal({
+              title: "Asistencia",
+              text: "La asistencia se actualizo exitosamente",
+              icon: "success",
+            });
+            if (fechaAsistencia && curso.idCurso) {
+              loadListEstudiantes(formatDate(fechaAsistencia.toString()), curso.idCurso);
+            }
+            setEditMode(true);
+          })
+          .catch((error) => {
+            console.error("Error al actualizar el formulario:", error);
           });
-          if (fechaAsistencia && curso.idCurso) {
-            loadListEstudiantes(formatDate(fechaAsistencia.toString()), curso.idCurso);
-          }
-          setEditMode(true);
-        })
-        .catch((error) => {
-          console.error("Error al actualizar el formulario:", error);
-        });
+      }
     }
   };
+
+  function validaciones(): boolean {
+
+    if (curso.idCurso === 0) {
+      toast.error("Seleccione el curso al que desea tomar asistecia", {
+        style: {
+          fontSize: '15px'
+        },
+        duration: 3000,
+      })
+      return false
+    }
+    if (!fechaAsistencia) {
+      toast.error("Por favor, escoja la fecha en que desea tomar asistencia", {
+        style: {
+          fontSize: '15px'
+        },
+        duration: 3000,
+      })
+      return false
+    }
+
+
+    return true
+
+  }
+
 
   function loadExcelReportData(data: IAsistencia[]) {
     const cursoEncontrado = cursos.find((curso) => curso.idCurso === curso.idCurso);
