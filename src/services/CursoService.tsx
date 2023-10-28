@@ -7,8 +7,8 @@ export class CursoService {
         return axios.get(this.baseUrl + "get").then((res) => res.data);
     }
 
-    getAllDocente(id: number) {
-        return axios.get(this.baseUrl + `getCurso/${id}`).then((res) => res.data);
+    cursoByUser(id: number) {
+        return axios.get(this.baseUrl + `cursoByUser?id=${id}`).then((res) => res.data);
     }
 
     busquedaCurso(busqueda: string) {

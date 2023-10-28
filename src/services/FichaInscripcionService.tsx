@@ -10,6 +10,11 @@ export class FichaInscripcionService {
   getBusquedaID(id: number) {
     return axios.get(`${this.baseUrl}busquedaID/${id}`).then((res) => res.data);
   }
+
+  listaEstudiantes(id: number) {
+    return axios.get(`${this.baseUrl}listaEstudiantes?id=${id}`).then((res) => res.data);
+  }
+
   //Crear
   save(publicacion: any) {
     return axios.post(this.baseUrl + "post", publicacion).then((res) => res.data);

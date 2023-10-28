@@ -24,7 +24,6 @@ import { IExcelReportParams, IHeaderItem } from "../../interfaces/IExcelReportPa
 
 
 function Curso() {
-  const options: string[] = ["Si", "No"];
 
   const [contra1, setContra1] = useState<ICurso[]>([]);
   const [formData, setFormData] = useState<ICurso>({
@@ -514,6 +513,7 @@ function Curso() {
                   <Dropdown
                     id="docente"
                     name="docente"
+                    filter
                     options={docentes}
                     onChange={(e) => {
                       setFormData({

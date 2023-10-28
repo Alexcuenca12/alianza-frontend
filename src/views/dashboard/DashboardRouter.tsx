@@ -97,9 +97,9 @@ export const DashboardRouter = () => {
     },
     {
       id: "12",
-      label: "Curso",
+      label: "Aula",
       icon: FcBusinessContact,
-      url: "/curso",
+      url: "/aula",
     },
     {
       id: "13",
@@ -109,11 +109,10 @@ export const DashboardRouter = () => {
     },
     {
       id: "14",
-      label: "Anexos",
+      label: "Asistencia",
       icon: FcInspection,
-      url: "/anexo",
+      url: "/asistencia",
     },
-
   ];
 
   const card: SideBarMenuCard = {
@@ -278,7 +277,7 @@ export const DashboardRouter = () => {
                   <SideBarMenu items={items} card={card} bodyComponent={<Home />} footerComponent={<Footer />} />
                 )}
               </Route>
-              <Route path="/curso">
+              <Route path="/aula">
                 {rol === 1 ? (
                   <>
                     <SideBarMenu items={items} card={card} bodyComponent={<Curso />} footerComponent={<Footer />} />
@@ -297,6 +296,21 @@ export const DashboardRouter = () => {
                 {rol === 1 ? (
                   <>
                     <SideBarMenu items={items} card={card} bodyComponent={<Reporte />} footerComponent={<Footer />} />
+                    {/* <Reporte /> */}
+                    {/* <Footer /> */}
+                  </>
+                ) : rol === 2 ? (
+                  <>
+                    <SideBarMenu items={items} card={card} bodyComponent={<Home />} footerComponent={<Footer />} />
+                  </>
+                ) : (
+                  <SideBarMenu items={items} card={card} bodyComponent={<Home />} footerComponent={<Footer />} />
+                )}
+              </Route>
+              <Route path="/asistencia">
+                {rol === 1 ? (
+                  <>
+                    <SideBarMenu items={items} card={card} bodyComponent={<Asistencia />} footerComponent={<Footer />} />
                     {/* <Reporte /> */}
                     {/* <Footer /> */}
                   </>

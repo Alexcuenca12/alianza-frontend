@@ -522,7 +522,7 @@ function FichaInscripcionContext() {
 
               <section className="layout">
                 <div className="">
-                  <div input-box>
+                  <div className="input-box">
                     <label className="font-medium w-auto min-w-min" htmlFor='genero'>Cedula o Nombre:</label>
 
                     <div className="flex-1">
@@ -559,8 +559,8 @@ function FichaInscripcionContext() {
                     </div>
                   </div>
                 </div>
-                <div className="">
-                  <div>
+                <div className="grow1 shrink0">
+                  <div className="input-box">
                     <label className="font-medium w-auto min-w-min" htmlFor="fichaPersonal">Resultados de la busqueda:</label>
                     <Dropdown
                       className="text-2xl"
@@ -572,7 +572,8 @@ function FichaInscripcionContext() {
                         setFormData({
                           ...formData,
                           fichaPersonal: {
-                            idFichaPersonal: parseInt(e.value), foto: '',
+                            idFichaPersonal: parseInt(e.value),
+                            foto: '',
                             apellidos: '',
                             nombres: '',
                             ciPasaporte: '',

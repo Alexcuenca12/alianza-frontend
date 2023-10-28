@@ -514,7 +514,7 @@ function FichaDesvinculacion() {
                       className="text-2xl"
                       id="tiempo_dedicacion"
                       name="tiempo_dedicacion"
-                      style={{ width: "100%" }}
+                      style={{ width: "100%", height: "36px", alignItems: "center" }}
                       options={listFperonales}
                       onChange={(e) => {
                         setFormData({
