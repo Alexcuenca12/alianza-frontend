@@ -39,59 +39,177 @@ export const excelExport = async (params: IExcelReportParams) => {
         extension: 'png'
     });
 
-    /* worksheet.addImage(logo, {
-        tl: { col: 6, row: 2 }, // top-left cell
-        ext: { width: 200, height: 100 }, // image dimensions
-    });*/
+
 
     worksheet.addImage(logo, params.logo);
 
-    const headerRow = worksheet.getRow(2);
-    headerRow.height = 20;
-    headerRow.font = {
-        name: "Times New Roman", size: 12,
-        bold: true, color: { argb: 'FFFFFFFF' }
-    };
-    headerRow.alignment = { horizontal: "center", vertical: "middle" }
-    headerRow.fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: '871B1B' }
 
-        // fgColor: { argb: 'B0252A' }
+    if (params.reportName === 'Reporte General') {
+
+        worksheet.mergeCells("A2:Y2");
+        worksheet.mergeCells("Z2:AH2");
+        worksheet.mergeCells("AI2:AU2");
+        worksheet.mergeCells("AV2:BK2");
+        worksheet.mergeCells("BL2:BZ2");
+        worksheet.mergeCells("CA2:CG2");
+        worksheet.mergeCells("CH2:CI2");
+
+        worksheet.getRow(2).height = 30;
+        worksheet.getRow(2).alignment = { vertical: 'middle', horizontal: 'center' }
+
+
+        const cellPersonal = worksheet.getCell("A2");
+        const cellEducativa = worksheet.getCell("Z2");
+        const cellFamiliar = worksheet.getCell("AI2");
+        const cellRepresentante = worksheet.getCell("AV2");
+        const cellSalud = worksheet.getCell("BL2");
+        const cellInscripcion = worksheet.getCell("CA2");
+        const cellDesvinculacion = worksheet.getCell("CH2");
+
+        cellPersonal.value = "FICHA PERSONAL";
+        cellEducativa.value = "FICHA EDUCATIVA";
+        cellFamiliar.value = "FICHA FAMILIAR";
+        cellRepresentante.value = "FICHA DE REPRESENTANTE";
+        cellSalud.value = "FICHA DE SALUD";
+        cellInscripcion.value = "FICHA DE INSCRIPCION";
+        cellDesvinculacion.value = "DESVINCULACION";
+
+        worksheet.getRow(2).font = {
+            name: "Times New Roman",
+            family: 4,
+            size: 26,
+            underline: false,
+            bold: true,
+
+        };
+
+        cellPersonal.fill = {
+            type: 'pattern',
+            pattern: 'darkTrellis',
+            fgColor: { argb: '2D98DA' },
+            bgColor: { argb: 'F7F1F1' }
+        };
+
+        cellEducativa.fill = {
+            type: 'pattern',
+            pattern: 'darkTrellis',
+            fgColor: { argb: 'A9DFBF' },
+            bgColor: { argb: 'F7F1F1' }
+        };
+
+        cellFamiliar.fill = {
+            type: 'pattern',
+            pattern: 'darkTrellis',
+            fgColor: { argb: 'F5B7B1' },
+            bgColor: { argb: 'F7F1F1' }
+        };
+        cellRepresentante.fill = {
+            type: 'pattern',
+            pattern: 'darkTrellis',
+            fgColor: { argb: 'F7DC6F' },
+            bgColor: { argb: 'F7F1F1' }
+        };
+        cellSalud.fill = {
+            type: 'pattern',
+            pattern: 'darkTrellis',
+            fgColor: { argb: 'FFA500' },
+            bgColor: { argb: 'F7F1F1' }
+        };
+        cellInscripcion.fill = {
+            type: 'pattern',
+            pattern: 'darkTrellis',
+            fgColor: { argb: 'D7BDE2' },
+            bgColor: { argb: 'F7F1F1' }
+        };
+        cellDesvinculacion.fill = {
+            type: 'pattern',
+            pattern: 'darkTrellis',
+            fgColor: { argb: 'ABEBC6' },
+            bgColor: { argb: 'F7F1F1' }
+        };
+
     }
 
-    // headerRow.border = {
-    //     top: { style: 'thin', color: { argb: 'FFFCBF64' } },
-    //     left: { style: 'thin', color: { argb: 'FFFCBF64' } },
-    //     bottom: { style: 'thin', color: { argb: 'FFFCBF64' } },
-    //     right: { style: 'thin', color: { argb: 'FFFCBF64' } },
-    // }
 
-    for (let i = 0; i < columns.length; i++) {
-        const currentColumnWidth = columns[i].width;
-        worksheet.getColumn(i + 1).width = currentColumnWidth !== undefined ? currentColumnWidth : 20;
-        const cell = headerRow.getCell(i + 1);
-        cell.value = columns[i].header;
-    }
+    if (params.reportName === 'Reporte General') {
+        const headerRow = worksheet.getRow(3);
+        headerRow.height = 20;
+        headerRow.font = {
+            name: "Times New Roman", size: 12,
+            bold: true, color: { argb: 'FFFFFFFF' }
+        };
+        headerRow.alignment = { horizontal: "center", vertical: "middle" }
+        headerRow.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: '871B1B' }
 
-    // set auto filer
-    worksheet.autoFilter = {
-        from: 'A4',
-        to: {
-            row: 2,
-            column: columns.length
+            // fgColor: { argb: 'B0252A' }
         }
+        for (let i = 0; i < columns.length; i++) {
+            const currentColumnWidth = columns[i].width;
+            worksheet.getColumn(i + 1).width = currentColumnWidth !== undefined ? currentColumnWidth : 20;
+            const cell = headerRow.getCell(i + 1);
+            cell.value = columns[i].header;
+        }
+        worksheet.autoFilter = {
+            from: 'A4',
+            to: {
+                row: 3,
+                column: columns.length
+            }
+        }
+
+        worksheet.views = [{ state: "frozen", ySplit: 3 }];
+
+
+    } else {
+        const headerRow = worksheet.getRow(2);
+        headerRow.height = 20;
+        headerRow.font = {
+            name: "Times New Roman", size: 12,
+            bold: true, color: { argb: 'FFFFFFFF' }
+        };
+        headerRow.alignment = { horizontal: "center", vertical: "middle" }
+        headerRow.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: '871B1B' }
+
+            // fgColor: { argb: 'B0252A' }
+        }
+        for (let i = 0; i < columns.length; i++) {
+            const currentColumnWidth = columns[i].width;
+            worksheet.getColumn(i + 1).width = currentColumnWidth !== undefined ? currentColumnWidth : 20;
+            const cell = headerRow.getCell(i + 1);
+            cell.value = columns[i].header;
+        }
+        worksheet.autoFilter = {
+            from: 'A4',
+            to: {
+                row: 2,
+                column: columns.length
+            }
+        }
+
+        worksheet.views = [{ state: "frozen", ySplit: 2 }];
+
     }
 
-    worksheet.views = [{ state: "frozen", ySplit: 2 }];
+
 
     // insert data
     if (params.reportName === 'Ficha Personal' || params.reportName === 'Reporte General') {
         for (let i = 0; i < params.rowData.length; i++) {
             const base64Image = params.rowData[i].foto.replace(/^data:.*,/, "");
             params.rowData[i].foto = '';
-            const currentCount = i + 1
+
+            let currentCount = 0;
+            if (params.reportName === 'Reporte General') {
+                currentCount = i + 2
+            } else {
+                currentCount = i + 1
+            }
             const dataRow = worksheet.getRow(2 + currentCount);
             dataRow.outlineLevel = 1;
             dataRow.alignment = { vertical: 'middle', horizontal: 'center' }
