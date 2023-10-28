@@ -65,7 +65,6 @@ function Reporte() {
     const loadData = () => {
 
         if (formData.rangoEdad === 0) {
-            // console.log("4 SIN EDAD")
             fichaPersonalService
                 .getBusqueda(formData.cedula, formData.genero, formData.estado)
                 .then((data) => {
@@ -77,7 +76,6 @@ function Reporte() {
                     console.error("Error al obtener los datos:", error);
                 });
         } else {
-            // console.log(" 4 CON EDAD")
             fichaPersonalService
                 .getBusquedaRE(formData.cedula, formData.genero, formData.rangoEdad, formData.estado)
                 .then((data) => {
@@ -115,12 +113,10 @@ function Reporte() {
     const loadReporte = () => {
 
         if (formData.rangoEdad === 0) {
-            // console.log("4 SIN EDAD")
             reporteService
-                .busquedaReporte(formData.cedula, formData.genero, formData.estado)
+                .reporteGeneral(formData.cedula, formData.genero, formData.estado)
                 .then((data) => {
                     setReporte(data);
-                    console.log(data);
 
                     loadExcelReportData(data);
                     // setDataLoaded(true); // Marcar los datos como cargados
@@ -129,14 +125,12 @@ function Reporte() {
                     console.error("Error al obtener los datos:", error);
                 });
         } else {
-            // console.log(" 4 CON EDAD")
             reporteService
-                .busquedaReporteRE(formData.cedula, formData.genero, formData.rangoEdad, formData.estado)
+                .reporteGeneralRE(formData.cedula, formData.genero, formData.rangoEdad, formData.estado)
                 .then((data) => {
                     setReporte(data);
                     loadExcelReportData(data);
                     // setDataLoaded(true); // Marcar los datos como cargados
-                    console.log(data);
 
                 })
                 .catch((error) => {
@@ -149,245 +143,226 @@ function Reporte() {
 
 
     function loadExcelReportData(data: IReporte[]) {
-        const reportName = "Reporte General"
+        console.log(data)
+
+        const reportName = "Ficha Personal"
         const logo = 'G1:I1'
 
         const rowData = data.map((item) => ({
-            idFichaPersonal: item.idFichaPersonal,
-            actTrabInfantil: item.actTrabInfantil,
-            apellidos: item.apellidos,
-            barrioSector: item.barrioSector,
-            ciPasaporte: item.ciPasaporte,
-            coordenadaX: item.coordenadaX,
-            coordenadaY: item.coordenadaY,
-            detalleActTrabInfantil: item.detalleActTrabInfantil,
-            direccion: item.direccion,
-            estVinculacion: item.estVinculacion,
-            fechaNacimiento: item.fechaNacimiento,
-            fechaRegistroFichaPersonal: item.fechaRegistroFichaPersonal,
-            foto: item.foto,
-            genero: item.genero,
-            idEtnia: item.idEtnia,
-            idParroquia: item.idParroquia,
-            idRangoEdad: item.idRangoEdad,
-            nacionalidad: item.nacionalidad,
-            nombres: item.nombres,
-            referencia: item.referencia,
-            tipoIdentificacion: item.tipoIdentificacion,
-            zona: item.zona,
 
-            idFichaInscripcion: item.idFichaInscripcion,
-            asistenciaInscripcion: item.asistenciaInscripcion,
-            fechaIngresoInscripcion: item.fechaIngresoInscripcion,
-            fechaRegistroFichaInscripcion: item.fechaRegistroFichaInscripcion,
-            jornadaAsistenciaInscripcion: item.jornadaAsistenciaInscripcion,
-            proyectoInscripcion: item.proyectoInscripcion,
-            situacionIngresoInscripcion: item.situacionIngresoInscripcion,
-            idCurso: item.idCurso,
+            //PERSONAL
+            idFichaPersonal: item?.fichaPersonal?.idFichaPersonal || 'FICHA PERSONAL NO REGISTRADA',
+            foto: item?.fichaPersonal?.foto || '',
+            apellidos: item?.fichaPersonal?.apellidos || '',
+            nombres: item?.fichaPersonal?.nombres || '',
+            tipoIdentificacion: item?.fichaPersonal?.tipoIdentificacion || '',
+            ciPasaporte: item?.fichaPersonal?.ciPasaporte || '',
+            nacionalidad: item?.fichaPersonal?.nacionalidad || '',
+            actTrabInfantil: item?.fichaPersonal?.actTrabInfantil ? 'SI' : 'NO',
+            detalleActTrabInfantil: item?.fichaPersonal?.detalleActTrabInfantil || 'N/A',
+            fechaNacimiento: item?.fichaPersonal?.fechaNacimiento || '',
+            edad: `${calcularEdad(item?.fichaPersonal?.fechaNacimiento || '')} años`,
+            rangoEdad: `${item?.fichaPersonal?.rangoEdad?.limInferior || ''} - ${item?.fichaPersonal?.rangoEdad?.limSuperior || ''}`,
+            genero: item?.fichaPersonal?.genero || '',
+            etnia: item?.fichaPersonal?.etnia?.etniaNombre || '',
+            provincia: item?.fichaPersonal?.parroquia?.canton.provincia.provinciaNombre || '',
+            canton: item?.fichaPersonal?.parroquia?.canton.cantonNombre || '',
+            parroquia: item?.fichaPersonal?.parroquia?.parroquiaNombre || '',
+            zona: item?.fichaPersonal?.zona || '',
+            barrioSector: item?.fichaPersonal?.barrioSector || '',
+            direccion: item?.fichaPersonal?.direccion || '',
+            referencia: item?.fichaPersonal?.referencia || '',
+            coordenadaX: item?.fichaPersonal?.coordenadaX || 'Pendiente',
+            coordenadaY: item?.fichaPersonal?.coordenadaY || 'Pendiente',
+            estVinculacion: item?.fichaPersonal?.estVinculacion ? 'VINCULADO' : 'DESVINCULADO',
+            fechaRegistro: item?.fichaPersonal?.fechaRegistro || '',
 
-            idFichaRepresentante: item.idFichaRepresentante,
-            apellidosRepresentante: item.apellidosRepresentante,
-            cedulaRepresentante: item.cedulaRepresentante,
-            contactoEmergenciaRepresentante: item.contactoEmergenciaRepresentante,
-            contactoRepresentante: item.contactoRepresentante,
-            fechaNacimientoRepresentante: item.fechaNacimientoRepresentante,
-            fechaRegistroFichaRepresentante: item.fechaRegistroFichaRepresentante,
-            generoRepresentante: item.generoRepresentante,
-            lugarTrabajoRepresentante: item.lugarTrabajoRepresentante,
-            nacionalidadRepresentante: item.nacionalidadRepresentante,
-            nivelInstruccionRepresentante: item.nivelInstruccionRepresentante,
-            nombresRepresentante: item.nombresRepresentante,
-            observacionesRepresentante: item.observacionesRepresentante,
-            ocupacionPrimariaRepresentante: item.ocupacionPrimariaRepresentante,
-            ocupacionSecundariaRepresentante: item.ocupacionSecundariaRepresentante,
-            parentescoRepresentante: item.parentescoRepresentante,
-            tipoIdentificacionRepresentante: item.tipoIdentificacionRepresentante,
+            //EDUCATIVA
+            grado: item?.fichaEducativa?.gradoEducativo || '',
+            jornada: item?.fichaEducativa?.jornadaEducativa || '',
+            centro: item?.fichaEducativa?.centroEducativo || '',
+            direccionedu: item?.fichaEducativa?.direccionEducativa || '',
+            referenciaedu: item?.fichaEducativa?.referenciaEducativa || '',
+            situacionPsico: item?.fichaEducativa?.situacionPsicopedagogica || 'Ningula',
+            repitente: item?.fichaEducativa?.repitente ? 'SI' : 'NO',
+            detallePsico: item?.fichaEducativa?.detalleRepitente || 'N/A',
+            observacion: item?.fichaEducativa?.observacionesEducativa || '',
 
-            idFichaSalud: item.idFichaSalud,
-            carnetDiscapacidad: item.carnetDiscapacidad,
-            condicionesMedicas: item.condicionesMedicas,
-            condicionesMedicas2: item.condicionesMedicas2,
-            condicionesMedicas3: item.condicionesMedicas3,
-            condicionesMedicas4: item.condicionesMedicas4,
-            condicionesMedicas5: item.condicionesMedicas5,
-            condicionesMedicasAdd: item.condicionesMedicasAdd,
-            discapacidadNNAFichaSalud: item.discapacidadNNAFichaSalud,
-            enfermedadesPrevalentesFichaSalud: item.enfermedadesPrevalentesFichaSalud,
-            fechaRegistroFichaSalud: item.fechaRegistroFichaSalud,
-            masaCorporal: item.masaCorporal,
-            pesoFichaSalud: item.pesoFichaSalud,
-            porcentajeDiscapacidadFichaSalud: item.porcentajeDiscapacidadFichaSalud,
-            situacionPsicoemocional: item.situacionPsicoemocional,
-            tallaFichaSalud: item.tallaFichaSalud,
-            tipoDiscapacidadFichaSalud: item.tipoDiscapacidadFichaSalud,
+            //FAMILIAR
+            numIntegrantes: item?.fichaFamiliar?.numIntegrantes || '',
+            numNNA: item?.fichaFamiliar?.numNNA || '',
+            numAdultos: item?.fichaFamiliar?.numAdultos || '',
+            numAdultosMayores: item?.fichaFamiliar?.numAdultosMayores || '',
+            visita: item?.fichaFamiliar?.visitaDomiciliaria ? 'SI' : 'NO',
+            jefaturaFamiliar: item?.fichaFamiliar?.jefaturaFamiliar || '',
+            tipoFamilia: item?.fichaFamiliar?.tipoFamilia?.nombreTipo || '',
+            beneficio: item?.fichaFamiliar?.beneficio ? 'SI' : 'NO', // Establecer 'N/A' si es una cadena vacía
+            beneficioAdicional: item?.fichaFamiliar?.beneficioAdicional || 'N/A', // Establecer 'N/A' si es una cadena vacía
+            organizacionBenefica: item?.fichaFamiliar?.organizacionBeneficio || 'N/A',
+            personasDiscapacidad: item?.fichaFamiliar?.discapacidadIntegrantes ? 'SI' : 'NO', // Corrección aquí
+            detallesSituacion: item?.fichaFamiliar?.detalleDiscapacidad || 'N/A',
+            otrasSituaciones: item?.fichaFamiliar?.otrasSituaciones || 'Ninguna',
 
-            idFichaFamiliar: item.idFichaFamiliar,
-            beneficio: item.beneficio,
-            beneficioAdicional: item.beneficioAdicional,
-            detalleDiscapacidad: item.detalleDiscapacidad,
-            discapacidadIntegrantes: item.discapacidadIntegrantes,
-            fechaRegistroFichaFamiliar: item.fechaRegistroFichaFamiliar,
-            jefaturaFamiliar: item.jefaturaFamiliar,
-            numAdultos: item.numAdultos,
-            numAdultosMayores: item.numAdultosMayores,
-            numIntegrantes: item.numIntegrantes,
-            numNNA: item.numNNA,
-            organizacionBeneficio: item.organizacionBeneficio,
-            otrasSituaciones: item.otrasSituaciones,
-            visitaDomiciliaria: item.visitaDomiciliaria,
-            idTipoFamilia: item.idTipoFamilia,
+            //REPRESENTANTE
+            tipoIdentificacionRepre: item?.fichaRepresentante?.tipoIdentificacionRepre || '',
+            cedulaRepre: item?.fichaRepresentante?.cedulaRepre || '',
+            nombresRepre: item?.fichaRepresentante?.nombresRepre || '',
+            apellidosRepre: item?.fichaRepresentante?.apellidosRepre || '',
+            parentesco: item?.fichaRepresentante?.parentescoRepre || '',
+            nacimiento: item?.fichaRepresentante?.fechaNacimientoRepre || '',
+            edadRepre: calcularEdad(item?.fichaRepresentante?.fechaNacimientoRepre || '') || '',
+            generoRepre: item?.fichaRepresentante?.generoRepre || '',
+            nacionalidadRepre: item?.fichaRepresentante?.nacionalidadRepre || '',
+            nivelInstruccion: item?.fichaRepresentante?.nivelInstruccionRepre || '',
+            trabajo: item?.fichaRepresentante?.lugarTrabajoRepre || '',
+            ocupacion: item?.fichaRepresentante?.ocupacionPrimariaRepre || '',
+            ocupacionSec: item?.fichaRepresentante?.ocupacionSecundariaRepre || '',
+            contacto: item?.fichaRepresentante?.contactoRepre || '',
+            contactoEmerg: item?.fichaRepresentante?.contactoEmergenciaRepre || '',
+            observaciones: item?.fichaRepresentante?.observacionesRepre || 'Ninguna',
 
-            idFichaEducativa: item.idFichaEducativa,
-            centroEducativo: item.centroEducativo,
-            detalleRepitente: item.detalleRepitente,
-            direccionEducativa: item.direccionEducativa,
-            fechaRegistroFichaEducativa: item.fechaRegistroFichaEducativa,
-            gradoEducativo: item.gradoEducativo,
-            jornadaEducativa: item.jornadaEducativa,
-            observacionesEducativa: item.observacionesEducativa,
-            referenciaEducativa: item.referenciaEducativa,
-            repitente: item.repitente,
-            situacionPsicopedagogica: item.situacionPsicopedagogica,
+            //SALUD
+            talla: item?.fichaSalud?.tallaFichaSalud + ' m' || 0.00 + ' m',
+            peso: item?.fichaSalud?.pesoFichaSalud + ' kg' || 0.00 + ' kg',
+            masa: item?.fichaSalud?.masaCorporal + ' %' || 0.00 + ' %',
+            discapacidad: item?.fichaSalud?.discapacidadNNAFichaSalud ? 'SI' : 'NO',
+            carnet: item?.fichaSalud?.carnetDiscapacidad ? 'SI' : 'NO',
+            tipoDisc: item?.fichaSalud?.tipoDiscapacidadFichaSalud || 'N/A',
+            porcDisca: item?.fichaSalud?.porcentajeDiscapacidadFichaSalud + ' %' || 0.00 + ' %',
+            psicoemocional: item?.fichaSalud?.situacionPsicoemocional || 'Ninguna',
+            prevalentes: item?.fichaSalud?.enfermedadesPrevalentesFichaSalud || 'Niunguna',
+            condicion1: item?.fichaSalud?.condicionesMedicas || 'Niunguna',
+            condicion2: item?.fichaSalud?.condicionesMedicas2 || 'Niunguna',
+            condicion3: item?.fichaSalud?.condicionesMedicas3 || 'Niunguna',
+            condicion4: item?.fichaSalud?.condicionesMedicas4 || 'Niunguna',
+            condicion5: item?.fichaSalud?.condicionesMedicas5 || 'Niunguna',
+            condicionAdd: item?.fichaSalud?.condicionesMedicasAdd || 'Niunguna',
 
-            idFichaDesvinculacion: item.idFichaDesvinculacion,
-            fechaDesvinculacion: item.fechaDesvinculacion,
-            fechaRegistroFichaDesvinculacion: item.fechaRegistroFichaDesvinculacion,
-            motivoDesvinculacion: item.motivoDesvinculacion,
+            //INSCRIPCION
+            fechaInscripcion: typeof item?.fichaInscripcion?.fechaIngresoInscrip === 'string' &&
+                `${item?.fichaInscripcion?.fechaIngresoInscrip.split('-')[2] || ''}/${item?.fichaInscripcion?.fechaIngresoInscrip.split('-')[1] || ''}/${item?.fichaInscripcion?.fechaIngresoInscrip.split('-')[0] || ''}` || '',
+            curso: item?.fichaInscripcion?.curso?.nombreCurso || '',
+            profe: `${item?.fichaInscripcion?.curso?.docente?.persona?.nombresPersona || ''} ${item?.fichaInscripcion?.curso?.docente?.persona?.apellidosPersona || ''}` || '',
+            jornadaAsistenciaInscrip: item?.fichaInscripcion?.jornadaAsistenciaInscrip || '',
+            asistenciaInscrip: item?.fichaInscripcion?.asistenciaInscrip || '',
+            proyecto: item?.fichaInscripcion?.proyectoInscrip || '',
+            situacion: item?.fichaInscripcion?.situacionIngresoInscrip || '',
 
-            etniaNombre: item.etniaNombre,
-            parroquiaNombre: item.parroquiaNombre,
-            cantonNombre: item.cantonNombre,
-            provinciaNombre: item.provinciaNombre,
-            limInferior: item.limInferior,
-            limSuperior: item.limSuperior,
-
-            fechaInicioCurso: item.fechaInicioCurso,
-            fechaRegistroCurso: item.fechaRegistroCurso,
-            nombreCurso: item.nombreCurso,
-            username: item.username,
-            nombresPersona: item.nombresPersona,
-            apellidosPersona: item.apellidosPersona,
-            tipoIdentificacionPersona: item.tipoIdentificacionPersona,
-            ciPasaportePersona: item.ciPasaportePersona,
-            limInferiorRec: item.limInferiorRec,
-            limSuperiorRec: item.limSuperiorRec,
-
-            nombreTipoFamilia: item.nombreTipoFamilia,
+            //DESVINCULACION
+            fechaDesvinculacion: new Date(item?.fichaDesvinculacion?.fechaDesvinculacion!).toLocaleDateString("es-ES", {
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+            }) || '',
+            motivo: item?.fichaDesvinculacion?.motivo || '',
 
         }));
 
         const headerItems: IHeaderItem[] = [
-            { header: "ID FICHA PERSONAL" },
-            { header: "ACT TRAB INFANTIL" },
+            //PERSONAL
+            { header: "№ FICHA" },
+            { header: "FOTO" },
             { header: "APELLIDOS" },
-            { header: "BARRIO/SECTOR" },
+            { header: "NOMBRES" },
+            { header: "TIPO IDENTIFICACIÓN" },
             { header: "CI/PASAPORTE" },
+            { header: "NACIONALIDAD" },
+            { header: "ACT. TRAB. INFANTIL" },
+            { header: "DETALLE ACT. TRAB. INFANTIL" },
+            { header: "FECHA NACIMIENTO" },
+            { header: "EDAD" },
+            { header: "RANGO DE EDAD" },
+            { header: "GENERO" },
+            { header: "ETNIA" },
+            { header: "PROVINCIA" },
+            { header: "CANTON" },
+            { header: "PARROQUIA" },
+            { header: "ZONA" },
+            { header: "BARRIO/SECTOR" },
+            { header: "DIRECCIÓN" },
+            { header: "REFERENCIA" },
             { header: "COORDENADA X" },
             { header: "COORDENADA Y" },
-            { header: "DETALLE ACT TRAB INFANTIL" },
-            { header: "DIRECCIÓN" },
-            { header: "EST VINCULACIÓN" },
-            { header: "FECHA NACIMIENTO" },
-            { header: "FECHA REGISTRO FICHA PERSONAL" },
-            { header: "FOTO" },
-            { header: "GÉNERO" },
-            { header: "ID ETNIA" },
-            { header: "ID PARROQUIA" },
-            { header: "ID RANGO EDAD" },
-            { header: "NACIONALIDAD" },
-            { header: "NOMBRES" },
-            { header: "REFERENCIA" },
-            { header: "TIPO IDENTIFICACIÓN" },
-            { header: "ZONA" },
-            { header: "ID FICHA INSCRIPCIÓN" },
-            { header: "ASISTENCIA INSCRIPCIÓN" },
-            { header: "FECHA INGRESO INSCRIPCIÓN" },
-            { header: "FECHA REGISTRO FICHA INSCRIPCIÓN" },
-            { header: "JORNADA ASISTENCIA INSCRIPCIÓN" },
-            { header: "PROYECTO INSCRIPCIÓN" },
-            { header: "SITUACIÓN INGRESO INSCRIPCIÓN" },
-            { header: "ID CURSO" },
-            { header: "ID FICHA REPRESENTANTE" },
-            { header: "APELLIDOS REPRESENTANTE" },
-            { header: "CÉDULA REPRESENTANTE" },
-            { header: "CONTACTO EMERGENCIA REPRESENTANTE" },
-            { header: "CONTACTO REPRESENTANTE" },
-            { header: "FECHA NACIMIENTO REPRESENTANTE" },
-            { header: "FECHA REGISTRO FICHA REPRESENTANTE" },
-            { header: "GÉNERO REPRESENTANTE" },
-            { header: "LUGAR TRABAJO REPRESENTANTE" },
-            { header: "NACIONALIDAD REPRESENTANTE" },
-            { header: "NIVEL INSTRUCCIÓN REPRESENTANTE" },
-            { header: "NOMBRES REPRESENTANTE" },
-            { header: "OBSERVACIONES REPRESENTANTE" },
-            { header: "OCUPACIÓN PRIMARIA REPRESENTANTE" },
-            { header: "OCUPACIÓN SECUNDARIA REPRESENTANTE" },
-            { header: "PARENTESCO REPRESENTANTE" },
-            { header: "TIPO IDENTIFICACIÓN REPRESENTANTE" },
-            { header: "ID FICHA SALUD" },
-            { header: "CARNET DISCAPACIDAD" },
-            { header: "CONDICIONES MÉDICAS" },
-            { header: "CONDICIONES MÉDICAS 2" },
-            { header: "CONDICIONES MÉDICAS 3" },
-            { header: "CONDICIONES MÉDICAS 4" },
-            { header: "CONDICIONES MÉDICAS 5" },
-            { header: "CONDICIONES MÉDICAS ADD" },
-            { header: "DISCAPACIDAD NNA FICHA SALUD" },
-            { header: "ENFERMEDADES PREVALENTES FICHA SALUD" },
-            { header: "FECHA REGISTRO FICHA SALUD" },
-            { header: "MASA CORPORAL" },
-            { header: "PESO FICHA SALUD" },
-            { header: "PORCENTAJE DISCAPACIDAD FICHA SALUD" },
-            { header: "SITUACIÓN PSICOEMOCIONAL" },
-            { header: "TALLA FICHA SALUD" },
-            { header: "TIPO DISCAPACIDAD FICHA SALUD" },
-            { header: "ID FICHA FAMILIAR" },
-            { header: "BENEFICIO" },
-            { header: "BENEFICIO ADICIONAL" },
-            { header: "DETALLE DISCAPACIDAD" },
-            { header: "DISCAPACIDAD INTEGRANTES" },
-            { header: "FECHA REGISTRO FICHA FAMILIAR" },
-            { header: "JEFE DE FAMILIA" },
-            { header: "NÚMERO DE ADULTOS" },
-            { header: "NÚMERO DE ADULTOS MAYORES" },
-            { header: "NÚMERO DE INTEGRANTES" },
-            { header: "NÚMERO DE NNA" },
-            { header: "ORGANIZACIÓN BENEFICIO" },
-            { header: "OTRAS SITUACIONES" },
-            { header: "VISITA DOMICILIARIA" },
-            { header: "ID TIPO FAMILIA" },
-            { header: "ID FICHA EDUCATIVA" },
+            { header: "EST. VINCULACIÓN" },
+            { header: "FECHA REGISTRO" },
+
+            //EDUCATIVA
+            { header: "GRADO" },
+            { header: "JORNADA" },
             { header: "CENTRO EDUCATIVO" },
-            { header: "DETALLE REPITENTE" },
-            { header: "DIRECCIÓN EDUCATIVA" },
-            { header: "FECHA REGISTRO FICHA EDUCATIVA" },
-            { header: "GRADO EDUCATIVO" },
-            { header: "JORNADA EDUCATIVA" },
-            { header: "OBSERVACIONES EDUCATIVA" },
-            { header: "REFERENCIA EDUCATIVA" },
-            { header: "REPITENTE" },
-            { header: "SITUACIÓN PSICOPEDAGÓGICA" },
-            { header: "ID FICHA DESVINCULACIÓN" },
-            { header: "FECHA DESVINCULACIÓN" },
-            { header: "FECHA REGISTRO FICHA DESVINCULACIÓN" },
-            { header: "MOTIVO DESVINCULACIÓN" },
-            { header: "ETNIA NOMBRE" },
-            { header: "PARROQUIA NOMBRE" },
-            { header: "CANTON NOMBRE" },
-            { header: "PROVINCIA NOMBRE" },
-            { header: "LIM INFERIOR" },
-            { header: "LIM SUPERIOR" },
-            { header: "FECHA INICIO CURSO" },
-            { header: "FECHA REGISTRO CURSO" },
-            { header: "NOMBRE CURSO" },
-            { header: "USERNAME" },
-            { header: "NOMBRES PERSONA" },
-            { header: "APELLIDOS PERSONA" },
-            { header: "TIPO IDENTIFICACIÓN PERSONA" },
-            { header: "CI/PASAPORTE PERSONA" },
-            { header: "LIM INFERIOR REC" },
-            { header: "LIM SUPERIOR REC" },
-            { header: "NOMBRE TIPO FAMILIA" },
+            { header: "DIRECCION" },
+            { header: "REFERENCIA" },
+            { header: "SITUACIÓN PSICOPEDAGOGICA:" },
+            { header: "¿ES REPITENTE?" },
+            { header: "DETALLES DEL REPITENTE" },
+            { header: "OBSERVACION" },
+
+
+            //FAMILIAR
+            { header: "№ INTEGRANTES" },
+            { header: "№ NNA" },
+            { header: "№ ADULTOS" },
+            { header: "№ ADULTOS MAYORES" },
+            { header: "VISITA DOMICILIAR" },
+            { header: "JEFATURA FAMILIAR" },
+            { header: "TIPO DE FAMILIA" },
+            { header: "BENEFICIO ADICIONAL" },
+            { header: "DETALLE DEL BENEFICIO" },
+            { header: "ORGANIZACION BENEFICA" },
+            { header: "¿RESIDE PERSONAS CON DICAPACIDAD?" },
+            { header: "DETALLES DE LA SITUACION FAMILIAR" },
+            { header: "OTRAS SITUACIONES" },
+
+
+            //REPRESENTANTE
+            { header: "TIPO DE IDENTIFICACION" },
+            { header: "CEDULA/PASAPORTE" },
+            { header: "NOMBRES" },
+            { header: "APELLIDOS" },
+            { header: "PARENTESCO" },
+            { header: "FECHA DE NACIMIENTO" },
+            { header: "EDAD" },
+            { header: "GENERO" },
+            { header: "NACIONALIDAD" },
+            { header: "NIVEL DE INSTRUCCION" },
+            { header: "LUGAR DE TRABAJO" },
+            { header: "OCUPACIÓN" },
+            { header: "OCUPACION SECUNDARIA" },
+            { header: "№ DE CONTACTO" },
+            { header: "№ DE EMERGENCIA" },
+            { header: "OBSERVACIONES" },
+
+            //SALUD
+            { header: "TALLA (m,)" },
+            { header: "PESO (kg.)" },
+            { header: "MASA CORPORAL(%)" },
+            { header: "DISCAPACIDAD" },
+            { header: "CARNET DE DISCAPACIDAD" },
+            { header: "TIPO DE DISCAPACIDAD" },
+            { header: "PORCENTAJE DE DISCAPACIDAD" },
+            { header: "SITUACION PSICOEMOCIONAL" },
+            { header: "ENFERMEDADES PREVALENTES" },
+            { header: "CONDICION MÉDICA 1" },
+            { header: "CONDICION MÉDICA 2" },
+            { header: "CONDICION MÉDICA 3" },
+            { header: "CONDICION MÉDICA 4" },
+            { header: "CONDICION MÉDICA 5" },
+            { header: "CONDICION MÉDICA ADICIONAL" },
+
+            //INSCRIPCION
+            { header: "FECHA DE INSCRIPCION" },
+            { header: "CURSO" },
+            { header: "DOCENTE DE CURSO" },
+            { header: "JORNADA" },
+            { header: "ASISTENCIA" },
+            { header: "PROYECTO" },
+            { header: "SITUACION" },
+
+            //DESVINCULACION
+            { header: "FECHA DE DESVINCULACIÓN" },
+            { header: "MOTIVO" },
+
+
         ];
 
         setExcelReportData({
@@ -440,72 +415,6 @@ function Reporte() {
             console.error("Error al decodificar la cadena base64:", error);
         }
     };
-
-
-
-    const handleExportExcel = () => {
-        loadReporte(); // Espera a que loadReporte() se complete
-        swal({
-            title: "Imprimir Rerporte General",
-            text: "Si el registro que busca no esta en el reporte, se debe a que el mismo no cuenta con todas las fichas necesarias",
-            icon: "warning",
-            buttons: {
-                cancel: {
-                    text: "Cancelar",
-                    visible: true,
-                    className: "cancel-button",
-                },
-                confirm: {
-                    text: "Imprimir",
-                    className: "confirm-button",
-                },
-            },
-        }).then((confirmed) => {
-            if (confirmed) {
-
-
-                if (excelReportData) {
-                    excelExport(excelReportData); // Espera a que excelExport se complete
-                    console.log('Generated report');
-                    if (excelReportData.onButtonClick) {
-                        excelReportData.onButtonClick(); // Llama al evento onClick opcional si se proporciona.
-                    }
-
-                    setExcelReportData(null)
-                    console.log(excelReportData)
-                }
-            }
-        });
-
-        // toast.promise(
-        //     loadReporte(),
-        //     {
-        //         loading: 'Cargando datos...', // Mensaje de carga
-        //         success: 'Datos cargados exitosamente.', // Mensaje de éxito
-        //         error: 'Error al cargar los datos.', // Mensaje de error
-        //     }
-        // ).then(() => {
-        //     // Continuar con la siguiente acción después de que la promesa se resuelva
-        //     // Esta función se ejecutará una vez que los datos se hayan cargado o en caso de error
-        //     // Puedes agregar tu código aquí
-        //     if (excelReportData) {
-        //         excelExport(excelReportData); // Espera a que excelExport se complete
-        //         console.log('Generated report');
-        //         if (excelReportData.onButtonClick) {
-        //             excelReportData.onButtonClick(); // Llama al evento onClick opcional si se proporciona.
-        //         }
-        //     }
-        //     vaciarReporte();
-
-        // })
-        // try {
-
-        // } catch (err) {
-        //     console.error(err);
-        // }
-    };
-
-
 
 
 

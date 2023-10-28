@@ -13,20 +13,20 @@ export class ReporteService {
     });
   }
 
-  busquedaReporteRE(ci: string, gen: string, rang: number, est: boolean) {
+  reporteGeneralRE(ci: string, gen: string, rang: number, est: boolean) {
     //Método para listar todas los Usuarios
     ci = ci || "NA";
     gen = gen || "NA";
     return this.api
-      .get(`busquedaReporteRE/${ci}/${gen}/${rang}/${est}`)
+      .get(`reporteGeneralRE/${ci}/${gen}/${rang}/${est}`)
       .then((res) => res.data);
   }
 
-  busquedaReporte(ci: string, gen: string, est: boolean) {
+  reporteGeneral(ci: string, gen: string, est: boolean) {
     //Método para listar todas los Usuarios
     ci = ci || "NA";
     gen = gen || "NA";
-    return this.api.get(`busquedaReporte/${ci}/${gen}/${est}`).then((res) => res.data);
+    return this.api.get(`reporteGeneral/${ci}/${gen}/${est}`).then((res) => res.data);
   }
 
 }

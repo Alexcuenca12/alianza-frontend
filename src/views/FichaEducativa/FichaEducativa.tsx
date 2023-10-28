@@ -391,7 +391,7 @@ function FichaInscripcionContext() {
         situacionPsico: item.situacionPsicopedagogica || 'Ningula',
         repitente: item.repitente ? 'SI' : 'NO',
 
-        detallePsico: item.detalleRepitente,
+        detallePsico: item.detalleRepitente || 'N/A',
 
         observacion: item.observacionesEducativa,
         registro: item.fechaRegistro || 'Ningula',

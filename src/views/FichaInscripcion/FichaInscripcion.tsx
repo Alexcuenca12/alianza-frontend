@@ -857,6 +857,9 @@ function FichaInscripcionContext() {
               <thead className="theadTab" >
                 <tr style={{ backgroundColor: "#871b1b", color: "white" }}>
                   <th className="trFichas">Nº de Publicacion</th>
+                  <th className="trFichas">Cedula/Pasaporte</th>
+                  <th className="trFichas">Nombres</th>
+                  <th className="trFichas">Apellidos</th>
                   <th className="trFichas">Fecha de Ingreso</th>
                   <th className="trFichas">Proyecto </th>
                   <th className="trFichas">Situación de Ingreso</th>
@@ -873,6 +876,9 @@ function FichaInscripcionContext() {
                     key={contrato.idFichaInscripcion?.toString()}
                   >
                     <td className="tdFichas">{contrato.idFichaInscripcion}</td>
+                    <td className="tdFichas">{contrato.fichaPersonal?.ciPasaporte}</td>
+                    <td className="tdFichas">{contrato.fichaPersonal?.nombres}</td>
+                    <td className="tdFichas">{contrato.fichaPersonal?.apellidos} </td>
                     <td className="tdFichas">
                       {contrato.fechaIngresoInscrip && (
                         <span>
