@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { InputText } from "primereact/inputtext";
 import { FileUpload, FileUploadSelectEvent } from "primereact/fileupload";
 import { Button } from "primereact/button";
-import { Calendar, CalendarChangeEvent } from 'primereact/calendar';
+import { Calendar, CalendarChangeEvent } from "primereact/calendar";
 import { Fieldset } from "primereact/fieldset";
 import { Card } from "primereact/card";
 import cardHeader from "../../shared/CardHeader";
@@ -13,28 +13,20 @@ import swal from "sweetalert";
 import { IFichaPersonal } from "../../interfaces/IFichaPersonal";
 import { FichaPersonalService } from "../../services/FichaPersonalService";
 import { Dropdown } from "primereact/dropdown";
-import { PiFileXlsFill } from "react-icons/pi";
-import '../../styles/FiltroFichas.css'
-import { IExcelReportParams, IHeaderItem } from "../../interfaces/IExcelReportParams";
+import "../../styles/FiltroFichas.css";
+import {
+  IExcelReportParams,
+  IHeaderItem,
+} from "../../interfaces/IExcelReportParams";
 import { ReportBar } from "../../common/ReportBar";
 import toast, { Toaster } from "react-hot-toast";
-import '../../styles/Fichas.css'
+import "../../styles/Fichas.css";
 import { InputTextarea } from "primereact/inputtextarea";
 import { PiFilePdfFill } from "react-icons/pi";
 
-
-
 function FichaDesvinculacion() {
-
-  //Session Storage
-  const userData = sessionStorage.getItem("user");
-  const userObj = JSON.parse(userData || "{}");
-  const idPersona = userObj.id;
-
   const [listFperonales, setListFperonales] = useState<IFichaPersonal[]>([]);
-
-  const [busqueda, setBusqueda] = useState<string>('');
-
+  const [busqueda, setBusqueda] = useState<string>("");
   const [contra1, setcontra1] = useState<IFichaDesvinculacion[]>([]);
   const [formData, setFormData] = useState<IFichaDesvinculacion>({
     idFichaDesvinculacion: 0,
@@ -42,7 +34,7 @@ function FichaDesvinculacion() {
     motivo: "",
     anexosExtras: "",
     fichaPersonal: null,
-    fechaRegistro: new Date
+    fechaRegistro: new Date(),
   });
 
   const fileUploadRef = useRef<FileUpload>(null);
@@ -51,9 +43,11 @@ function FichaDesvinculacion() {
   const [editItemId, setEditItemId] = useState<number | undefined>(undefined);
   const desvinService = new FichaDesvinculacionService();
   const fichaPersonalService = new FichaPersonalService();
-  const [foto, setFoto] = useState<string>('https://cdn-icons-png.flaticon.com/128/666/666201.png');
-  const [excelReportData, setExcelReportData] = useState<IExcelReportParams | null>(null);
-
+  const [foto, setFoto] = useState<string>(
+    "https://cdn-icons-png.flaticon.com/128/666/666201.png"
+  );
+  const [excelReportData, setExcelReportData] =
+    useState<IExcelReportParams | null>(null);
 
   const loadData = () => {
     desvinService
@@ -113,7 +107,7 @@ function FichaDesvinculacion() {
       link.download = "AnexosExtras.pdf";
       link.click();
       swal({
-        title: "Publicación",
+        title: "Ficha Desvinculación",
         text: "Descargando pdf....",
         icon: "success",
         timer: 1000,
@@ -128,22 +122,23 @@ function FichaDesvinculacion() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
     if (validaciones()) {
       desvinService
         .save(formData)
         .then((response) => {
           loadDataID(response.fichaPersonal?.idFichaPersonal);
-
           resetForm();
-          swal("Publicacion", "Datos Guardados Correctamente", "success");
+          swal(
+            "Ficha Desvinculacion",
+            "Datos Guardados Correctamente",
+            "success"
+          );
           resetFiltro();
         })
         .catch((error) => {
           console.error("Error al enviar el formulario:", error);
         });
     }
-
   };
 
   const handleDelete = (id: number | undefined) => {
@@ -198,25 +193,23 @@ function FichaDesvinculacion() {
       if (editItem) {
         const editedItem = { ...editItem };
 
-
-        if (typeof editedItem.fechaRegistro === 'string') {
+        if (typeof editedItem.fechaRegistro === "string") {
           const registro = new Date(editedItem.fechaRegistro);
           registro.setDate(registro.getDate() + 1);
           const formattedDate = registro
-            ? registro.toISOString().split('T')[0]
-            : '';
+            ? registro.toISOString().split("T")[0]
+            : "";
           editedItem.fechaRegistro = formattedDate;
         }
 
-        if (typeof editedItem.fechaDesvinculacion === 'string') {
+        if (typeof editedItem.fechaDesvinculacion === "string") {
           const nacimiento = new Date(editedItem.fechaDesvinculacion);
           nacimiento.setDate(nacimiento.getDate() + 1);
           const formattedDate = nacimiento
-            ? nacimiento.toISOString().split('T')[0]
-            : '';
+            ? nacimiento.toISOString().split("T")[0]
+            : "";
           editedItem.fechaDesvinculacion = formattedDate;
         }
-
 
         setFormData(editedItem);
 
@@ -224,10 +217,9 @@ function FichaDesvinculacion() {
         setEditItemId(id);
 
         setBusqueda(editedItem.fichaPersonal?.ciPasaporte ?? "");
-        setFoto(editedItem.fichaPersonal?.foto ?? '')
+        setFoto(editedItem.fichaPersonal?.foto ?? "");
 
         if (editedItem.fichaPersonal !== null) {
-
           const editItemWithLabel = {
             ...editedItem,
             fichaPersonal: {
@@ -249,7 +241,7 @@ function FichaDesvinculacion() {
         .then((response) => {
           loadDataID(response.fichaPersonal?.idFichaPersonal);
           swal({
-            title: "Publicaciones",
+            title: "Ficha Desvinculacion",
             text: "Datos actualizados correctamente",
             icon: "success",
           });
@@ -271,8 +263,7 @@ function FichaDesvinculacion() {
       motivo: "",
       anexosExtras: "",
       fichaPersonal: null,
-      fechaRegistro: new Date
-
+      fechaRegistro: new Date(),
     });
     setEditMode(false);
     setEditItemId(undefined);
@@ -281,14 +272,7 @@ function FichaDesvinculacion() {
     }
   };
 
-  // if (!dataLoaded) {
-  //   return <div>Cargando datos...</div>;
-  // }
-
-
   const loadRelacion = () => {
-
-    // console.log("4 SIN EDAD")
     fichaPersonalService
       .getBusquedaRelacion(true, busqueda)
       .then((data: IFichaPersonal[]) => {
@@ -298,48 +282,41 @@ function FichaDesvinculacion() {
         }));
 
         setListFperonales(dataWithLabel); // Establecer los datos procesados en el estado
-        // setDataLoaded(true); // Puedes marcar los datos como cargados si es necesario
       })
       .catch((error) => {
         console.error("Error al obtener los datos:", error);
       });
-
-
-    // console.log('Datos enviados:', { listFperonales });
-
   };
 
   const cargarFoto = (id: number) => {
-    const fPersonal = listFperonales.find((persona) => persona.idFichaPersonal === id);
-    console.log("chucha= " + formData.fichaPersonal?.idFichaPersonal)
+    const fPersonal = listFperonales.find(
+      (persona) => persona.idFichaPersonal === id
+    );
+    console.log("chucha= " + formData.fichaPersonal?.idFichaPersonal);
     if (fPersonal) {
       // Actualiza formData con la foto correspondiente
-      // setFormData({ ...formData, fichaPersonal: fPersonal })
       setFoto(fPersonal.foto);
-
-      // alert(foto)
     }
-
-  }
+  };
 
   function loadExcelReportData(data: IFichaDesvinculacion[]) {
-    const reportName = "Ficha de Desvinculación"
-    const logo = 'G1:K1'
-    const rowData = data.map((item) => (
-      {
-        idFicha: item.idFichaDesvinculacion,
-        tipoIdentcedula: item.fichaPersonal?.tipoIdentificacion,
-        cedula: item.fichaPersonal?.ciPasaporte,
-        nombres: item.fichaPersonal?.nombres,
-        apellidos: item.fichaPersonal?.apellidos,
-        fechaDesvinculacion: new Date(item.fechaDesvinculacion!).toLocaleDateString("es-ES", {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-        }),
-        motivo: item.motivo,
-      }
-    ));
+    const reportName = "Ficha de Desvinculación";
+    const logo = "G1:K1";
+    const rowData = data.map((item) => ({
+      idFicha: item.idFichaDesvinculacion,
+      tipoIdentcedula: item.fichaPersonal?.tipoIdentificacion,
+      cedula: item.fichaPersonal?.ciPasaporte,
+      nombres: item.fichaPersonal?.nombres,
+      apellidos: item.fichaPersonal?.apellidos,
+      fechaDesvinculacion: new Date(
+        item.fechaDesvinculacion!
+      ).toLocaleDateString("es-ES", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }),
+      motivo: item.motivo,
+    }));
     const headerItems: IHeaderItem[] = [
       { header: "№ FICHA" },
       { header: "TIPO DE IDENTIFICACION" },
@@ -348,55 +325,48 @@ function FichaDesvinculacion() {
       { header: "APELLIDOS" },
       { header: "FECHA DE DESVINCULACIÓN" },
       { header: "MOTIVO" },
-
-
-    ]
-
+    ];
 
     setExcelReportData({
       reportName,
       headerItems,
       rowData,
-      logo
-    }
-    )
+      logo,
+    });
   }
 
   function validaciones(): boolean {
-
-
     if (!formData.fichaPersonal?.idFichaPersonal) {
       toast.error("Seleccione al propietario de la ficha", {
         style: {
-          fontSize: '15px'
+          fontSize: "15px",
         },
         duration: 3000,
-      })
-      return false
+      });
+      return false;
     }
-
 
     if (!formData.fechaDesvinculacion) {
       toast.error("Seleccione la fecha de desvinculacion", {
         style: {
-          fontSize: '15px'
+          fontSize: "15px",
         },
         duration: 3000,
-      })
-      return false
+      });
+      return false;
     }
 
     if (!formData.motivo) {
       toast.error("Debe proporcionar detaller de la desvinculacion", {
         style: {
-          fontSize: '15px'
+          fontSize: "15px",
         },
         duration: 3000,
-      })
-      return false
+      });
+      return false;
     }
 
-    return true
+    return true;
   }
 
   const loadDataID = (id: number) => {
@@ -412,23 +382,21 @@ function FichaDesvinculacion() {
       });
   };
 
-
-
   const resetFiltro = () => {
-    setBusqueda('')
-    setFoto('https://cdn-icons-png.flaticon.com/128/666/666201.png')
-    setListFperonales([])
-
+    setBusqueda("");
+    setFoto("https://cdn-icons-png.flaticon.com/128/666/666201.png");
+    setListFperonales([]);
   };
 
   return (
     <>
       <div>
-        <Toaster position="top-right"
-          reverseOrder={true} />
+        <Toaster position="top-right" reverseOrder={true} />
       </div>
-      <Fieldset className="fgrid col-fixed " style={{ display: 'flex', justifyContent: 'center' }}>
-
+      <Fieldset
+        className="fgrid col-fixed "
+        style={{ display: "flex", justifyContent: "center" }}
+      >
         <Card
           header={cardHeader}
           className="border-solid border-red-800 border-3 flex-1 flex-wrap"
@@ -436,19 +404,32 @@ function FichaDesvinculacion() {
         >
           <div
             className="h1-rem"
-            style={{ display: 'flex', justifyContent: 'center' }}
+            style={{ display: "flex", justifyContent: "center" }}
           >
             <h1 className="text-5xl font-smibold lg:md-2 h-full max-w-full max-h-full min-w-min">
               Ficha de Desvinculación
             </h1>
           </div>
 
-          <div className="" style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "right" }}>
-            <label className="font-medium w-auto min-w-min" htmlFor="fichaPersonal" style={{ marginRight: "10px" }}>Fecha de Registro:</label>
+          <div
+            className=""
+            style={{
+              display: "flex",
+              width: "100%",
+              alignItems: "center",
+              justifyContent: "right",
+            }}
+          >
+            <label
+              className="font-medium w-auto min-w-min"
+              htmlFor="fichaPersonal"
+              style={{ marginRight: "10px" }}
+            >
+              Fecha de Registro:
+            </label>
             <Calendar
               disabled
               dateFormat="dd-mm-yy" // Cambiar el formato a ISO 8601
-
               style={{ width: "95px", marginRight: "25px", fontWeight: "bold" }}
               onChange={(e: CalendarChangeEvent) => {
                 if (e.value !== undefined) {
@@ -458,9 +439,11 @@ function FichaDesvinculacion() {
                   });
                 }
               }}
-
-              value={typeof formData.fechaRegistro === 'string' ? new Date(formData.fechaRegistro) : new Date()}
-
+              value={
+                typeof formData.fechaRegistro === "string"
+                  ? new Date(formData.fechaRegistro)
+                  : new Date()
+              }
             />
           </div>
 
@@ -471,18 +454,47 @@ function FichaDesvinculacion() {
                 <b>Filtro</b>
               </div>
             </Divider>
-            <Fieldset legend="Filtros de busqueda" style={{ width: "1000px", position: "relative" }}>
-              <div style={{ position: "absolute", top: "0", right: "5px", marginTop: "-15px" }}>
-                <label className="font-medium w-auto min-w-min" htmlFor="rangoEdad" style={{ marginRight: "10px" }}>Limpiar filtros:</label>
+            <Fieldset
+              legend="Filtros de busqueda"
+              style={{ width: "1000px", position: "relative" }}
+            >
+              <div
+                style={{
+                  position: "absolute",
+                  top: "0",
+                  right: "5px",
+                  marginTop: "-15px",
+                }}
+              >
+                <label
+                  className="font-medium w-auto min-w-min"
+                  htmlFor="rangoEdad"
+                  style={{ marginRight: "10px" }}
+                >
+                  Limpiar filtros:
+                </label>
 
-                <Button icon="pi pi-times" rounded severity="danger" aria-label="Cancel" onClick={() => { resetFiltro(); loadData() }} />
+                <Button
+                  icon="pi pi-times"
+                  rounded
+                  severity="danger"
+                  aria-label="Cancel"
+                  onClick={() => {
+                    resetFiltro();
+                    loadData();
+                  }}
+                />
               </div>
-
 
               <section className="layout">
                 <div className="">
                   <div input-box>
-                    <label className="font-medium w-auto min-w-min" htmlFor='genero'>Cedula o Nombre:</label>
+                    <label
+                      className="font-medium w-auto min-w-min"
+                      htmlFor="genero"
+                    >
+                      Cedula o Nombre:
+                    </label>
 
                     <div className="flex-1">
                       <InputText
@@ -493,62 +505,70 @@ function FichaDesvinculacion() {
                         onChange={(e) => {
                           // Actualizar el estado usando setFormData
                           setListFperonales([]); // Asignar un arreglo vacío para vaciar el estado listFperonales
-
                           setBusqueda(e.currentTarget.value);
-
                           // Luego, llamar a loadRelacion después de que se actualice el estado
                           loadRelacion();
                         }}
-
                         value={busqueda}
                       />
 
-                      <Button icon="pi pi-search" className="p-button-warning" />
+                      <Button
+                        icon="pi pi-search"
+                        className="p-button-warning"
+                      />
                     </div>
                   </div>
                 </div>
                 <div className="grow1 shrink0">
                   <div>
-                    <label className="font-medium w-auto min-w-min" htmlFor="fichaPersonal">Resultados de la busqueda:</label>
+                    <label
+                      className="font-medium w-auto min-w-min"
+                      htmlFor="fichaPersonal"
+                    >
+                      Resultados de la busqueda:
+                    </label>
                     <Dropdown
                       className="text-2xl"
                       id="tiempo_dedicacion"
                       name="tiempo_dedicacion"
-                      style={{ width: "100%", height: "36px", alignItems: "center" }}
+                      style={{
+                        width: "100%",
+                        height: "36px",
+                        alignItems: "center",
+                      }}
                       options={listFperonales}
                       onChange={(e) => {
                         setFormData({
                           ...formData,
                           fichaPersonal: {
                             idFichaPersonal: parseInt(e.value),
-                            foto: '',
-                            apellidos: '',
-                            nombres: '',
-                            ciPasaporte: '',
-                            tipoIdentificacion: '',
+                            foto: "",
+                            apellidos: "",
+                            nombres: "",
+                            ciPasaporte: "",
+                            tipoIdentificacion: "",
                             actTrabInfantil: false,
-                            detalleActTrabInfantil: '',
-                            nacionalidad: '',
-                            fechaNacimiento: '',
+                            detalleActTrabInfantil: "",
+                            nacionalidad: "",
+                            fechaNacimiento: "",
                             rangoEdad: null,
-                            genero: '',
+                            genero: "",
                             etnia: null,
                             parroquia: null,
-                            zona: '',
-                            barrioSector: '',
-                            direccion: '',
-                            referencia: '',
+                            zona: "",
+                            barrioSector: "",
+                            direccion: "",
+                            referencia: "",
                             coordenadaX: 0,
                             coordenadaY: 0,
                             estVinculacion: true,
-                            fechaRegistro: new Date()
-                          }
+                            fechaRegistro: new Date(),
+                            anexosCedula: "",
+                            anexosDocumentosLegales: "",
+                          },
                         });
-
-
-                        loadDataID(parseInt(e.value))
-                        cargarFoto(parseInt(e.value))
-
+                        loadDataID(parseInt(e.value));
+                        cargarFoto(parseInt(e.value));
                       }}
                       value={formData.fichaPersonal?.idFichaPersonal}
                       optionLabel="label"
@@ -563,7 +583,6 @@ function FichaDesvinculacion() {
                       src={foto}
                       alt="FotoNNA"
                       style={{
-                        // width: "80px",
                         height: "80px",
                         borderRadius: "50%", // Borde redondeado
                         border: "2px solid gray", // Borde gris
@@ -573,24 +592,34 @@ function FichaDesvinculacion() {
                 </div>
               </section>
             </Fieldset>
-
-
-            <form onSubmit={editMode ? handleUpdate : handleSubmit} className='form' encType="multipart/form-data">
+            <form
+              onSubmit={editMode ? handleUpdate : handleSubmit}
+              className="form"
+              encType="multipart/form-data"
+            >
               <Divider align="left">
                 <div className="inline-flex align-items-center">
                   <i className="pi pi-book mr-2"></i>
                   <b>Formulario </b>
                 </div>
               </Divider>
-
-              <div className='column' style={{}}>
-                <div className='column' style={{ width: "30%", }}>
-
-                  <div className='' style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                    <label htmlFor="fechaDesvinculacion" className="font-medium w-auto min-w-min">
+              <div className="column" style={{}}>
+                <div className="column" style={{ width: "30%" }}>
+                  <div
+                    className=""
+                    style={{
+                      width: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "flex-start",
+                    }}
+                  >
+                    <label
+                      htmlFor="fechaDesvinculacion"
+                      className="font-medium w-auto min-w-min"
+                    >
                       Fecha de Desvinculación:
                     </label>
-
                     <Calendar
                       className="text-2xl"
                       id="fechaDesvinculacion"
@@ -601,10 +630,13 @@ function FichaDesvinculacion() {
                       dateFormat="dd-mm-yy" // Cambiar el formato a ISO 8601
                       showIcon
                       onChange={(e) => {
-                        const selectedDate = e.value instanceof Date ? e.value : null;
+                        const selectedDate =
+                          e.value instanceof Date ? e.value : null;
                         if (selectedDate) {
                           selectedDate.setDate(selectedDate.getDate() + 1);
-                          const formattedDate = selectedDate.toISOString().split("T")[0];
+                          const formattedDate = selectedDate
+                            .toISOString()
+                            .split("T")[0];
                           setFormData({
                             ...formData,
                             fechaDesvinculacion: formattedDate,
@@ -624,17 +656,22 @@ function FichaDesvinculacion() {
                     />
                     <span className="input-border"></span>
                   </div>
-
                 </div>
-
-
-
-                <div className='column' style={{ width: "70%" }}>
-
-                  <div className='' style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', paddingBottom: '35px' }}>
+                <div className="column" style={{ width: "70%" }}>
+                  <div
+                    className=""
+                    style={{
+                      width: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "flex-start",
+                      paddingBottom: "35px",
+                    }}
+                  >
                     <label
                       htmlFor="motivo"
-                      className="font-medium w-auto min-w-min"  >
+                      className="font-medium w-auto min-w-min"
+                    >
                       Motivo:
                     </label>
                     <InputTextarea
@@ -642,32 +679,16 @@ function FichaDesvinculacion() {
                       placeholder="Ingrese el Motivo"
                       id="motivo"
                       name="motivo"
-                      style={{ width: '100%', }}
+                      style={{ width: "100%" }}
                       value={formData.motivo}
-                      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setFormData({
-                        ...formData,
-                        motivo: e.currentTarget.value,
-                      })}
-
-                    />
-                    <span className="input-border"></span>
-                    {/* <InputText
-                      className="text-2xl"
-                      placeholder="Ingrese el Motivo"
-                      id="motivo"
-                      name="motivo"
-                      style={{ width: '100%', }}
-                      onChange={(e) =>
+                      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                         setFormData({
                           ...formData,
                           motivo: e.currentTarget.value,
                         })
                       }
-                      value={formData.motivo}
-                    /> */}
-
-
-
+                    />
+                    <span className="input-border"></span>
                   </div>
                 </div>
               </div>
@@ -678,10 +699,9 @@ function FichaDesvinculacion() {
                   <b>Anexos</b>
                 </div>
               </Divider>
-              <div className='column' style={{}}>
-
-                <div className='input-box'>
-                  <label htmlFor="pdf" className="font-medium w-auto min-w-min"                >
+              <div className="column" style={{}}>
+                <div className="input-box">
+                  <label htmlFor="pdf" className="font-medium w-auto min-w-min">
                     Subir Anexos Extra:
                   </label>
                   <FileUpload
@@ -700,8 +720,8 @@ function FichaDesvinculacion() {
                   />
                 </div>
 
-                <div className='input-box'>
-                  <label htmlFor="pdf" className="font-medium w-auto min-w-min"                >
+                <div className="input-box">
+                  <label htmlFor="pdf" className="font-medium w-auto min-w-min">
                     Subir Anexos Extra:
                   </label>
                   <FileUpload
@@ -720,9 +740,8 @@ function FichaDesvinculacion() {
                   />
                 </div>
 
-
-                <div className='input-box'>
-                  <label htmlFor="pdf" className="font-medium w-auto min-w-min"                >
+                <div className="input-box">
+                  <label htmlFor="pdf" className="font-medium w-auto min-w-min">
                     Subir Anexos Extra:
                   </label>
                   <FileUpload
@@ -740,13 +759,12 @@ function FichaDesvinculacion() {
                     accept="application/pdf"
                   />
                 </div>
-
               </div>
-              {/* <Divider style={{ marginTop: "30px" }} /> */}
-              <div className='btnSend'>
-
-                <div className="flex align-items-center justify-content-center w-auto min-w-min"
-                  style={{ gap: "25px" }}>
+              <div className="btnSend">
+                <div
+                  className="flex align-items-center justify-content-center w-auto min-w-min"
+                  style={{ gap: "25px" }}
+                >
                   <Button
                     type="submit"
                     label={editMode ? "Actualizar" : "Guardar"}
@@ -768,7 +786,8 @@ function FichaDesvinculacion() {
                     onClick={() => {
                       resetForm();
                       resetFiltro();
-                    }} />
+                    }}
+                  />
                 </div>
               </div>
             </form>
@@ -781,17 +800,35 @@ function FichaDesvinculacion() {
             </div>
           </Divider>
 
-          <div className="opcTblLayout" >
-            <div className="" style={{ flex: 1, display: "flex", alignItems: "flex-end", justifyContent: "flex-end" }}>
+          <div className="opcTblLayout">
+            <div
+              className=""
+              style={{
+                flex: 1,
+                display: "flex",
+                alignItems: "flex-end",
+                justifyContent: "flex-end",
+              }}
+            >
+              <div className="opcTbl" style={{ justifyContent: "right" }}>
+                <label
+                  className="font-medium w-auto min-w-min"
+                  htmlFor="estado"
+                >
+                  Cargar todo:
+                </label>
 
-              <div className="opcTbl" style={{ justifyContent: "right" }} >
-                <label className="font-medium w-auto min-w-min" htmlFor='estado'>Cargar todo:</label>
-
-                <Button className="buttonIcon" // Agrega una clase CSS personalizada
-                  icon="pi pi-refresh" style={{ width: "120px", height: "39px" }}
-                  severity="danger" aria-label="Cancel" onClick={() => { loadData(); resetFiltro(); }}
+                <Button
+                  className="buttonIcon" // Agrega una clase CSS personalizada
+                  icon="pi pi-refresh"
+                  style={{ width: "120px", height: "39px" }}
+                  severity="danger"
+                  aria-label="Cancel"
+                  onClick={() => {
+                    loadData();
+                    resetFiltro();
+                  }}
                 />
-
               </div>
               <ReportBar
                 reportName={excelReportData?.reportName!}
@@ -802,18 +839,16 @@ function FichaDesvinculacion() {
             </div>
           </div>
 
-          <div className="tblContainer" >
-
+          <div className="tblContainer">
             <table className="tableFichas">
-              <thead className="theadTab" >
-
+              <thead className="theadTab">
                 <tr style={{ backgroundColor: "#871b1b", color: "white" }}>
                   <th className="trFichas">Nº de Registro </th>
                   <th className="trFichas">Cedula</th>
                   <th className="trFichas">Nombres</th>
                   <th className="trFichas">Apellidos</th>
                   <th className="trFichas">Fecha de Desvinculación </th>
-                  <th className="trFichas">Motvio</th>
+                  <th className="trFichas">Motivo</th>
                   <th className="trFichas">Editar</th>
                   <th className="trFichas">Eliminar</th>
                   <th className="trFichas">Evidencia</th>
@@ -826,22 +861,28 @@ function FichaDesvinculacion() {
                     key={cargaF.idFichaDesvinculacion?.toString()}
                   >
                     <td className="tdFichas">{cargaF.idFichaDesvinculacion}</td>
-                    <td className="tdFichas">{cargaF.fichaPersonal?.ciPasaporte}</td>
-                    <td className="tdFichas">{cargaF.fichaPersonal?.nombres}</td>
-                    <td className="tdFichas">{cargaF.fichaPersonal?.apellidos} </td>
                     <td className="tdFichas">
-                      {/* {cargaF.fechaDesvinculacion} */}
+                      {cargaF.fichaPersonal?.ciPasaporte}
+                    </td>
+                    <td className="tdFichas">
+                      {cargaF.fichaPersonal?.nombres}
+                    </td>
+                    <td className="tdFichas">
+                      {cargaF.fichaPersonal?.apellidos}{" "}
+                    </td>
+                    <td className="tdFichas">
                       {cargaF.fechaDesvinculacion && (
                         <span>
-                          {cargaF.fechaDesvinculacion.split('-')[2]}-
-                          {cargaF.fechaDesvinculacion.split('-')[1]}-
-                          {cargaF.fechaDesvinculacion.split('-')[0]}
+                          {cargaF.fechaDesvinculacion.split("-")[2]}-
+                          {cargaF.fechaDesvinculacion.split("-")[1]}-
+                          {cargaF.fechaDesvinculacion.split("-")[0]}
                         </span>
                       )}
                     </td>
                     <td className="tdFichas">{cargaF.motivo}</td>
                     <td className="tdFichas">
-                      <Button className="buttonIcon"
+                      <Button
+                        className="buttonIcon"
                         type="button"
                         icon="pi pi-file-edit"
                         style={{
@@ -855,13 +896,13 @@ function FichaDesvinculacion() {
                         onClick={() =>
                           handleEdit(cargaF.idFichaDesvinculacion?.valueOf())
                         }
-                      // Agrega el evento onClick para la operación de editar
+                        // Agrega el evento onClick para la operación de editar
                       />
-
                     </td>
 
                     <td className="tdFichas">
-                      <Button className="buttonIcon"
+                      <Button
+                        className="buttonIcon"
                         type="button"
                         icon="pi pi-trash"
                         style={{
@@ -875,13 +916,15 @@ function FichaDesvinculacion() {
                         onClick={() =>
                           handleDelete(cargaF.idFichaDesvinculacion?.valueOf())
                         }
-                      // Agrega el evento onClick para la operación de eliminar
+                        // Agrega el evento onClick para la operación de eliminar
                       />
                     </td>
                     <td className="tdFichas">
                       {cargaF.anexosExtras ? (
-
-                        <button className="btnPdf" onClick={() => decodeBase64(cargaF.anexosExtras!)}>
+                        <button
+                          className="btnPdf"
+                          onClick={() => decodeBase64(cargaF.anexosExtras!)}
+                        >
                           <div className="svg-wrapper-1">
                             <div className="svg-wrapper">
                               <PiFilePdfFill className="icono"></PiFilePdfFill>
@@ -889,7 +932,6 @@ function FichaDesvinculacion() {
                           </div>
                           <span>Descargar PDF</span>
                         </button>
-
                       ) : (
                         <span>Sin evidencia</span>
                       )}
@@ -900,7 +942,7 @@ function FichaDesvinculacion() {
             </table>
           </div>
         </Card>
-      </Fieldset >
+      </Fieldset>
     </>
   );
 }

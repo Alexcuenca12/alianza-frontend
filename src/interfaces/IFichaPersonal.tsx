@@ -25,6 +25,8 @@ export interface IFichaPersonal {
     coordenadaY: number;
     estVinculacion: boolean;
     fechaRegistro: string | Date | Date[] | null;
+    anexosCedula: string;
+    anexosDocumentosLegales: string;
 
 }
 

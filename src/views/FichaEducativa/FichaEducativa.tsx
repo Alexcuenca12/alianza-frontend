@@ -575,7 +575,9 @@ function FichaInscripcionContext() {
                             coordenadaX: 0,
                             coordenadaY: 0,
                             estVinculacion: true,
-                            fechaRegistro: new Date()
+                            fechaRegistro: new Date(),
+                            anexosCedula: "",
+                            anexosDocumentosLegales: "",
                           }
                         });
                         cargarFoto(parseInt(e.value))

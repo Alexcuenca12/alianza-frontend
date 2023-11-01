@@ -6,7 +6,7 @@ import { Fieldset } from "primereact/fieldset";
 import { Card } from "primereact/card";
 import { InputTextarea } from "primereact/inputtextarea";
 import { PiFileXlsFill } from "react-icons/pi";
-import { Calendar, CalendarChangeEvent } from 'primereact/calendar';
+import { Calendar, CalendarChangeEvent } from "primereact/calendar";
 import cardHeader from "../../shared/CardHeader";
 import { IFichaSalud } from "../../interfaces/IFichaSalud";
 import { IFichaPersonal } from "../../interfaces/IFichaPersonal";
@@ -14,22 +14,30 @@ import { FichaPersonalService } from "../../services/FichaPersonalService";
 import { FichaSaludService } from "../../services/FichaSaludService";
 import swal from "sweetalert";
 import { Dropdown } from "primereact/dropdown";
-import '../../styles/FiltroFichas.css'
-import { Divider } from 'primereact/divider';
+import "../../styles/FiltroFichas.css";
+import { Divider } from "primereact/divider";
 
-import { InputNumber, InputNumberValueChangeEvent } from 'primereact/inputnumber';
+import {
+  InputNumber,
+  InputNumberValueChangeEvent,
+} from "primereact/inputnumber";
 import toast, { Toaster } from "react-hot-toast";
-import { IExcelReportParams, IHeaderItem } from "../../interfaces/IExcelReportParams";
+import {
+  IExcelReportParams,
+  IHeaderItem,
+} from "../../interfaces/IExcelReportParams";
 import { ReportBar } from "../../common/ReportBar";
-
 
 function FichaSaludContext() {
   const fichaPersonalService = new FichaPersonalService();
-  const [busqueda, setBusqueda] = useState<string>('');
-  const [foto, setFoto] = useState<string>('https://cdn-icons-png.flaticon.com/128/666/666201.png');
+  const [busqueda, setBusqueda] = useState<string>("");
+  const [foto, setFoto] = useState<string>(
+    "https://cdn-icons-png.flaticon.com/128/666/666201.png"
+  );
   const [listFperonales, setListFperonales] = useState<IFichaPersonal[]>([]);
 
-  const [excelReportData, setExcelReportData] = useState<IExcelReportParams | null>(null);
+  const [excelReportData, setExcelReportData] =
+    useState<IExcelReportParams | null>(null);
 
   const [contra1, setcontra1] = useState<IFichaSalud[]>([]);
   const [formData, setFormData] = useState<IFichaSalud>({
@@ -42,7 +50,7 @@ function FichaSaludContext() {
     condicionesMedicasAdd: "",
     carnetDiscapacidad: false,
     masaCorporal: 0,
-    situacionPsicoemocional: '',
+    situacionPsicoemocional: "",
     pesoFichaSalud: 0,
     tallaFichaSalud: 0,
     discapacidadNNAFichaSalud: false,
@@ -50,9 +58,8 @@ function FichaSaludContext() {
     porcentajeDiscapacidadFichaSalud: 0,
     enfermedadesPrevalentesFichaSalud: "",
     fichaPersonal: null,
-    fechaRegistro: new Date
+    fechaRegistro: new Date(),
   });
-
 
   const [tempTalla, setTempTalla] = useState<string>();
   const [tempPeso, setTempPeso] = useState<string>();
@@ -79,26 +86,20 @@ function FichaSaludContext() {
     loadData();
   }, []);
 
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validaciones()) {
-
       saludService
         .save(formData)
         .then((response) => {
           resetForm();
           swal("Publicacion", "Datos Guardados Correctamente", "success");
-
           loadDataID(response.fichaPersonal?.idFichaPersonal);
-          // setcontra1(data);
           resetForm();
-          resetFiltro()
-
+          resetFiltro();
           if (fileUploadRef.current) {
             fileUploadRef.current.clear();
-          };
-
+          }
         })
         .catch((error) => {
           console.error("Error al enviar el formulario:", error);
@@ -138,7 +139,6 @@ function FichaSaludContext() {
               );
             })
             .catch((error) => {
-              console.error("Error al eliminar el registro:", error);
               swal(
                 "Error",
                 "Ha ocurrido un error al eliminar el registro",
@@ -154,31 +154,24 @@ function FichaSaludContext() {
     if (id !== undefined) {
       const editItem = contra1.find((contra) => contra.idFichaSalud === id);
       if (editItem) {
-
         const editedItem = { ...editItem };
 
-
-        if (typeof editedItem.fechaRegistro === 'string') {
+        if (typeof editedItem.fechaRegistro === "string") {
           const registro = new Date(editedItem.fechaRegistro);
           registro.setDate(registro.getDate() + 1);
           const formattedDate = registro
-            ? registro.toISOString().split('T')[0]
-            : '';
+            ? registro.toISOString().split("T")[0]
+            : "";
           editedItem.fechaRegistro = formattedDate;
         }
-
         setFormData(editedItem);
-
         setEditMode(true);
         setEditItemId(id);
-
-        setBusqueda(editItem.fichaPersonal?.ciPasaporte || '');
-        setFoto(editItem.fichaPersonal?.foto || '')
-
-        setTempPeso(editItem.pesoFichaSalud.toString() as string)
-        setTempTalla(editItem.tallaFichaSalud.toString() as string)
+        setBusqueda(editItem.fichaPersonal?.ciPasaporte || "");
+        setFoto(editItem.fichaPersonal?.foto || "");
+        setTempPeso(editItem.pesoFichaSalud.toString() as string);
+        setTempTalla(editItem.tallaFichaSalud.toString() as string);
         if (editItem.fichaPersonal !== null) {
-
           const editItemWithLabel = {
             ...editItem,
             fichaPersonal: {
@@ -197,7 +190,6 @@ function FichaSaludContext() {
 
     if (editItemId !== undefined) {
       if (validaciones()) {
-
         saludService
           .update(Number(editItemId), formData as IFichaSalud)
           .then((response) => {
@@ -206,14 +198,13 @@ function FichaSaludContext() {
               text: "Datos actualizados correctamente",
               icon: "success",
             });
-            resetForm()
-            setTempPeso('')
-            setTempTalla('')
+            resetForm();
+            setTempPeso("");
+            setTempTalla("");
             loadDataID(response.fichaPersonal?.idFichaPersonal);
             setEditMode(false);
             setEditItemId(undefined);
-            resetFiltro()
-
+            resetFiltro();
           })
           .catch((error) => {
             console.error("Error al actualizar el formulario:", error);
@@ -232,7 +223,7 @@ function FichaSaludContext() {
       condicionesMedicasAdd: "",
       carnetDiscapacidad: false,
       masaCorporal: 0,
-      situacionPsicoemocional: '',
+      situacionPsicoemocional: "",
       pesoFichaSalud: 0,
       tallaFichaSalud: 0,
       discapacidadNNAFichaSalud: false,
@@ -240,127 +231,130 @@ function FichaSaludContext() {
       porcentajeDiscapacidadFichaSalud: 0,
       enfermedadesPrevalentesFichaSalud: "",
       fichaPersonal: null,
-      fechaRegistro: new Date
+      fechaRegistro: new Date(),
     });
     setEditMode(false);
     setEditItemId(undefined);
-    setTempPeso('')
-    setTempTalla('')
+    setTempPeso("");
+    setTempTalla("");
     if (fileUploadRef.current) {
-      fileUploadRef.current.clear(); // Limpiar el campo FileUpload
+      fileUploadRef.current.clear(); 
     }
   };
-
 
   if (!dataLoaded) {
     return <div style={{ marginLeft: "50%" }}>Cargando datos...</div>;
   }
 
   function validaciones(): boolean {
-
     if (!formData.fichaPersonal?.idFichaPersonal) {
       toast.error("Seleccione al propietario de la ficha", {
         style: {
-          fontSize: '15px'
+          fontSize: "15px",
         },
         duration: 3000,
-      })
-      return false
+      });
+      return false;
     }
 
     if (!formData.tallaFichaSalud) {
-      toast('No olvides ingresar la talla más tarde', {
-        icon: '⚠️',
+      toast("No olvides ingresar la talla más tarde", {
+        icon: "⚠️",
         style: {
-          fontSize: '15px'
-
+          fontSize: "15px",
         },
         duration: 4000,
       });
     }
 
     if (!formData.pesoFichaSalud) {
-      toast('No olvides ingresar el peso más tarde', {
-        icon: '⚠️',
+      toast("No olvides ingresar el peso más tarde", {
+        icon: "⚠️",
         style: {
-          fontSize: '15px'
-
+          fontSize: "15px",
         },
         duration: 4000,
       });
     }
 
     if (!formData.masaCorporal) {
-      toast('No olvides ingresar el indice de masa corporal mas tarde más tarde', {
-        icon: '⚠️',
-        style: {
-          fontSize: '15px'
-
-        },
-        duration: 4000,
-      });
+      toast(
+        "No olvides ingresar el indice de masa corporal mas tarde más tarde",
+        {
+          icon: "⚠️",
+          style: {
+            fontSize: "15px",
+          },
+          duration: 4000,
+        }
+      );
     }
 
     if (formData.discapacidadNNAFichaSalud) {
       if (!formData.tipoDiscapacidadFichaSalud) {
-        toast.error("Por favor, proporcione informacion acerca de la discapacidad", {
-          style: {
-            fontSize: '15px'
-          },
-          duration: 3000,
-        })
-        return false
+        toast.error(
+          "Por favor, proporcione informacion acerca de la discapacidad",
+          {
+            style: {
+              fontSize: "15px",
+            },
+            duration: 3000,
+          }
+        );
+        return false;
       }
       if (!formData.porcentajeDiscapacidadFichaSalud) {
-        toast('No olvides ingresar el porcentaje de discapacidad mas tarde más tarde', {
-          icon: '⚠️',
-          style: {
-            fontSize: '15px'
-
-          },
-          duration: 4000,
-        });
+        toast(
+          "No olvides ingresar el porcentaje de discapacidad mas tarde más tarde",
+          {
+            icon: "⚠️",
+            style: {
+              fontSize: "15px",
+            },
+            duration: 4000,
+          }
+        );
       }
     }
 
     if (!formData.situacionPsicoemocional) {
-      toast('No ingresaste ninguna situacion psicoemocional', {
-        icon: '⚠️',
+      toast("No ingresaste ninguna situacion psicoemocional", {
+        icon: "⚠️",
         style: {
-          fontSize: '15px'
-
+          fontSize: "15px",
         },
         duration: 4000,
       });
     }
     if (!formData.enfermedadesPrevalentesFichaSalud) {
-      toast('No ingresaste ninguna enfermedad prevalente', {
-        icon: '⚠️',
+      toast("No ingresaste ninguna enfermedad prevalente", {
+        icon: "⚠️",
         style: {
-          fontSize: '15px'
-
+          fontSize: "15px",
         },
         duration: 4000,
       });
     }
-    if (!formData.condicionesMedicas && !formData.condicionesMedicas2 && !formData.condicionesMedicas3 && !formData.condicionesMedicas4 && !formData.condicionesMedicas5 && !formData.condicionesMedicasAdd) {
-      toast('No ingresaste ninguna condicion medica', {
-        icon: '⚠️',
+    if (
+      !formData.condicionesMedicas &&
+      !formData.condicionesMedicas2 &&
+      !formData.condicionesMedicas3 &&
+      !formData.condicionesMedicas4 &&
+      !formData.condicionesMedicas5 &&
+      !formData.condicionesMedicasAdd
+    ) {
+      toast("No ingresaste ninguna condicion medica", {
+        icon: "⚠️",
         style: {
-          fontSize: '15px'
-
+          fontSize: "15px",
         },
         duration: 4000,
       });
     }
-
-    return true
-
+    return true;
   }
 
   const loadRelacion = () => {
-
-    // console.log("4 SIN EDAD")
     fichaPersonalService
       .getBusquedaRelacion(true, busqueda)
       .then((data: IFichaPersonal[]) => {
@@ -370,67 +364,56 @@ function FichaSaludContext() {
         }));
 
         setListFperonales(dataWithLabel); // Establecer los datos procesados en el estado
-        // setDataLoaded(true); // Puedes marcar los datos como cargados si es necesario
+    
       })
       .catch((error) => {
         console.error("Error al obtener los datos:", error);
       });
 
-
-    console.log('Datos enviados:', { listFperonales });
-
   };
 
   const cargarFoto = (id: number) => {
-    const Foto = listFperonales.find((persona) => persona.idFichaPersonal === id);
-
+    const Foto = listFperonales.find(
+      (persona) => persona.idFichaPersonal === id
+    );
     if (Foto) {
-      // Actualiza formData con la foto correspondiente
       setFoto(Foto.foto);
-      if (Foto) {
-        console.log("Foto cargada")
-      }
-
     }
-
-  }
+  };
 
   const resetFiltro = () => {
-    setBusqueda('')
-    setFoto('https://cdn-icons-png.flaticon.com/128/666/666201.png')
-    setListFperonales([])
-
+    setBusqueda("");
+    setFoto("https://cdn-icons-png.flaticon.com/128/666/666201.png");
+    setListFperonales([]);
   };
 
   function loadExcelReportData(data: IFichaSalud[]) {
-    const reportName = "Ficha Medica"
-    const logo = 'G1:I1'
+    const reportName = "Ficha Medica";
+    const logo = "G1:I1";
 
-    const rowData = data.map((item) => (
-      {
-        idFichaPersonal: item.idFichaSalud,
-        tipoIdentificacion: item.fichaPersonal?.tipoIdentificacion || '',
-        ciPasaporte: item.fichaPersonal?.ciPasaporte || '',
-        apellidos: item.fichaPersonal?.apellidos || '',
-        nombres: item.fichaPersonal?.nombres || '',
-        talla: item.tallaFichaSalud + ' m' || 0.00 + ' m',
-        peso: item.pesoFichaSalud + ' kg' || 0.00 + ' kg',
-        masa: item.masaCorporal + ' %' || 0.00 + ' %',
-        discapacidad: item.discapacidadNNAFichaSalud ? 'SI' : 'NO',
-        carnet: item.carnetDiscapacidad ? 'SI' : 'NO',
-        tipoDisc: item.tipoDiscapacidadFichaSalud || 'N/A',
-        porcDisca: item.porcentajeDiscapacidadFichaSalud + ' %' || 0.00 + ' %',
-        psicoemocional: item.situacionPsicoemocional || 'Ninguna',
-        prevalentes: item.enfermedadesPrevalentesFichaSalud || 'Niunguna',
-        condicion1: item.condicionesMedicas || 'Niunguna',
-        condicion2: item.condicionesMedicas2 || 'Niunguna',
-        condicion3: item.condicionesMedicas3 || 'Niunguna',
-        condicion4: item.condicionesMedicas4 || 'Niunguna',
-        condicion5: item.condicionesMedicas5 || 'Niunguna',
-        condicionAdd: item.condicionesMedicasAdd || 'Niunguna',
-        fechaRegistro: item.fechaRegistro || ''
-      }
-    ));
+    const rowData = data.map((item) => ({
+      idFichaPersonal: item.idFichaSalud,
+      tipoIdentificacion: item.fichaPersonal?.tipoIdentificacion || "",
+      ciPasaporte: item.fichaPersonal?.ciPasaporte || "",
+      apellidos: item.fichaPersonal?.apellidos || "",
+      nombres: item.fichaPersonal?.nombres || "",
+      talla: item.tallaFichaSalud + " m" || 0.0 + " m",
+      peso: item.pesoFichaSalud + " kg" || 0.0 + " kg",
+      masa: item.masaCorporal + " %" || 0.0 + " %",
+      discapacidad: item.discapacidadNNAFichaSalud ? "SI" : "NO",
+      carnet: item.carnetDiscapacidad ? "SI" : "NO",
+      tipoDisc: item.tipoDiscapacidadFichaSalud || "N/A",
+      porcDisca: item.porcentajeDiscapacidadFichaSalud + " %" || 0.0 + " %",
+      psicoemocional: item.situacionPsicoemocional || "Ninguna",
+      prevalentes: item.enfermedadesPrevalentesFichaSalud || "Niunguna",
+      condicion1: item.condicionesMedicas || "Niunguna",
+      condicion2: item.condicionesMedicas2 || "Niunguna",
+      condicion3: item.condicionesMedicas3 || "Niunguna",
+      condicion4: item.condicionesMedicas4 || "Niunguna",
+      condicion5: item.condicionesMedicas5 || "Niunguna",
+      condicionAdd: item.condicionesMedicasAdd || "Niunguna",
+      fechaRegistro: item.fechaRegistro || "",
+    }));
     const headerItems: IHeaderItem[] = [
       { header: "№ FICHA" },
       { header: "TIPO IDENTIFICACIÓN" },
@@ -452,17 +435,14 @@ function FichaSaludContext() {
       { header: "CONDICION MÉDICA 4" },
       { header: "CONDICION MÉDICA 5" },
       { header: "CONDICION MÉDICA ADICIONAL" },
-      { header: "FECHA REGISTRO" }
-
-
-    ]
+      { header: "FECHA REGISTRO" },
+    ];
     setExcelReportData({
       reportName,
       headerItems,
       rowData,
-      logo
-    }
-    )
+      logo,
+    });
   }
 
   const loadDataID = (id: number) => {
@@ -479,14 +459,15 @@ function FichaSaludContext() {
       });
   };
 
-
   return (
     <>
       <div>
-        <Toaster position="top-right"
-          reverseOrder={true} />
+        <Toaster position="top-right" reverseOrder={true} />
       </div>
-      <Fieldset className="fgrid col-fixed " style={{ display: 'flex', justifyContent: 'center' }}>
+      <Fieldset
+        className="fgrid col-fixed "
+        style={{ display: "flex", justifyContent: "center" }}
+      >
         <Card
           header={cardHeader}
           className="border-solid border-red-800 border-3 flex-1 flex-wrap"
@@ -494,19 +475,32 @@ function FichaSaludContext() {
         >
           <div
             className="h1-rem"
-            style={{ display: 'flex', justifyContent: 'center' }}
+            style={{ display: "flex", justifyContent: "center" }}
           >
             <h1 className="text-5xl font-smibold lg:md-2 h-full max-w-full max-h-full min-w-min">
               Ficha Médica
             </h1>
           </div>
 
-          <div className="" style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "right" }}>
-            <label className="font-medium w-auto min-w-min" htmlFor="fichaPersonal" style={{ marginRight: "10px" }}>Fecha de Registro:</label>
+          <div
+            className=""
+            style={{
+              display: "flex",
+              width: "100%",
+              alignItems: "center",
+              justifyContent: "right",
+            }}
+          >
+            <label
+              className="font-medium w-auto min-w-min"
+              htmlFor="fichaPersonal"
+              style={{ marginRight: "10px" }}
+            >
+              Fecha de Registro:
+            </label>
             <Calendar
               disabled
               dateFormat="dd-mm-yy" // Cambiar el formato a ISO 8601
-
               style={{ width: "95px", marginRight: "25px", fontWeight: "bold" }}
               onChange={(e: CalendarChangeEvent) => {
                 if (e.value !== undefined) {
@@ -516,9 +510,11 @@ function FichaSaludContext() {
                   });
                 }
               }}
-
-              value={typeof formData.fechaRegistro === 'string' ? new Date(formData.fechaRegistro) : new Date()}
-
+              value={
+                typeof formData.fechaRegistro === "string"
+                  ? new Date(formData.fechaRegistro)
+                  : new Date()
+              }
             />
           </div>
 
@@ -529,55 +525,73 @@ function FichaSaludContext() {
                 <b>Filtro</b>
               </div>
             </Divider>
-            <Fieldset legend="Filtros de busqueda" style={{ width: "1000px", position: "relative" }}>
-              <div style={{ position: "absolute", top: "0", right: "5px", marginTop: "-15px" }}>
-                <label className="font-medium w-auto min-w-min" htmlFor="rangoEdad" style={{ marginRight: "10px" }}>Limpiar filtros:</label>
+            <Fieldset
+              legend="Filtros de busqueda"
+              style={{ width: "1000px", position: "relative" }}
+            >
+              <div
+                style={{
+                  position: "absolute",
+                  top: "0",
+                  right: "5px",
+                  marginTop: "-15px",
+                }}
+              >
+                <label
+                  className="font-medium w-auto min-w-min"
+                  htmlFor="rangoEdad"
+                  style={{ marginRight: "10px" }}
+                >
+                  Limpiar filtros:
+                </label>
 
-                <Button icon="pi pi-times" rounded severity="danger" aria-label="Cancel" onClick={() => resetFiltro()} />
+                <Button
+                  icon="pi pi-times"
+                  rounded
+                  severity="danger"
+                  aria-label="Cancel"
+                  onClick={() => resetFiltro()}
+                />
               </div>
 
               <section className="layout">
                 <div className="">
                   <div input-box>
-                    <label className="font-medium w-auto min-w-min" htmlFor='genero'>Cedula o Nombre:</label>
+                    <label
+                      className="font-medium w-auto min-w-min"
+                      htmlFor="genero"
+                    >
+                      Cedula o Nombre:
+                    </label>
 
                     <div className="flex-1">
                       <InputText
                         placeholder="Cedula de identidad"
                         id="integer"
-                        // keyfilter="int"
                         style={{ width: "75%" }}
-
                         onChange={(e) => {
-                          // Actualizar el estado usando setFormData
-                          setListFperonales([]); // Asignar un arreglo vacío para vaciar el estado listFperonales
-
+                          setListFperonales([]); 
                           setBusqueda(e.currentTarget.value);
-
-                          // Luego, llamar a loadRelacion después de que se actualice el estado
                           loadRelacion();
                         }}
-
-                        // onKeyUp={(e) => {
-                        //   setListFperonales([]); // Asignar un arreglo vacío para vaciar el estado listFperonales
-
-                        //   setBusqueda(e.currentTarget.value);
-
-                        //   // Luego, llamar a loadRelacion después de que se actualice el estado
-                        //   loadRelacion();
-                        //   loadRelacion(); // Llama a tu método aquí o realiza las acciones necesarias.
-                        // }}
-
                         value={busqueda}
                       />
 
-                      <Button icon="pi pi-search" className="p-button-warning" />
+                      <Button
+                        icon="pi pi-search"
+                        className="p-button-warning"
+                      />
                     </div>
                   </div>
                 </div>
                 <div className="">
                   <div>
-                    <label className="font-medium w-auto min-w-min" htmlFor="fichaPersonal">Resultados de la busqueda:</label>
+                    <label
+                      className="font-medium w-auto min-w-min"
+                      htmlFor="fichaPersonal"
+                    >
+                      Resultados de la busqueda:
+                    </label>
                     <Dropdown
                       className="text-2xl"
                       id="tiempo_dedicacion"
@@ -589,32 +603,33 @@ function FichaSaludContext() {
                           ...formData,
                           fichaPersonal: {
                             idFichaPersonal: parseInt(e.value),
-                            foto: '',
-                            apellidos: '',
-                            nombres: '',
-                            ciPasaporte: '',
-                            tipoIdentificacion: '',
+                            foto: "",
+                            apellidos: "",
+                            nombres: "",
+                            ciPasaporte: "",
+                            tipoIdentificacion: "",
                             actTrabInfantil: false,
-                            detalleActTrabInfantil: '',
-                            nacionalidad: '',
-                            fechaNacimiento: '',
+                            detalleActTrabInfantil: "",
+                            nacionalidad: "",
+                            fechaNacimiento: "",
                             rangoEdad: null,
-                            genero: '',
+                            genero: "",
                             etnia: null,
                             parroquia: null,
-                            zona: '',
-                            barrioSector: '',
-                            direccion: '',
-                            referencia: '',
+                            zona: "",
+                            barrioSector: "",
+                            direccion: "",
+                            referencia: "",
                             coordenadaX: 0,
                             coordenadaY: 0,
                             estVinculacion: true,
-                            fechaRegistro: new Date()
-                          }
+                            fechaRegistro: new Date(),
+                            anexosCedula: "",
+                            anexosDocumentosLegales: "",
+                          },
                         });
-                        cargarFoto(parseInt(e.value))
-                        loadDataID(parseInt(e.value))
-
+                        cargarFoto(parseInt(e.value));
+                        loadDataID(parseInt(e.value));
                       }}
                       value={formData.fichaPersonal?.idFichaPersonal}
                       optionLabel="label"
@@ -629,7 +644,6 @@ function FichaSaludContext() {
                       src={foto}
                       alt="FotoNNA"
                       style={{
-                        // width: "80px",
                         height: "80px",
                         borderRadius: "50%", // Borde redondeado
                         border: "2px solid gray", // Borde gris
@@ -640,8 +654,11 @@ function FichaSaludContext() {
               </section>
             </Fieldset>
 
-            <form onSubmit={editMode ? handleUpdate : handleSubmit} className='form' encType="multipart/form-data">
-
+            <form
+              onSubmit={editMode ? handleUpdate : handleSubmit}
+              className="form"
+              encType="multipart/form-data"
+            >
               <Divider align="left">
                 <div className="inline-flex align-items-center">
                   <i className="pi pi-book mr-2"></i>
@@ -649,10 +666,13 @@ function FichaSaludContext() {
                 </div>
               </Divider>
 
-              <div className='column' style={{}}>
-                <div className='column' style={{ width: "30.3%" }}>
-                  <div className='input-box' style={{}}>
-                    <label className="font-medium w-auto min-w-min" htmlFor="tipoDocumento">
+              <div className="column" style={{}}>
+                <div className="column" style={{ width: "30.3%" }}>
+                  <div className="input-box" style={{}}>
+                    <label
+                      className="font-medium w-auto min-w-min"
+                      htmlFor="tipoDocumento"
+                    >
                       Talla:
                     </label>
 
@@ -662,10 +682,12 @@ function FichaSaludContext() {
                       className="text-2xl"
                       inputId="percent"
                       value={formData.tallaFichaSalud || 0}
-                      onValueChange={(e: InputNumberValueChangeEvent) => setFormData({
-                        ...formData,
-                        tallaFichaSalud: e.value || 0,
-                      })}
+                      onValueChange={(e: InputNumberValueChangeEvent) =>
+                        setFormData({
+                          ...formData,
+                          tallaFichaSalud: e.value || 0,
+                        })
+                      }
                       suffix=" m"
                       min={0}
                       minFractionDigits={2}
@@ -673,12 +695,14 @@ function FichaSaludContext() {
                       placeholder="Ingrese la talla"
                       style={{ width: "100%" }}
                     />
-
                   </div>
                 </div>
-                <div className='column' style={{ width: "30.3%" }}>
-                  <div className='input-box' style={{}}>
-                    <label className="font-medium w-auto min-w-min" htmlFor="tipoDocumento">
+                <div className="column" style={{ width: "30.3%" }}>
+                  <div className="input-box" style={{}}>
+                    <label
+                      className="font-medium w-auto min-w-min"
+                      htmlFor="tipoDocumento"
+                    >
                       Peso:
                     </label>
                     <InputNumber
@@ -687,10 +711,12 @@ function FichaSaludContext() {
                       className="text-2xl"
                       inputId="percent"
                       value={formData.pesoFichaSalud || 0}
-                      onValueChange={(e: InputNumberValueChangeEvent) => setFormData({
-                        ...formData,
-                        pesoFichaSalud: e.value || 0,
-                      })}
+                      onValueChange={(e: InputNumberValueChangeEvent) =>
+                        setFormData({
+                          ...formData,
+                          pesoFichaSalud: e.value || 0,
+                        })
+                      }
                       suffix=" kg"
                       min={0}
                       minFractionDigits={2}
@@ -700,9 +726,12 @@ function FichaSaludContext() {
                     />
                   </div>
                 </div>
-                <div className='column' style={{ width: "30.3%" }}>
-                  <div className='input-box' style={{}}>
-                    <label className="font-medium w-auto min-w-min" htmlFor="tipoDocumento">
+                <div className="column" style={{ width: "30.3%" }}>
+                  <div className="input-box" style={{}}>
+                    <label
+                      className="font-medium w-auto min-w-min"
+                      htmlFor="tipoDocumento"
+                    >
                       Indice de masa corporal:
                     </label>
 
@@ -712,10 +741,12 @@ function FichaSaludContext() {
                       className="text-2xl"
                       inputId="percent"
                       value={formData.masaCorporal || 0}
-                      onValueChange={(e: InputNumberValueChangeEvent) => setFormData({
-                        ...formData,
-                        masaCorporal: e.value || 0,
-                      })}
+                      onValueChange={(e: InputNumberValueChangeEvent) =>
+                        setFormData({
+                          ...formData,
+                          masaCorporal: e.value || 0,
+                        })
+                      }
                       suffix=" %"
                       min={0}
                       minFractionDigits={2}
@@ -725,19 +756,20 @@ function FichaSaludContext() {
                     />
                   </div>
                 </div>
-                {/* <div className='column' style={{ width: "25%" }}>
-                </div> */}
               </div>
 
-              <div className='column' style={{}}>
-                <div className='column' style={{ width: "30.3%" }}>
-                  <div className='column' style={{ width: "30%" }}>
-                    <div className='input-box' style={{}}>
-                      <label className="font-medium w-auto min-w-min" htmlFor="tipoDocumento">
+              <div className="column" style={{}}>
+                <div className="column" style={{ width: "30.3%" }}>
+                  <div className="column" style={{ width: "30%" }}>
+                    <div className="input-box" style={{}}>
+                      <label
+                        className="font-medium w-auto min-w-min"
+                        htmlFor="tipoDocumento"
+                      >
                         Discapacidad:
                       </label>
 
-                      <div className="mydict" >
+                      <div className="mydict">
                         <div>
                           <label className="radioLabel">
                             <input
@@ -746,7 +778,9 @@ function FichaSaludContext() {
                               id="discapacidadTrue"
                               name="discapacidad"
                               value="true"
-                              checked={formData.discapacidadNNAFichaSalud === true}
+                              checked={
+                                formData.discapacidadNNAFichaSalud === true
+                              }
                               onChange={() =>
                                 setFormData({
                                   ...formData,
@@ -763,11 +797,16 @@ function FichaSaludContext() {
                               id="discapacidadFalse"
                               name="discapacidad"
                               value="false"
-                              checked={formData.discapacidadNNAFichaSalud === false}
+                              checked={
+                                formData.discapacidadNNAFichaSalud === false
+                              }
                               onChange={() =>
                                 setFormData({
                                   ...formData,
-                                  discapacidadNNAFichaSalud: false, carnetDiscapacidad: false, tipoDiscapacidadFichaSalud: '', porcentajeDiscapacidadFichaSalud: 0,
+                                  discapacidadNNAFichaSalud: false,
+                                  carnetDiscapacidad: false,
+                                  tipoDiscapacidadFichaSalud: "",
+                                  porcentajeDiscapacidadFichaSalud: 0,
                                 })
                               }
                             />
@@ -777,19 +816,28 @@ function FichaSaludContext() {
                       </div>
                     </div>
                   </div>
-                  <div className='column' style={{ width: "70%" }}>
-                    <div className='input-box' style={{}} >
-                      <label className="font-medium w-auto min-w-min" htmlFor="carner">
+                  <div className="column" style={{ width: "70%" }}>
+                    <div className="input-box" style={{}}>
+                      <label
+                        className="font-medium w-auto min-w-min"
+                        htmlFor="carner"
+                      >
                         Carnet de discapacidad:
                       </label>
 
-                      <div className="mydict" style={{ opacity: !formData.discapacidadNNAFichaSalud ? 0.5 : 1 }}>
+                      <div
+                        className="mydict"
+                        style={{
+                          opacity: !formData.discapacidadNNAFichaSalud
+                            ? 0.5
+                            : 1,
+                        }}
+                      >
                         <div>
                           <label className="radioLabel">
                             <input
                               className="input"
                               disabled={!formData.discapacidadNNAFichaSalud}
-
                               type="radio"
                               id="carnerTrue"
                               name="carner"
@@ -808,7 +856,6 @@ function FichaSaludContext() {
                             <input
                               className="input"
                               disabled={!formData.discapacidadNNAFichaSalud}
-
                               type="radio"
                               id="carnerFalse"
                               name="carner"
@@ -827,11 +874,13 @@ function FichaSaludContext() {
                       </div>
                     </div>
                   </div>
-
                 </div>
-                <div className='column' style={{ width: "30.3%" }}>
-                  <div className='input-box' style={{}}>
-                    <label className="font-medium w-auto min-w-min" htmlFor="tipoDocumento">
+                <div className="column" style={{ width: "30.3%" }}>
+                  <div className="input-box" style={{}}>
+                    <label
+                      className="font-medium w-auto min-w-min"
+                      htmlFor="tipoDocumento"
+                    >
                       Tipo de Discapacidad:
                     </label>
                     <InputTextarea
@@ -840,7 +889,6 @@ function FichaSaludContext() {
                       id="tipoDiscapacidad"
                       name="tipoDiscapacidad"
                       style={{ width: "100%" }}
-
                       disabled={!formData.discapacidadNNAFichaSalud}
                       onChange={(e) =>
                         setFormData({
@@ -852,9 +900,12 @@ function FichaSaludContext() {
                     />
                   </div>
                 </div>
-                <div className='column' style={{ width: "30.3%" }}>
-                  <div className='input-box' style={{}}>
-                    <label className="font-medium w-auto min-w-min" htmlFor="tipoDocumento">
+                <div className="column" style={{ width: "30.3%" }}>
+                  <div className="input-box" style={{}}>
+                    <label
+                      className="font-medium w-auto min-w-min"
+                      htmlFor="tipoDocumento"
+                    >
                       Porcentaje de Discapacidad:
                     </label>
 
@@ -865,10 +916,12 @@ function FichaSaludContext() {
                       inputId="percent"
                       disabled={!formData.discapacidadNNAFichaSalud}
                       value={formData.porcentajeDiscapacidadFichaSalud || 0}
-                      onValueChange={(e: InputNumberValueChangeEvent) => setFormData({
-                        ...formData,
-                        porcentajeDiscapacidadFichaSalud: e.value || 0,
-                      })}
+                      onValueChange={(e: InputNumberValueChangeEvent) =>
+                        setFormData({
+                          ...formData,
+                          porcentajeDiscapacidadFichaSalud: e.value || 0,
+                        })
+                      }
                       suffix=" %"
                       min={0}
                       minFractionDigits={2}
@@ -876,15 +929,17 @@ function FichaSaludContext() {
                       placeholder="Ingrese el porcentaje de discapacidad"
                       style={{ width: "100%" }}
                     />
-
                   </div>
                 </div>
               </div>
 
-              <div className='column' style={{}}>
-                <div className='column' style={{ width: "50%" }}>
-                  <div className='input-box' style={{}}>
-                    <label className="font-medium w-auto min-w-min" htmlFor="tipoDocumento">
+              <div className="column" style={{}}>
+                <div className="column" style={{ width: "50%" }}>
+                  <div className="input-box" style={{}}>
+                    <label
+                      className="font-medium w-auto min-w-min"
+                      htmlFor="tipoDocumento"
+                    >
                       Situación psicoemocional:
                     </label>
                     <InputTextarea
@@ -896,18 +951,19 @@ function FichaSaludContext() {
                       onChange={(e) =>
                         setFormData({
                           ...formData,
-                          situacionPsicoemocional:
-                            e.currentTarget.value,
+                          situacionPsicoemocional: e.currentTarget.value,
                         })
                       }
                       value={formData.situacionPsicoemocional}
                     />
                   </div>
-
                 </div>
-                <div className='column' style={{ width: "50%" }}>
-                  <div className='input-box' style={{}}>
-                    <label className="font-medium w-auto min-w-min" htmlFor="tipoDocumento">
+                <div className="column" style={{ width: "50%" }}>
+                  <div className="input-box" style={{}}>
+                    <label
+                      className="font-medium w-auto min-w-min"
+                      htmlFor="tipoDocumento"
+                    >
                       Enfermedades Prevalentes:
                     </label>
                     <InputTextarea
@@ -930,10 +986,13 @@ function FichaSaludContext() {
               </div>
               <Divider />
 
-              <div className='column' style={{}}>
-                <div className='column' style={{ width: "30.3%" }}>
-                  <div className='input-box' style={{}}>
-                    <label className="font-medium w-auto min-w-min" htmlFor="tipoDocumento">
+              <div className="column" style={{}}>
+                <div className="column" style={{ width: "30.3%" }}>
+                  <div className="input-box" style={{}}>
+                    <label
+                      className="font-medium w-auto min-w-min"
+                      htmlFor="tipoDocumento"
+                    >
                       Condicion médica 1:
                     </label>
                     <InputTextarea
@@ -953,9 +1012,12 @@ function FichaSaludContext() {
                   </div>
                 </div>
 
-                <div className='column' style={{ width: "30.3%" }}>
-                  <div className='input-box' style={{}}>
-                    <label className="font-medium w-auto min-w-min" htmlFor="tipoDocumento">
+                <div className="column" style={{ width: "30.3%" }}>
+                  <div className="input-box" style={{}}>
+                    <label
+                      className="font-medium w-auto min-w-min"
+                      htmlFor="tipoDocumento"
+                    >
                       Condicione médica 2:
                     </label>
                     <InputTextarea
@@ -974,9 +1036,12 @@ function FichaSaludContext() {
                     />
                   </div>
                 </div>
-                <div className='column' style={{ width: "30.3%" }}>
-                  <div className='input-box' style={{}}>
-                    <label className="font-medium w-auto min-w-min" htmlFor="tipoDocumento">
+                <div className="column" style={{ width: "30.3%" }}>
+                  <div className="input-box" style={{}}>
+                    <label
+                      className="font-medium w-auto min-w-min"
+                      htmlFor="tipoDocumento"
+                    >
                       Condicion médica 3:
                     </label>
                     <InputTextarea
@@ -997,10 +1062,13 @@ function FichaSaludContext() {
                 </div>
               </div>
 
-              <div className='column' style={{}}>
-                <div className='column' style={{ width: "30.3%" }}>
-                  <div className='input-box' style={{}}>
-                    <label className="font-medium w-auto min-w-min" htmlFor="tipoDocumento">
+              <div className="column" style={{}}>
+                <div className="column" style={{ width: "30.3%" }}>
+                  <div className="input-box" style={{}}>
+                    <label
+                      className="font-medium w-auto min-w-min"
+                      htmlFor="tipoDocumento"
+                    >
                       Condicion médica 4:
                     </label>
                     <InputTextarea
@@ -1019,9 +1087,12 @@ function FichaSaludContext() {
                     />
                   </div>
                 </div>
-                <div className='column' style={{ width: "30.3%" }}>
-                  <div className='input-box' style={{}}>
-                    <label className="font-medium w-auto min-w-min" htmlFor="tipoDocumento">
+                <div className="column" style={{ width: "30.3%" }}>
+                  <div className="input-box" style={{}}>
+                    <label
+                      className="font-medium w-auto min-w-min"
+                      htmlFor="tipoDocumento"
+                    >
                       Condicion médica 5:
                     </label>
                     <InputTextarea
@@ -1040,9 +1111,12 @@ function FichaSaludContext() {
                     />
                   </div>
                 </div>
-                <div className='column' style={{ width: "30.3%" }}>
-                  <div className='input-box' style={{}}>
-                    <label className="font-medium w-auto min-w-min" htmlFor="tipoDocumento">
+                <div className="column" style={{ width: "30.3%" }}>
+                  <div className="input-box" style={{}}>
+                    <label
+                      className="font-medium w-auto min-w-min"
+                      htmlFor="tipoDocumento"
+                    >
                       Condicione médica adicional:
                     </label>
                     <InputTextarea
@@ -1063,9 +1137,11 @@ function FichaSaludContext() {
                 </div>
               </div>
 
-              <div className='btnSend' style={{ marginTop: "25px" }}>
-                <div className="flex align-items-center justify-content-center w-auto min-w-min"
-                  style={{ gap: "25px" }}>
+              <div className="btnSend" style={{ marginTop: "25px" }}>
+                <div
+                  className="flex align-items-center justify-content-center w-auto min-w-min"
+                  style={{ gap: "25px" }}
+                >
                   <Button
                     type="submit"
                     label={editMode ? "Actualizar" : "Guardar"}
@@ -1088,7 +1164,8 @@ function FichaSaludContext() {
                       resetForm();
                       resetFiltro();
                       setEditMode(false);
-                    }} />
+                    }}
+                  />
                 </div>
               </div>
             </form>
@@ -1101,17 +1178,35 @@ function FichaSaludContext() {
             </div>
           </Divider>
 
-          <div className="opcTblLayout" >
-            <div className="" style={{ flex: 1, display: "flex", alignItems: "flex-end", justifyContent: "flex-end" }}>
+          <div className="opcTblLayout">
+            <div
+              className=""
+              style={{
+                flex: 1,
+                display: "flex",
+                alignItems: "flex-end",
+                justifyContent: "flex-end",
+              }}
+            >
+              <div className="opcTbl" style={{ justifyContent: "right" }}>
+                <label
+                  className="font-medium w-auto min-w-min"
+                  htmlFor="estado"
+                >
+                  Cargar todo:
+                </label>
 
-              <div className="opcTbl" style={{ justifyContent: "right" }} >
-                <label className="font-medium w-auto min-w-min" htmlFor='estado'>Cargar todo:</label>
-
-                <Button className="buttonIcon" // Agrega una clase CSS personalizada
-                  icon="pi pi-refresh" style={{ width: "120px", height: "39px" }}
-                  severity="danger" aria-label="Cancel" onClick={() => { loadData(); resetFiltro(); }}
+                <Button
+                  className="buttonIcon" // Agrega una clase CSS personalizada
+                  icon="pi pi-refresh"
+                  style={{ width: "120px", height: "39px" }}
+                  severity="danger"
+                  aria-label="Cancel"
+                  onClick={() => {
+                    loadData();
+                    resetFiltro();
+                  }}
                 />
-
               </div>
               <ReportBar
                 reportName={excelReportData?.reportName!}
@@ -1122,9 +1217,9 @@ function FichaSaludContext() {
             </div>
           </div>
 
-          <div className="tblContainer" >
+          <div className="tblContainer">
             <table className="tableFichas">
-              <thead className="theadTab" >
+              <thead className="theadTab">
                 <tr style={{ backgroundColor: "#871b1b", color: "white" }}>
                   <th className="trFichas">Nº de Ficha</th>
                   <th className="trFichas">Cedula/Pasaporte</th>
@@ -1149,19 +1244,49 @@ function FichaSaludContext() {
                     key={contrato.idFichaSalud?.toString()}
                   >
                     <td className="tdFichas">{contrato.idFichaSalud}</td>
-                    <td className="tdFichas">{contrato.fichaPersonal?.ciPasaporte}</td>
-                    <td className="tdFichas">{contrato.fichaPersonal?.nombres}</td>
-                    <td className="tdFichas">{contrato.fichaPersonal?.apellidos} </td>
-                    <td className="tdFichas">{contrato.pesoFichaSalud + " kg" || "0.00 kg"}</td>
-                    <td className="tdFichas">{contrato.tallaFichaSalud + " cm" || "0.00 cm"}</td>
-                    <td className="tdFichas">{contrato.masaCorporal + " %" || "0.00 %"}</td>
-                    <td className="tdFichas">{contrato.discapacidadNNAFichaSalud ? "Si" : "No"}</td>
-                    <td className="tdFichas">{contrato.tipoDiscapacidadFichaSalud || 'Ninguna'}</td>
-                    <td className="tdFichas">{contrato.porcentajeDiscapacidadFichaSalud + " %" || "0.00 %"}</td>
-                    <td className="tdFichas">{contrato.enfermedadesPrevalentesFichaSalud || 'Ninguna'}</td>
-                    <td className="tdFichas">{contrato.condicionesMedicas || contrato.condicionesMedicas2 || contrato.condicionesMedicas3 || contrato.condicionesMedicas4 || contrato.condicionesMedicas5 || contrato.condicionesMedicasAdd || 'Ninguna'}</td>
                     <td className="tdFichas">
-                      <Button className="buttonIcon"
+                      {contrato.fichaPersonal?.ciPasaporte}
+                    </td>
+                    <td className="tdFichas">
+                      {contrato.fichaPersonal?.nombres}
+                    </td>
+                    <td className="tdFichas">
+                      {contrato.fichaPersonal?.apellidos}{" "}
+                    </td>
+                    <td className="tdFichas">
+                      {contrato.pesoFichaSalud + " kg" || "0.00 kg"}
+                    </td>
+                    <td className="tdFichas">
+                      {contrato.tallaFichaSalud + " cm" || "0.00 cm"}
+                    </td>
+                    <td className="tdFichas">
+                      {contrato.masaCorporal + " %" || "0.00 %"}
+                    </td>
+                    <td className="tdFichas">
+                      {contrato.discapacidadNNAFichaSalud ? "Si" : "No"}
+                    </td>
+                    <td className="tdFichas">
+                      {contrato.tipoDiscapacidadFichaSalud || "Ninguna"}
+                    </td>
+                    <td className="tdFichas">
+                      {contrato.porcentajeDiscapacidadFichaSalud + " %" ||
+                        "0.00 %"}
+                    </td>
+                    <td className="tdFichas">
+                      {contrato.enfermedadesPrevalentesFichaSalud || "Ninguna"}
+                    </td>
+                    <td className="tdFichas">
+                      {contrato.condicionesMedicas ||
+                        contrato.condicionesMedicas2 ||
+                        contrato.condicionesMedicas3 ||
+                        contrato.condicionesMedicas4 ||
+                        contrato.condicionesMedicas5 ||
+                        contrato.condicionesMedicasAdd ||
+                        "Ninguna"}
+                    </td>
+                    <td className="tdFichas">
+                      <Button
+                        className="buttonIcon"
                         type="button"
                         icon="pi pi-file-edit"
                         style={{
@@ -1175,13 +1300,12 @@ function FichaSaludContext() {
                         onClick={() =>
                           handleEdit(contrato.idFichaSalud?.valueOf())
                         }
-                      // Agrega el evento onClick para la operación de editar
                       />
-
                     </td>
 
                     <td className="tdFichas">
-                      <Button className="buttonIcon"
+                      <Button
+                        className="buttonIcon"
                         type="button"
                         icon="pi pi-trash"
                         style={{
@@ -1195,7 +1319,6 @@ function FichaSaludContext() {
                         onClick={() =>
                           handleDelete(contrato.idFichaSalud?.valueOf())
                         }
-                      // Agrega el evento onClick para la operación de eliminar
                       />
                     </td>
                   </tr>
