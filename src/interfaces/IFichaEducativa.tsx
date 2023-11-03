@@ -13,5 +13,8 @@ export interface IFichaEducativa {
   gradoEducativo: string;
   fichaPersonal: IFichaPersonal | null;
   fechaRegistro: string | Date | Date[] | null;
-
+  anexosMatricula: string;
+  anexosCalificaciones1: string;
+  anexosCalificaciones2: string;
+  anexosCalificaciones3: string;
 }

@@ -8,16 +8,18 @@ export interface IFichaSalud {
   condicionesMedicas4: string;
   condicionesMedicas5: string;
   condicionesMedicasAdd: string;
-  carnetDiscapacidad: boolean;//
-  situacionPsicoemocional: string;//
-  masaCorporal: number;//
-  pesoFichaSalud: number;//
-  tallaFichaSalud: number;//
-  discapacidadNNAFichaSalud: boolean;//
-  tipoDiscapacidadFichaSalud: string;//
-  porcentajeDiscapacidadFichaSalud: number;//
-  enfermedadesPrevalentesFichaSalud: string;//
-  fichaPersonal: IFichaPersonal | null;//
-  fechaRegistro: string | Date | Date[] | null;//
-
+  carnetDiscapacidad: boolean; //
+  situacionPsicoemocional: string; //
+  masaCorporal: number; //
+  pesoFichaSalud: number; //
+  tallaFichaSalud: number; //
+  discapacidadNNAFichaSalud: boolean; //
+  tipoDiscapacidadFichaSalud: string; //
+  porcentajeDiscapacidadFichaSalud: number; //
+  enfermedadesPrevalentesFichaSalud: string; //
+  fichaPersonal: IFichaPersonal | null; //
+  fechaRegistro: string | Date | Date[] | null; //
+  anexosCertificadoSalud: string;
+  anexosCertificadoSalud2: string;
+  anexosDiscapacidad: string;
 }

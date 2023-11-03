@@ -19,6 +19,5 @@ export interface IFichaRepresentante {
   nacionalidadRepre: string;
   generoRepre: string;
   tipoIdentificacionRepre: string;
-
-
+  anexosCedulaPPFF: string;
 }

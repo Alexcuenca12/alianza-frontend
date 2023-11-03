@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { InputText } from "primereact/inputtext";
-import { FileUpload } from "primereact/fileupload";
+import { FileUpload, FileUploadSelectEvent } from "primereact/fileupload";
 import { Button } from "primereact/button";
 import { Fieldset } from "primereact/fieldset";
 import { Card } from "primereact/card";
@@ -12,28 +12,34 @@ import { FichaPersonalService } from "../../services/FichaPersonalService";
 import swal from "sweetalert";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Dropdown } from "primereact/dropdown";
-import { Calendar, CalendarChangeEvent } from 'primereact/calendar';
-import { IExcelReportParams, IHeaderItem } from "../../interfaces/IExcelReportParams";
+import { Calendar, CalendarChangeEvent } from "primereact/calendar";
+import {
+  IExcelReportParams,
+  IHeaderItem,
+} from "../../interfaces/IExcelReportParams";
 import { ReportBar } from "../../common/ReportBar";
-import { Divider } from 'primereact/divider';
-import '../../styles/FiltroFichas.css'
+import { Divider } from "primereact/divider";
+import "../../styles/FiltroFichas.css";
 import toast, { Toaster } from "react-hot-toast";
+import { PiFilePdfFill } from "react-icons/pi";
 
 function FichaInscripcionContext() {
-  const [idPersona, setIDPersona] = useState<number>(0);
-  const personalService = new FichaPersonalService();
   const fichaPersonalService = new FichaPersonalService();
 
-  const [excelReportData, setExcelReportData] = useState<IExcelReportParams | null>(null);
+  const [excelReportData, setExcelReportData] =
+    useState<IExcelReportParams | null>(null);
 
-
-  const [busqueda, setBusqueda] = useState<string>('');
-  const [foto, setFoto] = useState<string>('https://cdn-icons-png.flaticon.com/128/666/666201.png');
+  const [busqueda, setBusqueda] = useState<string>("");
+  const [foto, setFoto] = useState<string>(
+    "https://cdn-icons-png.flaticon.com/128/666/666201.png"
+  );
   const [listFperonales, setListFperonales] = useState<IFichaPersonal[]>([]);
 
-
-  const [listJornadas, setListJornadas] = useState<string[]>(['Matutina', 'Vespertina', 'Nocturna']);
-
+  const [listJornadas, setListJornadas] = useState<string[]>([
+    "Matutina",
+    "Vespertina",
+    "Nocturna",
+  ]);
 
   const [contra1, setcontra1] = useState<IFichaEducativa[]>([]);
   const [formData, setFormData] = useState<IFichaEducativa>({
@@ -44,12 +50,15 @@ function FichaInscripcionContext() {
     jornadaEducativa: "",
     observacionesEducativa: "",
     gradoEducativo: "",
-    detalleRepitente: '',
+    detalleRepitente: "",
     repitente: false,
-    situacionPsicopedagogica: '',
+    situacionPsicopedagogica: "",
     fichaPersonal: null,
-    fechaRegistro: new Date
-
+    fechaRegistro: new Date(),
+    anexosMatricula: "",
+    anexosCalificaciones1: "",
+    anexosCalificaciones2: "",
+    anexosCalificaciones3: "",
   });
 
   const fileUploadRef = useRef<FileUpload>(null);
@@ -67,7 +76,7 @@ function FichaInscripcionContext() {
         setDataLoaded(true); // Marcar los datos como cargados
       })
       .catch((error) => {
-        console.error("Error al obtener los datos:", error);
+        swal("Error", "Ha ocurrido un error al cargar la información", "error");
       });
   };
   useEffect(() => {
@@ -77,11 +86,10 @@ function FichaInscripcionContext() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validaciones()) {
-
       educaService
         .save(formData)
         .then((response) => {
-          swal("Publicacion", "Datos Guardados Correctamente", "success");
+          swal("Ficha Educativa", "Datos Guardados Correctamente", "success");
           loadDataID(response.fichaPersonal?.idFichaPersonal);
 
           resetForm();
@@ -128,7 +136,6 @@ function FichaInscripcionContext() {
               );
             })
             .catch((error) => {
-              console.error("Error al eliminar el registro:", error);
               swal(
                 "Error",
                 "Ha ocurrido un error al eliminar el registro",
@@ -144,18 +151,16 @@ function FichaInscripcionContext() {
     if (id !== undefined) {
       const editItem = contra1.find((contra) => contra.idFichaEducativa === id);
       if (editItem) {
-
         const editedItem = { ...editItem };
 
-        if (typeof editedItem.fechaRegistro === 'string') {
+        if (typeof editedItem.fechaRegistro === "string") {
           const registro = new Date(editedItem.fechaRegistro);
           registro.setDate(registro.getDate() + 1);
           const formattedDate = registro
-            ? registro.toISOString().split('T')[0]
-            : '';
+            ? registro.toISOString().split("T")[0]
+            : "";
           editedItem.fechaRegistro = formattedDate;
         }
-
 
         setFormData(editedItem);
 
@@ -163,11 +168,9 @@ function FichaInscripcionContext() {
         setEditItemId(id);
 
         setBusqueda(editItem.fichaPersonal?.ciPasaporte ?? "");
-        setFoto(editItem.fichaPersonal?.foto ?? '')
-
+        setFoto(editItem.fichaPersonal?.foto ?? "");
 
         if (editItem.fichaPersonal !== null) {
-
           const editItemWithLabel = {
             ...editItem,
             fichaPersonal: {
@@ -190,124 +193,122 @@ function FichaInscripcionContext() {
           .update(Number(editItemId), formData as IFichaEducativa)
           .then((response) => {
             swal({
-              title: "Publicaciones",
+              title: "Ficha Educativa",
               text: "Datos actualizados correctamente",
               icon: "success",
             });
-            resetForm()
-            resetFiltro()
+            resetForm();
+            resetFiltro();
             loadDataID(response.fichaPersonal?.idFichaPersonal);
 
             setEditMode(false);
             setEditItemId(undefined);
-
           })
           .catch((error) => {
-            console.error("Error al actualizar el formulario:", error);
+            swal(
+              "Error",
+              "Ha ocurrido un error al actualizar este registro",
+              "error"
+            );
           });
       }
     }
   };
 
   function validaciones(): boolean {
-
     if (!formData.fichaPersonal?.idFichaPersonal) {
       toast.error("Seleccione al propietario de la ficha", {
         style: {
-          fontSize: '15px'
+          fontSize: "15px",
         },
         duration: 3000,
-      })
-      return false
+      });
+      return false;
     }
 
     if (!formData.centroEducativo) {
       toast.error("Ingrese el centro educativo", {
         style: {
-          fontSize: '15px'
+          fontSize: "15px",
         },
         duration: 3000,
-      })
-      return false
+      });
+      return false;
     }
 
     if (!formData.direccionEducativa) {
       toast.error("Por favor, ingrese la direccion del centro educativo", {
         style: {
-          fontSize: '15px'
+          fontSize: "15px",
         },
         duration: 3000,
-      })
-      return false
+      });
+      return false;
     }
 
     if (!formData.jornadaEducativa) {
       toast.error("Seleccione la jornada en la que estudia", {
         style: {
-          fontSize: '15px'
+          fontSize: "15px",
         },
         duration: 3000,
-      })
-      return false
+      });
+      return false;
     }
 
     if (!formData.gradoEducativo) {
       toast.error("Ingrese el grado por el que esta cursando", {
         style: {
-          fontSize: '15px'
+          fontSize: "15px",
         },
         duration: 3000,
-      })
-      return false
+      });
+      return false;
     }
 
     if (formData.repitente) {
       if (!formData.detalleRepitente) {
         toast.error("Por favor, proporcione detalles acerca del repitente", {
           style: {
-            fontSize: '15px'
+            fontSize: "15px",
           },
           duration: 3000,
-        })
-        return false
+        });
+        return false;
       }
     }
 
     if (!formData.referenciaEducativa) {
-      toast('No olvides proporcionar una referencia del centro educativo', {
-        icon: '⚠️',
+      toast("No olvides proporcionar una referencia del centro educativo", {
+        icon: "⚠️",
         style: {
-          fontSize: '15px'
-
+          fontSize: "15px",
         },
         duration: 4000,
       });
     }
 
     if (!formData.situacionPsicopedagogica) {
-      toast('No ha ingresado ninguna situación psicopedagogíca', {
-        icon: '⚠️',
+      toast("No ha ingresado ninguna situación psicopedagogíca", {
+        icon: "⚠️",
         style: {
-          fontSize: '15px'
-
+          fontSize: "15px",
         },
         duration: 4000,
       });
     }
 
     if (!formData.observacionesEducativa) {
-      toast('No ha ingresado ninguna ob servacion', {
-        icon: '⚠️',
+      toast("No ha ingresado ninguna ob servacion", {
+        icon: "⚠️",
         style: {
-          fontSize: '15px'
-
+          fontSize: "15px",
         },
         duration: 4000,
       });
     }
 
-    return true
-
+    return true;
   }
 
   const resetForm = () => {
@@ -318,12 +319,15 @@ function FichaInscripcionContext() {
       jornadaEducativa: "",
       observacionesEducativa: "",
       gradoEducativo: "",
-      detalleRepitente: '',
+      detalleRepitente: "",
       repitente: false,
-      situacionPsicopedagogica: '',
+      situacionPsicopedagogica: "",
       fichaPersonal: null,
-      fechaRegistro: new Date
-
+      fechaRegistro: new Date(),
+      anexosMatricula: "",
+      anexosCalificaciones1: "",
+      anexosCalificaciones2: "",
+      anexosCalificaciones3: "",
     });
     setEditMode(false);
     setEditItemId(undefined);
@@ -331,14 +335,12 @@ function FichaInscripcionContext() {
       fileUploadRef.current.clear(); // Limpiar el campo FileUpload
     }
   };
+
   if (!dataLoaded) {
     return <div style={{ marginLeft: "50%" }}>Cargando datos...</div>;
   }
 
-
   const loadRelacion = () => {
-
-    // console.log("4 SIN EDAD")
     fichaPersonalService
       .getBusquedaRelacion(true, busqueda)
       .then((data: IFichaPersonal[]) => {
@@ -348,55 +350,44 @@ function FichaInscripcionContext() {
         }));
 
         setListFperonales(dataWithLabel); // Establecer los datos procesados en el estado
-        // setDataLoaded(true); // Puedes marcar los datos como cargados si es necesario
       })
       .catch((error) => {
-        console.error("Error al obtener los datos:", error);
+        swal("Error", "Ha ocurrido un error al cargar ", "error");
       });
-
-
-    console.log('Datos enviados:', { listFperonales });
-
   };
 
   const cargarFoto = (id: number) => {
-    const Foto = listFperonales.find((persona) => persona.idFichaPersonal === id);
+    const Foto = listFperonales.find(
+      (persona) => persona.idFichaPersonal === id
+    );
 
     if (Foto) {
-      // Actualiza formData con la foto correspondiente
       setFoto(Foto.foto);
-      if (Foto) {
-        console.log("Foto cargada")
-      }
-
     }
-
-  }
+  };
 
   function loadExcelReportData(data: IFichaEducativa[]) {
-    const reportName = "Ficha de Educativa"
-    const logo = 'G1:I1'
-    const rowData = data.map((item) => (
-      {
-        idFicha: item.idFichaEducativa,
-        cedula: item.fichaPersonal?.ciPasaporte,
-        nombres: item.fichaPersonal?.nombres,
-        apellidos: item.fichaPersonal?.apellidos,
-        grado: item.gradoEducativo,
-        jornada: item.jornadaEducativa,
-        centro: item.centroEducativo,
-        direccion: item.direccionEducativa,
-        referencia: item.referenciaEducativa,
+    const reportName = "Ficha de Educativa";
+    const logo = "G1:I1";
+    const rowData = data.map((item) => ({
+      idFicha: item.idFichaEducativa,
+      cedula: item.fichaPersonal?.ciPasaporte,
+      nombres: item.fichaPersonal?.nombres,
+      apellidos: item.fichaPersonal?.apellidos,
+      grado: item.gradoEducativo,
+      jornada: item.jornadaEducativa,
+      centro: item.centroEducativo,
+      direccion: item.direccionEducativa,
+      referencia: item.referenciaEducativa,
 
-        situacionPsico: item.situacionPsicopedagogica || 'Ningula',
-        repitente: item.repitente ? 'SI' : 'NO',
+      situacionPsico: item.situacionPsicopedagogica || "Ningula",
+      repitente: item.repitente ? "SI" : "NO",
 
-        detallePsico: item.detalleRepitente || 'N/A',
+      detallePsico: item.detalleRepitente || "N/A",
 
-        observacion: item.observacionesEducativa,
-        registro: item.fechaRegistro || 'Ningula',
-      }
-    ));
+      observacion: item.observacionesEducativa,
+      registro: item.fechaRegistro || "Ningula",
+    }));
     const headerItems: IHeaderItem[] = [
       { header: "№ FICHA" },
       { header: "CEDULA" },
@@ -412,18 +403,13 @@ function FichaInscripcionContext() {
       { header: "DETALLES DEL REPITENTE" },
       { header: "OBSERVACION" },
       { header: "FECHA DE REGISTRO" },
-    ]
-    console.log(reportName, '  //  ',
-      headerItems, '  //  ',
-      rowData)
-
+    ];
     setExcelReportData({
       reportName,
       headerItems,
       rowData,
-      logo
-    }
-    )
+      logo,
+    });
   }
 
   const loadDataID = (id: number) => {
@@ -436,25 +422,145 @@ function FichaInscripcionContext() {
         setDataLoaded(true); // Marcar los datos como cargados
       })
       .catch((error) => {
-        console.error("Error al obtener los datos:", error);
+        swal("Error", "Ha ocurrido un error al cargar", "error");
       });
   };
 
   const resetFiltro = () => {
-    setBusqueda('')
-    setFoto('https://cdn-icons-png.flaticon.com/128/666/666201.png')
-    setListFperonales([])
-
+    setBusqueda("");
+    setFoto("https://cdn-icons-png.flaticon.com/128/666/666201.png");
+    setListFperonales([]);
   };
 
+  const customBytesUploaderMatricula = (event: FileUploadSelectEvent) => {
+    if (event.files && event.files.length > 0) {
+      const file = event.files[0];
+      const reader = new FileReader();
+
+      reader.onloadend = function () {
+        const base64data = reader.result as string;
+        setFormData({ ...formData, anexosMatricula: base64data });
+      };
+
+      reader.onerror = (error) => {
+        console.error("Error al leer el archivo:", error);
+      };
+
+      reader.readAsDataURL(file);
+
+      if (fileUploadRef.current) {
+        fileUploadRef.current.clear();
+      }
+    }
+  };
+
+  const customBytesUploaderCalf = (event: FileUploadSelectEvent) => {
+    if (event.files && event.files.length > 0) {
+      const file = event.files[0];
+      const reader = new FileReader();
+
+      reader.onloadend = function () {
+        const base64data = reader.result as string;
+        setFormData({ ...formData, anexosCalificaciones1: base64data });
+      };
+
+      reader.onerror = (error) => {
+        console.error("Error al leer el archivo:", error);
+      };
+
+      reader.readAsDataURL(file);
+
+      if (fileUploadRef.current) {
+        fileUploadRef.current.clear();
+      }
+    }
+  };
+
+  const customBytesUploaderCalf2 = (event: FileUploadSelectEvent) => {
+    if (event.files && event.files.length > 0) {
+      const file = event.files[0];
+      const reader = new FileReader();
+
+      reader.onloadend = function () {
+        const base64data = reader.result as string;
+        setFormData({ ...formData, anexosCalificaciones2: base64data });
+      };
+
+      reader.onerror = (error) => {
+        console.error("Error al leer el archivo:", error);
+      };
+
+      reader.readAsDataURL(file);
+
+      if (fileUploadRef.current) {
+        fileUploadRef.current.clear();
+      }
+    }
+  };
+
+  const customBytesUploaderCalf3 = (event: FileUploadSelectEvent) => {
+    if (event.files && event.files.length > 0) {
+      const file = event.files[0];
+      const reader = new FileReader();
+
+      reader.onloadend = function () {
+        const base64data = reader.result as string;
+        setFormData({ ...formData, anexosCalificaciones3: base64data });
+      };
+
+      reader.onerror = (error) => {
+        console.error("Error al leer el archivo:", error);
+      };
+
+      reader.readAsDataURL(file);
+
+      if (fileUploadRef.current) {
+        fileUploadRef.current.clear();
+      }
+    }
+  };
+
+  const decodeBase64 = (base64Data: string) => {
+    try {
+      const base64WithoutHeader = base64Data.replace(/^data:.*,/, "");
+
+      const decodedData = atob(base64WithoutHeader);
+      const byteCharacters = new Uint8Array(decodedData.length);
+
+      for (let i = 0; i < decodedData.length; i++) {
+        byteCharacters[i] = decodedData.charCodeAt(i);
+      }
+
+      const byteArray = new Blob([byteCharacters], { type: "application/pdf" });
+      const fileUrl = URL.createObjectURL(byteArray);
+
+      const link = document.createElement("a");
+      link.href = fileUrl;
+      link.download = "Anexo Educativo.pdf";
+      link.click();
+      swal({
+        title: "Anexo",
+        text: "Descargando pdf....",
+        icon: "success",
+        timer: 1000,
+      });
+      console.log("pdf descargado...");
+
+      URL.revokeObjectURL(fileUrl);
+    } catch (error) {
+      console.error("Error al decodificar la cadena base64:", error);
+    }
+  };
 
   return (
     <>
       <div>
-        <Toaster position="top-right"
-          reverseOrder={true} />
+        <Toaster position="top-right" reverseOrder={true} />
       </div>
-      <Fieldset className="fgrid col-fixed " style={{ display: 'flex', justifyContent: 'center' }}>
+      <Fieldset
+        className="fgrid col-fixed "
+        style={{ display: "flex", justifyContent: "center" }}
+      >
         <Card
           header={cardHeader}
           className="border-solid border-red-800 border-3 flex-1 flex-wrap"
@@ -462,19 +568,32 @@ function FichaInscripcionContext() {
         >
           <div
             className="h1-rem"
-            style={{ display: 'flex', justifyContent: 'center' }}
+            style={{ display: "flex", justifyContent: "center" }}
           >
             <h1 className="text-5xl font-smibold lg:md-2 h-full max-w-full max-h-full min-w-min">
               Ficha Educativa
             </h1>
           </div>
 
-          <div className="" style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "right" }}>
-            <label className="font-medium w-auto min-w-min" htmlFor="fichaPersonal" style={{ marginRight: "10px" }}>Fecha de Registro:</label>
+          <div
+            className=""
+            style={{
+              display: "flex",
+              width: "100%",
+              alignItems: "center",
+              justifyContent: "right",
+            }}
+          >
+            <label
+              className="font-medium w-auto min-w-min"
+              htmlFor="fichaPersonal"
+              style={{ marginRight: "10px" }}
+            >
+              Fecha de Registro:
+            </label>
             <Calendar
               disabled
               dateFormat="dd-mm-yy" // Cambiar el formato a ISO 8601
-
               style={{ width: "95px", marginRight: "25px", fontWeight: "bold" }}
               onChange={(e: CalendarChangeEvent) => {
                 if (e.value !== undefined) {
@@ -484,9 +603,11 @@ function FichaInscripcionContext() {
                   });
                 }
               }}
-
-              value={typeof formData.fechaRegistro === 'string' ? new Date(formData.fechaRegistro) : new Date()}
-
+              value={
+                typeof formData.fechaRegistro === "string"
+                  ? new Date(formData.fechaRegistro)
+                  : new Date()
+              }
             />
           </div>
 
@@ -497,54 +618,71 @@ function FichaInscripcionContext() {
                 <b>Filtro</b>
               </div>
             </Divider>
-            <Fieldset legend="Filtros de busqueda" style={{ width: "1000px", position: "relative" }}>
-              <div style={{ position: "absolute", top: "0", right: "5px", marginTop: "-15px" }}>
-                <label className="font-medium w-auto min-w-min" htmlFor="rangoEdad" style={{ marginRight: "10px" }}>Limpiar filtros:</label>
+            <Fieldset
+              legend="Filtros de busqueda"
+              style={{ width: "1000px", position: "relative" }}
+            >
+              <div
+                style={{
+                  position: "absolute",
+                  top: "0",
+                  right: "5px",
+                  marginTop: "-15px",
+                }}
+              >
+                <label
+                  className="font-medium w-auto min-w-min"
+                  htmlFor="rangoEdad"
+                  style={{ marginRight: "10px" }}
+                >
+                  Limpiar filtros:
+                </label>
 
-                <Button icon="pi pi-times" rounded severity="danger" aria-label="Cancel" onClick={() => resetFiltro()} />
+                <Button
+                  icon="pi pi-times"
+                  rounded
+                  severity="danger"
+                  aria-label="Cancel"
+                  onClick={() => resetFiltro()}
+                />
               </div>
               <section className="layout">
                 <div className="">
                   <div input-box>
-                    <label className="font-medium w-auto min-w-min" htmlFor='genero'>Cedula o Nombre:</label>
+                    <label
+                      className="font-medium w-auto min-w-min"
+                      htmlFor="genero"
+                    >
+                      Cedula o Nombre:
+                    </label>
 
                     <div className="flex-1">
                       <InputText
                         placeholder="Cedula de identidad"
                         id="integer"
-                        // keyfilter="int"
                         style={{ width: "75%" }}
-
                         onChange={(e) => {
-                          // Actualizar el estado usando setFormData
                           setListFperonales([]); // Asignar un arreglo vacío para vaciar el estado listFperonales
-
                           setBusqueda(e.currentTarget.value);
-
-                          // Luego, llamar a loadRelacion después de que se actualice el estado
                           loadRelacion();
                         }}
-
-                        // onKeyUp={(e) => {
-                        //   setListFperonales([]); // Asignar un arreglo vacío para vaciar el estado listFperonales
-
-                        //   setBusqueda(e.currentTarget.value);
-
-                        //   // Luego, llamar a loadRelacion después de que se actualice el estado
-                        //   loadRelacion();
-                        //   loadRelacion(); // Llama a tu método aquí o realiza las acciones necesarias.
-                        // }}
-
                         value={busqueda}
                       />
-
-                      <Button icon="pi pi-search" className="p-button-warning" />
+                      <Button
+                        icon="pi pi-search"
+                        className="p-button-warning"
+                      />
                     </div>
                   </div>
                 </div>
                 <div className="">
                   <div>
-                    <label className="font-medium w-auto min-w-min" htmlFor="fichaPersonal">Resultados de la busqueda:</label>
+                    <label
+                      className="font-medium w-auto min-w-min"
+                      htmlFor="fichaPersonal"
+                    >
+                      Resultados de la busqueda:
+                    </label>
                     <Dropdown
                       className="text-2xl"
                       id="tiempo_dedicacion"
@@ -555,36 +693,36 @@ function FichaInscripcionContext() {
                         setFormData({
                           ...formData,
                           fichaPersonal: {
-                            idFichaPersonal: parseInt(e.value), foto: '',
-                            apellidos: '',
-                            nombres: '',
-                            ciPasaporte: '',
-                            tipoIdentificacion: '',
+                            idFichaPersonal: parseInt(e.value),
+                            foto: "",
+                            apellidos: "",
+                            nombres: "",
+                            ciPasaporte: "",
+                            tipoIdentificacion: "",
                             actTrabInfantil: false,
-                            detalleActTrabInfantil: '',
-                            nacionalidad: '',
-                            fechaNacimiento: '',
+                            detalleActTrabInfantil: "",
+                            nacionalidad: "",
+                            fechaNacimiento: "",
                             rangoEdad: null,
-                            genero: '',
+                            genero: "",
                             etnia: null,
                             parroquia: null,
-                            zona: '',
-                            barrioSector: '',
-                            direccion: '',
-                            referencia: '',
+                            zona: "",
+                            barrioSector: "",
+                            direccion: "",
+                            referencia: "",
                             coordenadaX: 0,
                             coordenadaY: 0,
                             estVinculacion: true,
                             fechaRegistro: new Date(),
                             anexosCedula: "",
                             anexosDocumentosLegales: "",
-                          }
+                          },
                         });
-                        cargarFoto(parseInt(e.value))
-                        loadDataID(parseInt(e.value))
+                        cargarFoto(parseInt(e.value));
+                        loadDataID(parseInt(e.value));
                       }}
                       value={formData.fichaPersonal?.idFichaPersonal}
-
                       optionLabel="label"
                       optionValue="idFichaPersonal"
                       placeholder="Seleccione una persona"
@@ -597,7 +735,6 @@ function FichaInscripcionContext() {
                       src={foto}
                       alt="FotoNNA"
                       style={{
-                        // width: "80px",
                         height: "80px",
                         borderRadius: "50%", // Borde redondeado
                         border: "2px solid gray", // Borde gris
@@ -606,12 +743,13 @@ function FichaInscripcionContext() {
                   </div>
                 </div>
               </section>
-
             </Fieldset>
 
-
-            <form onSubmit={editMode ? handleUpdate : handleSubmit} className='form' encType="multipart/form-data">
-
+            <form
+              onSubmit={editMode ? handleUpdate : handleSubmit}
+              className="form"
+              encType="multipart/form-data"
+            >
               <Divider align="left">
                 <div className="inline-flex align-items-center">
                   <i className="pi pi-book mr-2"></i>
@@ -619,10 +757,13 @@ function FichaInscripcionContext() {
                 </div>
               </Divider>
 
-              <div className='column' style={{}}>
-                <div className='column' style={{ width: "33.3%" }}>
-                  <div className='input-box' style={{}}>
-                    <label className="font-medium w-auto min-w-min" htmlFor="tipoDocumento">
+              <div className="column" style={{}}>
+                <div className="column" style={{ width: "33.3%" }}>
+                  <div className="input-box" style={{}}>
+                    <label
+                      className="font-medium w-auto min-w-min"
+                      htmlFor="tipoDocumento"
+                    >
                       Centro Educativo:
                     </label>
                     <InputText
@@ -641,9 +782,12 @@ function FichaInscripcionContext() {
                     />
                   </div>
                 </div>
-                <div className='column' style={{ width: "33.3%" }}>
-                  <div className='input-box' style={{}}>
-                    <label className="font-medium w-auto min-w-min" htmlFor="tipoDocumento">
+                <div className="column" style={{ width: "33.3%" }}>
+                  <div className="input-box" style={{}}>
+                    <label
+                      className="font-medium w-auto min-w-min"
+                      htmlFor="tipoDocumento"
+                    >
                       Dirección del Centro:
                     </label>
                     <InputText
@@ -662,9 +806,12 @@ function FichaInscripcionContext() {
                     />
                   </div>
                 </div>
-                <div className='column' style={{ width: "33.3%" }}>
-                  <div className='input-box' style={{}}>
-                    <label className="font-medium w-auto min-w-min" htmlFor="tipoDocumento">
+                <div className="column" style={{ width: "33.3%" }}>
+                  <div className="input-box" style={{}}>
+                    <label
+                      className="font-medium w-auto min-w-min"
+                      htmlFor="tipoDocumento"
+                    >
                       Referencia de la Ubicación:
                     </label>
                     <InputText
@@ -685,18 +832,28 @@ function FichaInscripcionContext() {
                 </div>
               </div>
 
-              <div className='column' style={{}}>
-                <div className='column' style={{ width: "33.3%" }}>
-                  <div className='input-box' style={{}}>
-                    <label className="font-medium w-auto min-w-min" htmlFor="tipoDocumento">
+              <div className="column" style={{}}>
+                <div className="column" style={{ width: "33.3%" }}>
+                  <div className="input-box" style={{}}>
+                    <label
+                      className="font-medium w-auto min-w-min"
+                      htmlFor="tipoDocumento"
+                    >
                       Jornada:
                     </label>
                     <Dropdown
                       className="text-2xl"
                       id="doi"
                       name="doi"
-                      style={{ width: "100%", height: "36px", alignItems: "center" }}
-                      options={listJornadas.map((jornada) => ({ label: jornada, value: jornada }))}
+                      style={{
+                        width: "100%",
+                        height: "36px",
+                        alignItems: "center",
+                      }}
+                      options={listJornadas.map((jornada) => ({
+                        label: jornada,
+                        value: jornada,
+                      }))}
                       onChange={(e) =>
                         setFormData({
                           ...formData,
@@ -704,15 +861,18 @@ function FichaInscripcionContext() {
                         })
                       }
                       value={formData.jornadaEducativa}
-                      optionLabel="label" // Usamos "label" para mostrar el nombre de la jornada
-                      optionValue="value" // Usamos "value" para el valor seleccionado
+                      optionLabel="label"
+                      optionValue="value"
                       placeholder="Ingrese la Jornada de Estudio"
                     />
                   </div>
                 </div>
-                <div className='column' style={{ width: "33.3%" }}>
-                  <div className='input-box' style={{}}>
-                    <label className="font-medium w-auto min-w-min" htmlFor="tipoDocumento">
+                <div className="column" style={{ width: "33.3%" }}>
+                  <div className="input-box" style={{}}>
+                    <label
+                      className="font-medium w-auto min-w-min"
+                      htmlFor="tipoDocumento"
+                    >
                       Grado Actual:
                     </label>
                     <InputText
@@ -731,9 +891,12 @@ function FichaInscripcionContext() {
                     />
                   </div>
                 </div>
-                <div className='column' style={{ width: "33.3%" }}>
-                  <div className='input-box' style={{}}>
-                    <label className="font-medium w-auto min-w-min" htmlFor="tipoDocumento">
+                <div className="column" style={{ width: "33.3%" }}>
+                  <div className="input-box" style={{}}>
+                    <label
+                      className="font-medium w-auto min-w-min"
+                      htmlFor="tipoDocumento"
+                    >
                       Situación Psicopedagogica:
                     </label>
                     <InputTextarea
@@ -741,7 +904,7 @@ function FichaInscripcionContext() {
                       placeholder="Ingrese la situación psicopedagogía"
                       id="situacionPsicopedagogica"
                       name="situacionPsicopedagogica"
-                      style={{ width: "100%", height: '40px' }}
+                      style={{ width: "100%", height: "40px" }}
                       onChange={(e) =>
                         setFormData({
                           ...formData,
@@ -752,17 +915,19 @@ function FichaInscripcionContext() {
                     />
                   </div>
                 </div>
-
               </div>
 
-              <div className='column' style={{}}>
-                <div className='column' style={{ width: "12%" }}>
-                  <div className='input-box' style={{}}>
-                    <label className="font-medium w-auto min-w-min" htmlFor="repitente">
+              <div className="column" style={{}}>
+                <div className="column" style={{ width: "12%" }}>
+                  <div className="input-box" style={{}}>
+                    <label
+                      className="font-medium w-auto min-w-min"
+                      htmlFor="repitente"
+                    >
                       ¿Es repitente?:
                     </label>
 
-                    <div className="mydict" >
+                    <div className="mydict">
                       <div>
                         <label className="radioLabel">
                           <input
@@ -792,7 +957,8 @@ function FichaInscripcionContext() {
                             onChange={() =>
                               setFormData({
                                 ...formData,
-                                repitente: false, detalleRepitente: '',
+                                repitente: false,
+                                detalleRepitente: "",
                               })
                             }
                           />
@@ -802,10 +968,13 @@ function FichaInscripcionContext() {
                     </div>
                   </div>
                 </div>
-                <div className='column' style={{ width: "44%" }}>
-                  <div className='input-box' style={{}}>
-                    <label className="font-medium w-auto min-w-min" htmlFor="tipoDocumento">
-                      Detalles  del repitente:
+                <div className="column" style={{ width: "44%" }}>
+                  <div className="input-box" style={{}}>
+                    <label
+                      className="font-medium w-auto min-w-min"
+                      htmlFor="tipoDocumento"
+                    >
+                      Detalles del repitente:
                     </label>
                     <InputTextarea
                       className="text-2xl"
@@ -813,7 +982,7 @@ function FichaInscripcionContext() {
                       id="repitente"
                       disabled={!formData.repitente}
                       name="repitente"
-                      style={{ width: "100%", height: '40px' }}
+                      style={{ width: "100%", height: "40px" }}
                       onChange={(e) =>
                         setFormData({
                           ...formData,
@@ -824,9 +993,12 @@ function FichaInscripcionContext() {
                     />
                   </div>
                 </div>
-                <div className='column' style={{ width: "44%" }}>
-                  <div className='input-box' style={{}}>
-                    <label className="font-medium w-auto min-w-min" htmlFor="tipoDocumento">
+                <div className="column" style={{ width: "44%" }}>
+                  <div className="input-box" style={{}}>
+                    <label
+                      className="font-medium w-auto min-w-min"
+                      htmlFor="tipoDocumento"
+                    >
                       Observaciones:
                     </label>
                     <InputTextarea
@@ -834,7 +1006,7 @@ function FichaInscripcionContext() {
                       placeholder="Ingrese las Observaciones"
                       id="filiacion"
                       name="filiacion"
-                      style={{ width: "100%", height: '40px' }}
+                      style={{ width: "100%", height: "40px" }}
                       onChange={(e) =>
                         setFormData({
                           ...formData,
@@ -846,10 +1018,98 @@ function FichaInscripcionContext() {
                   </div>
                 </div>
               </div>
+              <Divider align="left">
+                <div className="inline-flex align-items-center">
+                  <i className="pi pi-file-pdf mr-2"></i>
+                  <b>Anexos</b>
+                </div>
+              </Divider>
+              <div className="column">
+                <div className="input-box">
+                  <label htmlFor="pdf" className="font-medium w-auto min-w-min">
+                    Subir Matricula:
+                  </label>
+                  <FileUpload
+                    name="pdf"
+                    chooseLabel="Escoger"
+                    uploadLabel="Cargar"
+                    cancelLabel="Cancelar"
+                    emptyTemplate={
+                      <p className="m-0 p-button-rounded">
+                        Arrastre y suelte los archivos aquí para cargarlos.
+                      </p>
+                    }
+                    customUpload
+                    onSelect={customBytesUploaderMatricula}
+                    accept="application/pdf"
+                  />
+                </div>
+                <div className="input-box">
+                  <label htmlFor="pdf" className="font-medium w-auto min-w-min">
+                    Subir Calificaciones 1er Trimestre:
+                  </label>
+                  <FileUpload
+                    name="pdf"
+                    chooseLabel="Escoger"
+                    uploadLabel="Cargar"
+                    cancelLabel="Cancelar"
+                    emptyTemplate={
+                      <p className="m-0 p-button-rounded">
+                        Arrastre y suelte los archivos aquí para cargarlos.
+                      </p>
+                    }
+                    customUpload
+                    onSelect={customBytesUploaderCalf}
+                    accept="application/pdf"
+                  />
+                </div>
+              </div>
+              <div className="column">
+                <div className="input-box">
+                  <label htmlFor="pdf" className="font-medium w-auto min-w-min">
+                    Subir Calificaciones 2do Trimestre:
+                  </label>
+                  <FileUpload
+                    name="pdf"
+                    chooseLabel="Escoger"
+                    uploadLabel="Cargar"
+                    cancelLabel="Cancelar"
+                    emptyTemplate={
+                      <p className="m-0 p-button-rounded">
+                        Arrastre y suelte los archivos aquí para cargarlos.
+                      </p>
+                    }
+                    customUpload
+                    onSelect={customBytesUploaderCalf2}
+                    accept="application/pdf"
+                  />
+                </div>
+                <div className="input-box">
+                  <label htmlFor="pdf" className="font-medium w-auto min-w-min">
+                    Subir Calificaciones 3er Trimestre:
+                  </label>
+                  <FileUpload
+                    name="pdf"
+                    chooseLabel="Escoger"
+                    uploadLabel="Cargar"
+                    cancelLabel="Cancelar"
+                    emptyTemplate={
+                      <p className="m-0 p-button-rounded">
+                        Arrastre y suelte los archivos aquí para cargarlos.
+                      </p>
+                    }
+                    customUpload
+                    onSelect={customBytesUploaderCalf3}
+                    accept="application/pdf"
+                  />
+                </div>
+              </div>
 
-              <div className='btnSend' style={{ marginTop: "25px" }}>
-                <div className="flex align-items-center justify-content-center w-auto min-w-min"
-                  style={{ gap: "25px" }}>
+              <div className="btnSend" style={{ marginTop: "25px" }}>
+                <div
+                  className="flex align-items-center justify-content-center w-auto min-w-min"
+                  style={{ gap: "25px" }}
+                >
                   <Button
                     type="submit"
                     label={editMode ? "Actualizar" : "Guardar"}
@@ -872,7 +1132,8 @@ function FichaInscripcionContext() {
                       resetForm();
                       resetFiltro();
                       setEditMode(false);
-                    }} />
+                    }}
+                  />
                 </div>
               </div>
             </form>
@@ -885,17 +1146,35 @@ function FichaInscripcionContext() {
             </div>
           </Divider>
 
-          <div className="opcTblLayout" >
-            <div className="" style={{ flex: 1, display: "flex", alignItems: "flex-end", justifyContent: "flex-end" }}>
+          <div className="opcTblLayout">
+            <div
+              className=""
+              style={{
+                flex: 1,
+                display: "flex",
+                alignItems: "flex-end",
+                justifyContent: "flex-end",
+              }}
+            >
+              <div className="opcTbl" style={{ justifyContent: "right" }}>
+                <label
+                  className="font-medium w-auto min-w-min"
+                  htmlFor="estado"
+                >
+                  Cargar todo:
+                </label>
 
-              <div className="opcTbl" style={{ justifyContent: "right" }} >
-                <label className="font-medium w-auto min-w-min" htmlFor='estado'>Cargar todo:</label>
-
-                <Button className="buttonIcon" // Agrega una clase CSS personalizada
-                  icon="pi pi-refresh" style={{ width: "120px", height: "39px" }}
-                  severity="danger" aria-label="Cancel" onClick={() => { loadData(); resetFiltro(); }}
+                <Button
+                  className="buttonIcon"
+                  icon="pi pi-refresh"
+                  style={{ width: "120px", height: "39px" }}
+                  severity="danger"
+                  aria-label="Cancel"
+                  onClick={() => {
+                    loadData();
+                    resetFiltro();
+                  }}
                 />
-
               </div>
               <ReportBar
                 reportName={excelReportData?.reportName!}
@@ -906,9 +1185,9 @@ function FichaInscripcionContext() {
             </div>
           </div>
 
-          <div className="tblContainer" >
+          <div className="tblContainer">
             <table className="tableFichas">
-              <thead className="theadTab" >
+              <thead className="theadTab">
                 <tr style={{ backgroundColor: "#871b1b", color: "white" }}>
                   <th className="trFichas">Nº de Registro</th>
                   <th className="trFichas">Cedula/Pasaporte</th>
@@ -920,6 +1199,10 @@ function FichaInscripcionContext() {
                   <th className="trFichas">Grado</th>
                   <th className="trFichas">Repitente</th>
                   <th className="trFichas">Observaciones</th>
+                  <th className="trFichas">Matrícula</th>
+                  <th className="trFichas">N. 1er Trimestre</th>
+                  <th className="trFichas">N. 2do Trimestre</th>
+                  <th className="trFichas">N. 3er Trimestre</th>
                   <th className="trFichas">Editar</th>
                   <th className="trFichas">Eliminar</th>
                 </tr>
@@ -931,17 +1214,104 @@ function FichaInscripcionContext() {
                     key={contrato.idFichaEducativa?.toString()}
                   >
                     <td className="tdFichas">{contrato.idFichaEducativa}</td>
-                    <td className="tdFichas">{contrato.fichaPersonal?.ciPasaporte}</td>
-                    <td className="tdFichas">{contrato.fichaPersonal?.nombres}</td>
-                    <td className="tdFichas">{contrato.fichaPersonal?.apellidos} </td>
+                    <td className="tdFichas">
+                      {contrato.fichaPersonal?.ciPasaporte}
+                    </td>
+                    <td className="tdFichas">
+                      {contrato.fichaPersonal?.nombres}
+                    </td>
+                    <td className="tdFichas">
+                      {contrato.fichaPersonal?.apellidos}{" "}
+                    </td>
                     <td className="tdFichas">{contrato.centroEducativo}</td>
                     <td className="tdFichas">{contrato.direccionEducativa}</td>
                     <td className="tdFichas">{contrato.jornadaEducativa}</td>
                     <td className="tdFichas">{contrato.gradoEducativo}</td>
-                    <td className="tdFichas">{contrato.repitente ? 'Si' : 'No'}</td>
-                    <td className="tdFichas">{contrato.observacionesEducativa}</td>
                     <td className="tdFichas">
-                      <Button className="buttonIcon"
+                      {contrato.repitente ? "Si" : "No"}
+                    </td>
+                    <td className="tdFichas">
+                      {contrato.observacionesEducativa}
+                    </td>
+                    <td className="tdFichas">
+                      {contrato.anexosMatricula ? (
+                        <button
+                          className="btnPdf"
+                          onClick={() =>
+                            decodeBase64(contrato.anexosMatricula!)
+                          }
+                        >
+                          <div className="svg-wrapper-1">
+                            <div className="svg-wrapper">
+                              <PiFilePdfFill className="icono"></PiFilePdfFill>
+                            </div>
+                          </div>
+                          <span>Descargar PDF</span>
+                        </button>
+                      ) : (
+                        <span>Sin evidencia</span>
+                      )}
+                    </td>
+                    <td className="tdFichas">
+                      {contrato.anexosCalificaciones1 ? (
+                        <button
+                          className="btnPdf"
+                          onClick={() =>
+                            decodeBase64(contrato.anexosCalificaciones1!)
+                          }
+                        >
+                          <div className="svg-wrapper-1">
+                            <div className="svg-wrapper">
+                              <PiFilePdfFill className="icono"></PiFilePdfFill>
+                            </div>
+                          </div>
+                          <span>Descargar PDF</span>
+                        </button>
+                      ) : (
+                        <span>Sin evidencia</span>
+                      )}
+                    </td>
+                    <td className="tdFichas">
+                      {contrato.anexosCalificaciones2 ? (
+                        <button
+                          className="btnPdf"
+                          onClick={() =>
+                            decodeBase64(contrato.anexosCalificaciones2!)
+                          }
+                        >
+                          <div className="svg-wrapper-1">
+                            <div className="svg-wrapper">
+                              <PiFilePdfFill className="icono"></PiFilePdfFill>
+                            </div>
+                          </div>
+                          <span>Descargar PDF</span>
+                        </button>
+                      ) : (
+                        <span>Sin evidencia</span>
+                      )}
+                    </td>
+                    <td className="tdFichas">
+                      {contrato.anexosCalificaciones3 ? (
+                        <button
+                          className="btnPdf"
+                          onClick={() =>
+                            decodeBase64(contrato.anexosCalificaciones3!)
+                          }
+                        >
+                          <div className="svg-wrapper-1">
+                            <div className="svg-wrapper">
+                              <PiFilePdfFill className="icono"></PiFilePdfFill>
+                            </div>
+                          </div>
+                          <span>Descargar PDF</span>
+                        </button>
+                      ) : (
+                        <span>Sin evidencia</span>
+                      )}
+                    </td>
+                    <td className="tdFichas">
+                      <Button
+                        className="buttonIcon"
                         type="button"
                         icon="pi pi-file-edit"
                         style={{
@@ -955,13 +1325,11 @@ function FichaInscripcionContext() {
                         onClick={() =>
                           handleEdit(contrato.idFichaEducativa?.valueOf())
                         }
-                      // Agrega el evento onClick para la operación de editar
                       />
-
                     </td>
-
                     <td className="tdFichas">
-                      <Button className="buttonIcon"
+                      <Button
+                        className="buttonIcon"
                         type="button"
                         icon="pi pi-trash"
                         style={{
@@ -975,7 +1343,6 @@ function FichaInscripcionContext() {
                         onClick={() =>
                           handleDelete(contrato.idFichaEducativa?.valueOf())
                         }
-                      // Agrega el evento onClick para la operación de eliminar
                       />
                     </td>
                   </tr>

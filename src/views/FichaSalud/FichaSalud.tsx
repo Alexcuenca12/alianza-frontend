@@ -1,11 +1,10 @@
 import React, { useEffect, useState, useRef } from "react";
 import { InputText } from "primereact/inputtext";
-import { FileUpload } from "primereact/fileupload";
+import { FileUpload, FileUploadSelectEvent } from "primereact/fileupload";
 import { Button } from "primereact/button";
 import { Fieldset } from "primereact/fieldset";
 import { Card } from "primereact/card";
 import { InputTextarea } from "primereact/inputtextarea";
-import { PiFileXlsFill } from "react-icons/pi";
 import { Calendar, CalendarChangeEvent } from "primereact/calendar";
 import cardHeader from "../../shared/CardHeader";
 import { IFichaSalud } from "../../interfaces/IFichaSalud";
@@ -16,7 +15,6 @@ import swal from "sweetalert";
 import { Dropdown } from "primereact/dropdown";
 import "../../styles/FiltroFichas.css";
 import { Divider } from "primereact/divider";
-
 import {
   InputNumber,
   InputNumberValueChangeEvent,
@@ -27,6 +25,7 @@ import {
   IHeaderItem,
 } from "../../interfaces/IExcelReportParams";
 import { ReportBar } from "../../common/ReportBar";
+import { PiFilePdfFill } from "react-icons/pi";
 
 function FichaSaludContext() {
   const fichaPersonalService = new FichaPersonalService();
@@ -59,6 +58,9 @@ function FichaSaludContext() {
     enfermedadesPrevalentesFichaSalud: "",
     fichaPersonal: null,
     fechaRegistro: new Date(),
+    anexosCertificadoSalud: "",
+    anexosCertificadoSalud2: "",
+    anexosDiscapacidad: "",
   });
 
   const [tempTalla, setTempTalla] = useState<string>();
@@ -93,7 +95,7 @@ function FichaSaludContext() {
         .save(formData)
         .then((response) => {
           resetForm();
-          swal("Publicacion", "Datos Guardados Correctamente", "success");
+          swal("Ficha Salud", "Datos Guardados Correctamente", "success");
           loadDataID(response.fichaPersonal?.idFichaPersonal);
           resetForm();
           resetFiltro();
@@ -194,7 +196,7 @@ function FichaSaludContext() {
           .update(Number(editItemId), formData as IFichaSalud)
           .then((response) => {
             swal({
-              title: "Publicaciones",
+              title: "Ficha Médica",
               text: "Datos actualizados correctamente",
               icon: "success",
             });
@@ -232,13 +234,16 @@ function FichaSaludContext() {
       enfermedadesPrevalentesFichaSalud: "",
       fichaPersonal: null,
       fechaRegistro: new Date(),
+      anexosCertificadoSalud: "",
+      anexosCertificadoSalud2: "",
+      anexosDiscapacidad: "",
     });
     setEditMode(false);
     setEditItemId(undefined);
     setTempPeso("");
     setTempTalla("");
     if (fileUploadRef.current) {
-      fileUploadRef.current.clear(); 
+      fileUploadRef.current.clear();
     }
   };
 
@@ -364,12 +369,10 @@ function FichaSaludContext() {
         }));
 
         setListFperonales(dataWithLabel); // Establecer los datos procesados en el estado
-    
       })
       .catch((error) => {
         console.error("Error al obtener los datos:", error);
       });
-
   };
 
   const cargarFoto = (id: number) => {
@@ -457,6 +460,109 @@ function FichaSaludContext() {
       .catch((error) => {
         console.error("Error al obtener los datos:", error);
       });
+  };
+
+  const customBytesUploaderCertificadoSalud1 = (
+    event: FileUploadSelectEvent
+  ) => {
+    if (event.files && event.files.length > 0) {
+      const file = event.files[0];
+      const reader = new FileReader();
+
+      reader.onloadend = function () {
+        const base64data = reader.result as string;
+        setFormData({ ...formData, anexosCertificadoSalud: base64data });
+      };
+
+      reader.onerror = (error) => {
+        console.error("Error al leer el archivo:", error);
+      };
+
+      reader.readAsDataURL(file);
+
+      if (fileUploadRef.current) {
+        fileUploadRef.current.clear();
+      }
+    }
+  };
+
+  const customBytesUploaderCertificadoSalud2 = (
+    event: FileUploadSelectEvent
+  ) => {
+    if (event.files && event.files.length > 0) {
+      const file = event.files[0];
+      const reader = new FileReader();
+
+      reader.onloadend = function () {
+        const base64data = reader.result as string;
+        setFormData({ ...formData, anexosCertificadoSalud2: base64data });
+      };
+
+      reader.onerror = (error) => {
+        console.error("Error al leer el archivo:", error);
+      };
+
+      reader.readAsDataURL(file);
+
+      if (fileUploadRef.current) {
+        fileUploadRef.current.clear();
+      }
+    }
+  };
+
+  const customBytesUploaderCarnet = (event: FileUploadSelectEvent) => {
+    if (event.files && event.files.length > 0) {
+      const file = event.files[0];
+      const reader = new FileReader();
+
+      reader.onloadend = function () {
+        const base64data = reader.result as string;
+        setFormData({ ...formData, anexosDiscapacidad: base64data });
+      };
+
+      reader.onerror = (error) => {
+        console.error("Error al leer el archivo:", error);
+      };
+
+      reader.readAsDataURL(file);
+
+      if (fileUploadRef.current) {
+        fileUploadRef.current.clear();
+      }
+    }
+  };
+
+  const decodeBase64 = (base64Data: string) => {
+    try {
+      // Eliminar encabezados o metadatos de la cadena base64
+      const base64WithoutHeader = base64Data.replace(/^data:.*,/, "");
+
+      const decodedData = atob(base64WithoutHeader); // Decodificar la cadena base64
+      const byteCharacters = new Uint8Array(decodedData.length);
+
+      for (let i = 0; i < decodedData.length; i++) {
+        byteCharacters[i] = decodedData.charCodeAt(i);
+      }
+
+      const byteArray = new Blob([byteCharacters], { type: "application/pdf" });
+      const fileUrl = URL.createObjectURL(byteArray);
+
+      const link = document.createElement("a");
+      link.href = fileUrl;
+      link.download = "AnexoMedico.pdf";
+      link.click();
+      swal({
+        title: "Anexo Medico",
+        text: "Descargando pdf....",
+        icon: "success",
+        timer: 1000,
+      });
+      console.log("pdf descargado...");
+
+      URL.revokeObjectURL(fileUrl);
+    } catch (error) {
+      console.error("Error al decodificar la cadena base64:", error);
+    }
   };
 
   return (
@@ -570,7 +676,7 @@ function FichaSaludContext() {
                         id="integer"
                         style={{ width: "75%" }}
                         onChange={(e) => {
-                          setListFperonales([]); 
+                          setListFperonales([]);
                           setBusqueda(e.currentTarget.value);
                           loadRelacion();
                         }}
@@ -1136,6 +1242,72 @@ function FichaSaludContext() {
                   </div>
                 </div>
               </div>
+              <Divider align="left">
+                <div className="inline-flex align-items-center">
+                  <i className="pi pi-file-pdf mr-2"></i>
+                  <b>Anexos</b>
+                </div>
+              </Divider>
+              <div className="column">
+                <div className="input-box">
+                  <label htmlFor="pdf" className="font-medium w-auto min-w-min">
+                    Subir Certificado Salud:
+                  </label>
+                  <FileUpload
+                    name="pdf"
+                    chooseLabel="Escoger"
+                    uploadLabel="Cargar"
+                    cancelLabel="Cancelar"
+                    emptyTemplate={
+                      <p className="m-0 p-button-rounded">
+                        Arrastre y suelte los archivos aquí para cargarlos.
+                      </p>
+                    }
+                    customUpload
+                    onSelect={customBytesUploaderCertificadoSalud1}
+                    accept="application/pdf"
+                  />
+                </div>
+                <div className="input-box">
+                  <label htmlFor="pdf" className="font-medium w-auto min-w-min">
+                    Subir Certificado Salud 2:
+                  </label>
+                  <FileUpload
+                    name="pdf"
+                    chooseLabel="Escoger"
+                    uploadLabel="Cargar"
+                    cancelLabel="Cancelar"
+                    emptyTemplate={
+                      <p className="m-0 p-button-rounded">
+                        Arrastre y suelte los archivos aquí para cargarlos.
+                      </p>
+                    }
+                    customUpload
+                    onSelect={customBytesUploaderCertificadoSalud2}
+                    accept="application/pdf"
+                  />
+                </div>
+
+                <div className="input-box">
+                  <label htmlFor="pdf" className="font-medium w-auto min-w-min">
+                    Subir Certificado Discapacidad:
+                  </label>
+                  <FileUpload
+                    name="pdf"
+                    chooseLabel="Escoger"
+                    uploadLabel="Cargar"
+                    cancelLabel="Cancelar"
+                    emptyTemplate={
+                      <p className="m-0 p-button-rounded">
+                        Arrastre y suelte los archivos aquí para cargarlos.
+                      </p>
+                    }
+                    customUpload
+                    onSelect={customBytesUploaderCarnet}
+                    accept="application/pdf"
+                  />
+                </div>
+              </div>
 
               <div className="btnSend" style={{ marginTop: "25px" }}>
                 <div
@@ -1233,6 +1405,9 @@ function FichaSaludContext() {
                   <th className="trFichas">Porcentaje de Discapacidad</th>
                   <th className="trFichas">Enfermedades Prevalentes</th>
                   <th className="trFichas">Condiciones Médicas</th>
+                  <th className="trFichas">Cert. Medico 1</th>
+                  <th className="trFichas">Cert. Medico 2</th>
+                  <th className="trFichas">Carnet Discapacidad</th>
                   <th className="trFichas">Editar</th>
                   <th className="trFichas">Eliminar</th>
                 </tr>
@@ -1283,6 +1458,63 @@ function FichaSaludContext() {
                         contrato.condicionesMedicas5 ||
                         contrato.condicionesMedicasAdd ||
                         "Ninguna"}
+                    </td>
+                    <td className="tdFichas">
+                      {contrato.anexosCertificadoSalud ? (
+                        <button
+                          className="btnPdf"
+                          onClick={() =>
+                            decodeBase64(contrato.anexosCertificadoSalud!)
+                          }
+                        >
+                          <div className="svg-wrapper-1">
+                            <div className="svg-wrapper">
+                              <PiFilePdfFill className="icono"></PiFilePdfFill>
+                            </div>
+                          </div>
+                          <span>Descargar PDF</span>
+                        </button>
+                      ) : (
+                        <span>Sin evidencia</span>
+                      )}
+                    </td>
+                    <td className="tdFichas">
+                      {contrato.anexosCertificadoSalud2 ? (
+                        <button
+                          className="btnPdf"
+                          onClick={() =>
+                            decodeBase64(contrato.anexosCertificadoSalud2!)
+                          }
+                        >
+                          <div className="svg-wrapper-1">
+                            <div className="svg-wrapper">
+                              <PiFilePdfFill className="icono"></PiFilePdfFill>
+                            </div>
+                          </div>
+                          <span>Descargar PDF</span>
+                        </button>
+                      ) : (
+                        <span>Sin evidencia</span>
+                      )}
+                    </td>
+                    <td className="tdFichas">
+                      {contrato.anexosDiscapacidad ? (
+                        <button
+                          className="btnPdf"
+                          onClick={() =>
+                            decodeBase64(contrato.anexosDiscapacidad!)
+                          }
+                        >
+                          <div className="svg-wrapper-1">
+                            <div className="svg-wrapper">
+                              <PiFilePdfFill className="icono"></PiFilePdfFill>
+                            </div>
+                          </div>
+                          <span>Descargar PDF</span>
+                        </button>
+                      ) : (
+                        <span>Sin evidencia</span>
+                      )}
                     </td>
                     <td className="tdFichas">
                       <Button
