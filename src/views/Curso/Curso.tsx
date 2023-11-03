@@ -1,18 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
-import { SelectButton } from "primereact/selectbutton";
 import { Button } from "primereact/button";
-import { Calendar, CalendarChangeEvent } from "primereact/calendar";
+import { Calendar } from "primereact/calendar";
 import { Fieldset } from "primereact/fieldset";
 import { Card } from "primereact/card";
 import cardHeader from "../../shared/CardHeader";
 import { ICurso } from "../../interfaces/ICurso";
-import { IDocente } from "../../interfaces/IDocente";
 import { IRangoEdad } from "../../interfaces/IRangoEdad";
 import { CursoService } from "../../services/CursoService";
 import { RangoEdadService } from "../../services/RangoEdadService";
-// import { DocenteService } from "../../services/DocenteService";
 import { UserService } from "../../services/UsuarioService";
 
 import swal from "sweetalert";
@@ -20,11 +17,12 @@ import { IUsuario } from "../../interfaces/IUsuario";
 import toast, { Toaster } from "react-hot-toast";
 import { Divider } from "primereact/divider";
 import { ReportBar } from "../../common/ReportBar";
-import { IExcelReportParams, IHeaderItem } from "../../interfaces/IExcelReportParams";
-
+import {
+  IExcelReportParams,
+  IHeaderItem,
+} from "../../interfaces/IExcelReportParams";
 
 function Curso() {
-
   const [contra1, setContra1] = useState<ICurso[]>([]);
   const [formData, setFormData] = useState<ICurso>({
     idCurso: 0,
@@ -33,7 +31,6 @@ function Curso() {
     rangoEdad: null,
     docente: null,
     fechaRegistro: new Date(),
-
   });
 
   const [docentes, setDocentes] = useState<IUsuario[]>([]);
@@ -46,37 +43,36 @@ function Curso() {
   const cursoService = new CursoService();
   const rangoService = new RangoEdadService();
   const usuarioService = new UserService();
-  const [excelReportData, setExcelReportData] = useState<IExcelReportParams | null>(null);
+  const [excelReportData, setExcelReportData] =
+    useState<IExcelReportParams | null>(null);
 
-  const [busqueda, setBusqueda] = useState<string>('');
+  const [busqueda, setBusqueda] = useState<string>("");
 
   useEffect(() => {
-
     loadDocentes();
   }, []);
 
   const loadDocentes = () => {
     usuarioService
       .userXrol(3)
-      .then((data: IUsuario[]) => { // Proporciona un tipo explícito para "data"
-
+      .then((data: IUsuario[]) => {
         const dataWithLabel = data.map((object) => ({
           ...object,
           label: `${object.persona?.nombresPersona} ${object.persona?.apellidosPersona}`,
         }));
-
         setDocentes(dataWithLabel);
         setDataLoaded(true);
-        // setSelectedDocente(null);
       })
       .catch((error) => {
-        console.error("Error al obtener los datos:", error);
+        swal({
+          title: "Error",
+          text: "Error al obtener datos",
+          icon: "error",
+        });
       });
-
   };
 
   useEffect(() => {
-
     loadRango();
   }, []);
   useEffect(() => {
@@ -84,14 +80,12 @@ function Curso() {
   }, []);
   useEffect(() => {
     loadBusqueda();
-  }, [busqueda]); // Se ejecutará cuando busqueda cambie
-
+  }, [busqueda]);
 
   const loadRango = () => {
     rangoService
       .getAll()
-      .then((data: IRangoEdad[]) => { // Proporciona un tipo explícito para "data"
-        // Transforma los datos para agregar la propiedad "label"
+      .then((data: IRangoEdad[]) => {
         const dataWithLabel = data.map((rangoEdad) => ({
           ...rangoEdad,
           label: `${rangoEdad.limInferior} - ${rangoEdad.limSuperior}`,
@@ -101,7 +95,11 @@ function Curso() {
         setDataLoaded(true);
       })
       .catch((error) => {
-        console.error("Error al obtener los datos:", error);
+        swal({
+          title: "Error",
+          text: "Error al obtener datos",
+          icon: "error",
+        });
       });
   };
 
@@ -111,57 +109,63 @@ function Curso() {
       .then((data) => {
         setContra1(data);
         loadExcelReportData(data);
-        setDataLoaded(true); // Marcar los datos como cargados
+        setDataLoaded(true);
       })
       .catch((error) => {
-        console.error("Error al obtener los datos:", error);
+        swal({
+          title: "Error",
+          text: "Error al obtener datos",
+          icon: "error",
+        });
       });
   };
 
-
-
   const loadBusqueda = () => {
-
     if (busqueda.trim()) {
       cursoService
         .busquedaCurso(busqueda)
         .then((data: ICurso[]) => {
-
           loadExcelReportData(data);
-          setContra1(data); // Establecer los datos procesados en el estado
-          // setDataLoaded(true); // Puedes marcar los datos como cargados si es necesario
+          setContra1(data);
         })
         .catch((error) => {
-          console.error("Error al obtener los datos:", error);
+          swal({
+            title: "Error",
+            text: "Error al obtener datos",
+            icon: "error",
+          });
         });
     } else {
-      loadData()
+      loadData();
     }
-
-
   };
 
   function loadExcelReportData(data: ICurso[]) {
-    const reportName = "Cursos"
-    const logo = 'G1:K1'
+    const reportName = "Cursos";
+    const logo = "G1:K1";
 
-    const rowData = data.map((item) => (
-      {
-        idFicha: item.idCurso,
-        aula: item.nombreCurso || '',
-        docente: `${item.docente?.persona?.nombresPersona} ${item.docente?.persona?.apellidosPersona}` || '',
-        inicio: item.fechaInicio
-          ? new Date(item.fechaInicio).toLocaleDateString("es-ES", {
+    const rowData = data.map((item) => ({
+      idFicha: item.idCurso,
+      aula: item.nombreCurso || "",
+      docente:
+        `${item.docente?.persona?.nombresPersona} ${item.docente?.persona?.apellidosPersona}` ||
+        "",
+      inicio: item.fechaInicio
+        ? new Date(item.fechaInicio).toLocaleDateString("es-ES", {
             year: "numeric",
             month: "2-digit",
             day: "2-digit",
           })
-          : "",
-        rango: `${item.rangoEdad?.limInferior} - ${item.rangoEdad?.limSuperior}` || 'Sin rango',
-        registro: typeof item.fechaRegistro === 'string' &&
-          `${item.fechaRegistro.split('-')[2]}/${item.fechaRegistro.split('-')[1]}/${item.fechaRegistro.split('-')[0]}`
-      }
-    ));
+        : "",
+      rango:
+        `${item.rangoEdad?.limInferior} - ${item.rangoEdad?.limSuperior}` ||
+        "Sin rango",
+      registro:
+        typeof item.fechaRegistro === "string" &&
+        `${item.fechaRegistro.split("-")[2]}/${
+          item.fechaRegistro.split("-")[1]
+        }/${item.fechaRegistro.split("-")[0]}`,
+    }));
     const headerItems: IHeaderItem[] = [
       { header: "№ FICHA" },
       { header: "AULA" },
@@ -169,14 +173,13 @@ function Curso() {
       { header: "FECHA DE INICIO" },
       { header: "RANGO DE EDAD" },
       { header: "FECHA DE REGISTRO" },
-    ]
+    ];
     setExcelReportData({
       reportName,
       headerItems,
       rowData,
-      logo
-    }
-    )
+      logo,
+    });
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -184,12 +187,11 @@ function Curso() {
     if (!formData.nombreCurso) {
       toast.error("Ingrese un nombre para identificar el aula", {
         style: {
-          fontSize: '15px'
+          fontSize: "15px",
         },
         duration: 3000,
-      })
+      });
       return;
-
     } else {
       cursoService
         .existsByNombreCurso(formData.nombreCurso)
@@ -197,38 +199,38 @@ function Curso() {
           if (data) {
             toast.error("Ya existe una aula registrada con este nombre", {
               style: {
-                fontSize: '17px'
+                fontSize: "17px",
               },
               duration: 4500,
-            })
+            });
           } else {
-
             if (validaciones()) {
               cursoService
                 .save(formData)
                 .then((response) => {
                   resetForm();
-                  swal("Publicacion", "Datos Guardados Correctamente", "success");
-
-                  // loadData();
-                  setBusqueda(response.nombreCurso)
-
+                  swal("Aula", "Datos Guardados Correctamente", "success");
+                  setBusqueda(response.nombreCurso);
                   loadBusqueda();
                 })
                 .catch((error) => {
-                  console.error("Error al enviar el formulario:", error);
+                  swal({
+                    title: "Error",
+                    text: "Error al enviar el formulario",
+                    icon: "error",
+                  });
                 });
             }
-
           }
         })
         .catch((error) => {
-          console.error("Error al obtener los datos:", error);
+          swal({
+            title: "Error",
+            text: "Error al obtener datos",
+            icon: "error",
+          });
         });
     }
-
-
-
   };
 
   const handleDelete = (id: number | undefined) => {
@@ -261,7 +263,6 @@ function Curso() {
               );
             })
             .catch((error) => {
-              console.error("Error al eliminar el registro:", error);
               swal(
                 "Error",
                 "Ha ocurrido un error al eliminar el registro",
@@ -279,12 +280,12 @@ function Curso() {
       if (editItem) {
         const editedItem = { ...editItem };
 
-        if (typeof editedItem.fechaRegistro === 'string') {
+        if (typeof editedItem.fechaRegistro === "string") {
           const registro = new Date(editedItem.fechaRegistro);
           registro.setDate(registro.getDate() + 1);
           const formattedDate = registro
-            ? registro.toISOString().split('T')[0]
-            : '';
+            ? registro.toISOString().split("T")[0]
+            : "";
           editedItem.fechaRegistro = formattedDate;
         }
 
@@ -300,80 +301,73 @@ function Curso() {
     e.preventDefault();
 
     if (editItemId !== undefined) {
-
       if (validaciones()) {
-
         cursoService
           .update(Number(editItemId), formData as ICurso)
           .then((response) => {
             swal({
-              title: "Publicaciones",
+              title: "Aulas",
               text: "Datos actualizados correctamente",
               icon: "success",
             });
             resetForm();
-            // loadData();
-            setBusqueda(response.nombreCurso)
+            setBusqueda(response.nombreCurso);
             loadBusqueda();
-
           })
           .catch((error) => {
-            console.error("Error al actualizar el formulario:", error);
+            swal({
+              title: "Error",
+              text: "Datos no actualizados",
+              icon: "error",
+            });
           });
       }
-
-
-
     }
   };
 
   function validaciones(): boolean {
-
-
-
     if (!formData.nombreCurso) {
       toast.error("Ingrese un nombre para identificar el aula", {
         style: {
-          fontSize: '15px'
+          fontSize: "15px",
         },
         duration: 3000,
-      })
-      return false
+      });
+      return false;
     }
 
     if (!formData.fechaInicio) {
       toast.error("Seleccione la fecha de inicio", {
         style: {
-          fontSize: '15px'
+          fontSize: "15px",
         },
         duration: 3000,
-      })
-      return false
+      });
+      return false;
     }
 
     if (!formData.docente) {
       toast.error("Seleccione el docente que estara acargo del aula", {
         style: {
-          fontSize: '15px'
+          fontSize: "15px",
         },
         duration: 3000,
-      })
-      return false
+      });
+      return false;
     }
 
     if (!formData.rangoEdad) {
       toast.error("Seleccione en que rango de edad estan los niños del aula", {
         style: {
-          fontSize: '15px'
+          fontSize: "15px",
         },
         duration: 3000,
-      })
-      return false
+      });
+      return false;
     }
 
-    return true
+    return true;
   }
-
 
   const resetForm = () => {
     setFormData({
@@ -392,52 +386,77 @@ function Curso() {
     return <div>Cargando datos...</div>;
   }
   return (
-
     <>
       <div>
-        <Toaster position="top-right"
-          reverseOrder={true} />
+        <Toaster position="top-right" reverseOrder={true} />
       </div>
-      <Fieldset className="fgrid col-fixed " style={{ display: 'flex', justifyContent: 'center' }}>
+      <Fieldset
+        className="fgrid col-fixed "
+        style={{ display: "flex", justifyContent: "center" }}
+      >
         <Card
           header={cardHeader}
           className="border-solid border-red-800 border-3 flex-1 flex-wrap"
-          style={{ marginBottom: "35px", minWidth: "800px ", maxWidth: "1100px" }}
+          style={{
+            marginBottom: "35px",
+            minWidth: "800px ",
+            maxWidth: "1100px",
+          }}
         >
           <div
             className="h1-rem"
-            style={{ display: 'flex', justifyContent: 'center' }}
+            style={{ display: "flex", justifyContent: "center" }}
           >
             <h1 className="text-5xl font-smibold lg:md-2 h-full max-w-full max-h-full min-w-min">
               Aula
             </h1>
           </div>
 
-
-          <div className="" style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "right" }}>
-            <label className="font-medium w-auto min-w-min" htmlFor="fichaPersonal" style={{ marginRight: "10px" }}>Fecha de Registro:</label>
+          <div
+            className=""
+            style={{
+              display: "flex",
+              width: "100%",
+              alignItems: "center",
+              justifyContent: "right",
+            }}
+          >
+            <label
+              className="font-medium w-auto min-w-min"
+              htmlFor="fichaPersonal"
+              style={{ marginRight: "10px" }}
+            >
+              Fecha de Registro:
+            </label>
             <Calendar
               disabled
               style={{ width: "95px", marginRight: "25px", fontWeight: "bold" }}
-              dateFormat="dd-mm-yy" // Cambiar el formato a ISO 8601
-
+              dateFormat="dd-mm-yy"
               onChange={(e) => {
-                if (e.value !== undefined && e.value !== null && !Array.isArray(e.value)) {
+                if (
+                  e.value !== undefined &&
+                  e.value !== null &&
+                  !Array.isArray(e.value)
+                ) {
                   setFormData({
                     ...formData,
                     fechaRegistro: e.value,
                   });
                 }
               }}
-
-              value={typeof formData.fechaRegistro === 'string' ? new Date(formData.fechaRegistro) : new Date()}
-
-
+              value={
+                typeof formData.fechaRegistro === "string"
+                  ? new Date(formData.fechaRegistro)
+                  : new Date()
+              }
             />
           </div>
 
-          <form onSubmit={editMode ? handleUpdate : handleSubmit} className='form' encType="multipart/form-data">
-
+          <form
+            onSubmit={editMode ? handleUpdate : handleSubmit}
+            className="form"
+            encType="multipart/form-data"
+          >
             <Divider align="left">
               <div className="inline-flex align-items-center">
                 <i className="pi pi-book mr-2"></i>
@@ -445,10 +464,21 @@ function Curso() {
               </div>
             </Divider>
 
-            <div className='column' style={{}}>
-              <div className='column' style={{ width: "50%" }}>
-                <div className='input-box' style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                  <label htmlFor="fechaDesvinculacion" className="font-medium w-auto min-w-min">
+            <div className="column" style={{}}>
+              <div className="column" style={{ width: "50%" }}>
+                <div
+                  className="input-box"
+                  style={{
+                    width: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "flex-start",
+                  }}
+                >
+                  <label
+                    htmlFor="fechaDesvinculacion"
+                    className="font-medium w-auto min-w-min"
+                  >
                     Nombre Aula:
                   </label>
                   <InputText
@@ -467,9 +497,20 @@ function Curso() {
                   />
                 </div>
               </div>
-              <div className='column' style={{ width: "50%" }}>
-                <div className='input-box' style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                  <label htmlFor="fechaDesvinculacion" className="font-medium w-auto min-w-min">
+              <div className="column" style={{ width: "50%" }}>
+                <div
+                  className="input-box"
+                  style={{
+                    width: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "flex-start",
+                  }}
+                >
+                  <label
+                    htmlFor="fechaDesvinculacion"
+                    className="font-medium w-auto min-w-min"
+                  >
                     Fecha de Inicio:
                   </label>
                   <Calendar
@@ -479,20 +520,22 @@ function Curso() {
                     placeholder="Ingrese la Fecha de Inicio"
                     required
                     style={{ width: "100%" }}
-                    dateFormat="dd-mm-yy" // Cambiar el formato a ISO 8601
+                    dateFormat="dd-mm-yy"
                     showIcon
                     onChange={(e) => {
-                      const selectedDate = e.value instanceof Date ? e.value : null;
+                      const selectedDate =
+                        e.value instanceof Date ? e.value : null;
                       if (selectedDate) {
                         selectedDate.setDate(selectedDate.getDate() + 1);
-                        const formattedDate = selectedDate.toISOString().split("T")[0];
+                        const formattedDate = selectedDate
+                          .toISOString()
+                          .split("T")[0];
 
                         setFormData({
                           ...formData,
                           fechaInicio: formattedDate,
                         });
                       }
-
                     }}
                     value={
                       formData.fechaInicio
@@ -504,10 +547,13 @@ function Curso() {
               </div>
             </div>
 
-            <div className='column' style={{}}>
-              <div className='column' style={{ width: "50%" }}>
-                <div className='input-box' style={{}}>
-                  <label className="font-medium w-auto min-w-min" htmlFor="tipoDocumento">
+            <div className="column" style={{}}>
+              <div className="column" style={{ width: "50%" }}>
+                <div className="input-box" style={{}}>
+                  <label
+                    className="font-medium w-auto min-w-min"
+                    htmlFor="tipoDocumento"
+                  >
                     Docente:
                   </label>
                   <Dropdown
@@ -518,21 +564,34 @@ function Curso() {
                     onChange={(e) => {
                       setFormData({
                         ...formData,
-                        docente: { idUsuario: parseInt(e.value), persona: null, username: '', password: '', rol: null, fechaRegistro: '' },
+                        docente: {
+                          idUsuario: parseInt(e.value),
+                          persona: null,
+                          username: "",
+                          password: "",
+                          rol: null,
+                          fechaRegistro: "",
+                        },
                       });
-
                     }}
                     value={formData.docente?.idUsuario}
                     optionLabel="label"
                     optionValue="idUsuario"
                     placeholder="Seleccione al Docente"
-                    style={{ width: "100%", height: "36px", alignItems: "center" }}
+                    style={{
+                      width: "100%",
+                      height: "36px",
+                      alignItems: "center",
+                    }}
                   />
                 </div>
               </div>
-              <div className='column' style={{ width: "50%" }}>
-                <div className='input-box' style={{}}>
-                  <label className="font-medium w-auto min-w-min" htmlFor="tipoDocumento">
+              <div className="column" style={{ width: "50%" }}>
+                <div className="input-box" style={{}}>
+                  <label
+                    className="font-medium w-auto min-w-min"
+                    htmlFor="tipoDocumento"
+                  >
                     Rango de Edad:
                   </label>
                   <Dropdown
@@ -542,23 +601,32 @@ function Curso() {
                     onChange={(e) => {
                       setFormData({
                         ...formData,
-                        rangoEdad: { idRangoEdad: parseInt(e.value), limInferior: 0, limSuperior: 0 },
-                      })
+                        rangoEdad: {
+                          idRangoEdad: parseInt(e.value),
+                          limInferior: 0,
+                          limSuperior: 0,
+                        },
+                      });
                     }}
                     value={formData.rangoEdad?.idRangoEdad}
                     optionLabel="label"
                     optionValue="idRangoEdad"
                     placeholder="Seleccione el Rango"
-                    style={{ width: "100%", height: "36px", alignItems: "center" }}
+                    style={{
+                      width: "100%",
+                      height: "36px",
+                      alignItems: "center",
+                    }}
                   />
                 </div>
               </div>
             </div>
 
-            <div className='btnSend'>
-
-              <div className="flex align-items-center justify-content-center w-auto min-w-min"
-                style={{ gap: "25px" }}>
+            <div className="btnSend">
+              <div
+                className="flex align-items-center justify-content-center w-auto min-w-min"
+                style={{ gap: "25px" }}
+              >
                 <Button
                   type="submit"
                   label={editMode ? "Actualizar" : "Guardar"}
@@ -580,7 +648,8 @@ function Curso() {
                   onClick={() => {
                     resetForm();
                     setEditMode(false);
-                  }} />
+                  }}
+                />
               </div>
             </div>
           </form>
@@ -591,44 +660,44 @@ function Curso() {
             </div>
           </Divider>
           <div className="opcTblLayout">
-
-            <div className="opcTbl" >
-              <label className="font-medium w-auto min-w-min" htmlFor='genero'>Aula o Docente:</label>
-
-              <div className="flex-1" >
+            <div className="opcTbl">
+              <label className="font-medium w-auto min-w-min" htmlFor="genero">
+                Aula o Docente:
+              </label>
+              <div className="flex-1">
                 <InputText
                   placeholder="Cedula de identidad"
                   id="integer"
-                  // keyfilter="int"
                   style={{ width: "75%" }}
-
                   onChange={(e) => {
                     setBusqueda(e.currentTarget.value);
                     loadBusqueda();
-
                   }}
-
-
-
                   value={busqueda}
                 />
-
                 <Button icon="pi pi-search" className="p-button-warning" />
               </div>
             </div>
 
-
-
             <div className="opcTbl">
-              <label className="font-medium w-auto min-w-min" htmlFor='estado'>Cargar todo:</label>
+              <label className="font-medium w-auto min-w-min" htmlFor="estado">
+                Cargar todo:
+              </label>
 
-              <Button className="buttonIcon" // Agrega una clase CSS personalizada
-                icon="pi pi-refresh" style={{ width: "120px", height: "39px" }} severity="danger" aria-label="Cancel" onClick={() => { loadData(); setBusqueda(''); }} />
-
+              <Button
+                className="buttonIcon"
+                icon="pi pi-refresh"
+                style={{ width: "120px", height: "39px" }}
+                severity="danger"
+                aria-label="Cancel"
+                onClick={() => {
+                  loadData();
+                  setBusqueda("");
+                }}
+              />
             </div>
 
-
-            <div className="" style={{ flex: 1, paddingTop: '24px' }}>
+            <div className="" style={{ flex: 1, paddingTop: "24px" }}>
               <ReportBar
                 reportName={excelReportData?.reportName!}
                 headerItems={excelReportData?.headerItems!}
@@ -645,9 +714,9 @@ function Curso() {
             </div>
           </Divider>
 
-          <div className="tblContainer" >
+          <div className="tblContainer">
             <table className="tableFichas">
-              <thead className="theadTab" >
+              <thead className="theadTab">
                 <tr style={{ backgroundColor: "#871b1b", color: "white" }}>
                   <th className="trFichas">Nº de Registro</th>
                   <th className="trFichas">Aula</th>
@@ -667,15 +736,19 @@ function Curso() {
                     <td className="tdFichas">{`${curso.rangoEdad?.limInferior} - ${curso.rangoEdad?.limSuperior}`}</td>
                     <td className="tdFichas">
                       {curso.fechaInicio
-                        ? new Date(curso.fechaInicio).toLocaleDateString("es-ES", {
-                          year: "numeric",
-                          month: "2-digit",
-                          day: "2-digit",
-                        })
+                        ? new Date(curso.fechaInicio).toLocaleDateString(
+                            "es-ES",
+                            {
+                              year: "numeric",
+                              month: "2-digit",
+                              day: "2-digit",
+                            }
+                          )
                         : ""}
                     </td>
                     <td className="tdFichas">
-                      <Button className="buttonIcon"
+                      <Button
+                        className="buttonIcon"
                         type="button"
                         icon="pi pi-file-edit"
                         style={{
@@ -687,14 +760,12 @@ function Curso() {
                           justifyContent: "center",
                         }}
                         onClick={() => handleEdit(curso.idCurso?.valueOf())}
-
-                      // Agrega el evento onClick para la operación de editar
                       />
-
                     </td>
 
                     <td className="tdFichas">
-                      <Button className="buttonIcon"
+                      <Button
+                        className="buttonIcon"
                         type="button"
                         icon="pi pi-trash"
                         style={{
@@ -706,11 +777,8 @@ function Curso() {
                           justifyContent: "center",
                         }}
                         onClick={() => handleDelete(curso.idCurso?.valueOf())}
-
-                      // Agrega el evento onClick para la operación de eliminar
                       />
                     </td>
-
                   </tr>
                 ))}
               </tbody>
