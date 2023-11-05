@@ -30,9 +30,17 @@ export function Login() {
       const resp = await AuthService.login(auth);
       const rol = resp.rol.idRol;
       const id = resp.persona.idPersona;
+      const datos = resp.persona;
+
+      console.log(datos)
       sessionStorage.setItem(
         "user",
         JSON.stringify({ id, rol, loggedIn: true })
+      );
+
+      sessionStorage.setItem(
+        "datos",
+        JSON.stringify(datos)
       );
       dispatchUser({ type: "login", payload: resp.data });
       history.replace("/dashboard/home");
@@ -77,7 +85,7 @@ export function Login() {
             </div>
             <div className="d-grid gap-2">
               <Button type="submit" className="btn btn-primary" id="btnLogin">
-               Iniciar Sesión
+                Iniciar Sesión
               </Button>
             </div>
           </form>

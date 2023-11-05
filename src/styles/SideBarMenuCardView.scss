@@ -4,7 +4,7 @@
 .SideBarMenuCardView {
     background-color: #222222;
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 
 
     .profile {
@@ -17,7 +17,7 @@
 
     .profileInfo {
         overflow: hidden;
-        height: 50px;
+        height: 64px;
         @include transition(height);
 
         .name {
