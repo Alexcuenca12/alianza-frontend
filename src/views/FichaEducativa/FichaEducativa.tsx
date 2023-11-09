@@ -22,6 +22,7 @@ import { Divider } from "primereact/divider";
 import "../../styles/FiltroFichas.css";
 import toast, { Toaster } from "react-hot-toast";
 import { PiFilePdfFill } from "react-icons/pi";
+import { ButtonPDF } from "../../common/ButtonPDF";
 
 function FichaInscripcionContext() {
   const fichaPersonalService = new FichaPersonalService();
@@ -564,7 +565,7 @@ function FichaInscripcionContext() {
         <Card
           header={cardHeader}
           className="border-solid border-red-800 border-3 flex-1 flex-wrap"
-          style={{ marginBottom: "35px", maxWidth: "1000px" }}
+          style={{ marginBottom: "35px", maxWidth: "1200px" }}
         >
           <div
             className="h1-rem"
@@ -1044,6 +1045,9 @@ function FichaInscripcionContext() {
                     accept="application/pdf"
                   />
                 </div>
+
+              </div>
+              <div className="column">
                 <div className="input-box">
                   <label htmlFor="pdf" className="font-medium w-auto min-w-min">
                     Subir Calificaciones 1er Trimestre:
@@ -1063,8 +1067,6 @@ function FichaInscripcionContext() {
                     accept="application/pdf"
                   />
                 </div>
-              </div>
-              <div className="column">
                 <div className="input-box">
                   <label htmlFor="pdf" className="font-medium w-auto min-w-min">
                     Subir Calificaciones 2do Trimestre:
@@ -1231,83 +1233,37 @@ function FichaInscripcionContext() {
                       {contrato.repitente ? "Si" : "No"}
                     </td>
                     <td className="tdFichas">
-                      {contrato.observacionesEducativa}
+                      {contrato.observacionesEducativa || 'S/N'}
                     </td>
                     <td className="tdFichas">
-                      {contrato.anexosMatricula ? (
-                        <button
-                          className="btnPdf"
-                          onClick={() =>
-                            decodeBase64(contrato.anexosMatricula!)
-                          }
-                        >
-                          <div className="svg-wrapper-1">
-                            <div className="svg-wrapper">
-                              <PiFilePdfFill className="icono"></PiFilePdfFill>
-                            </div>
-                          </div>
-                          <span>Descargar PDF</span>
-                        </button>
-                      ) : (
-                        <span>Sin evidencia</span>
-                      )}
+                      <ButtonPDF
+                        base64={contrato.anexosMatricula}
+                        filename={`Matricula_${contrato.fichaPersonal?.apellidos}_${contrato.fichaPersonal?.nombres}`}
+                        tipo={`Matricula: ${contrato.fichaPersonal?.apellidos} ${contrato.fichaPersonal?.nombres}`}
+                      />
+
                     </td>
                     <td className="tdFichas">
-                      {contrato.anexosCalificaciones1 ? (
-                        <button
-                          className="btnPdf"
-                          onClick={() =>
-                            decodeBase64(contrato.anexosCalificaciones1!)
-                          }
-                        >
-                          <div className="svg-wrapper-1">
-                            <div className="svg-wrapper">
-                              <PiFilePdfFill className="icono"></PiFilePdfFill>
-                            </div>
-                          </div>
-                          <span>Descargar PDF</span>
-                        </button>
-                      ) : (
-                        <span>Sin evidencia</span>
-                      )}
+                      <ButtonPDF
+                        base64={contrato.anexosCalificaciones1}
+                        filename={`Calificaciones_1er_Trimestre_${contrato.fichaPersonal?.apellidos}_${contrato.fichaPersonal?.nombres}`}
+                        tipo={`Calificaciones 1er Trimestre: ${contrato.fichaPersonal?.apellidos} ${contrato.fichaPersonal?.nombres}`}
+                      />
                     </td>
                     <td className="tdFichas">
-                      {contrato.anexosCalificaciones2 ? (
-                        <button
-                          className="btnPdf"
-                          onClick={() =>
-                            decodeBase64(contrato.anexosCalificaciones2!)
-                          }
-                        >
-                          <div className="svg-wrapper-1">
-                            <div className="svg-wrapper">
-                              <PiFilePdfFill className="icono"></PiFilePdfFill>
-                            </div>
-                          </div>
-                          <span>Descargar PDF</span>
-                        </button>
-                      ) : (
-                        <span>Sin evidencia</span>
-                      )}
+                      <ButtonPDF
+                        base64={contrato.anexosCalificaciones2}
+                        filename={`Calificaciones_2do_Trimestre_${contrato.fichaPersonal?.apellidos}_${contrato.fichaPersonal?.nombres}`}
+                        tipo={`Calificaciones 2do Trimestre: ${contrato.fichaPersonal?.apellidos} ${contrato.fichaPersonal?.nombres}`}
+                      />
+
                     </td>
                     <td className="tdFichas">
-                      {contrato.anexosCalificaciones3 ? (
-                        <button
-                          className="btnPdf"
-                          onClick={() =>
-                            decodeBase64(contrato.anexosCalificaciones3!)
-                          }
-                        >
-                          <div className="svg-wrapper-1">
-                            <div className="svg-wrapper">
-                              <PiFilePdfFill className="icono"></PiFilePdfFill>
-                            </div>
-                          </div>
-                          <span>Descargar PDF</span>
-                        </button>
-                      ) : (
-                        <span>Sin evidencia</span>
-                      )}
+                      <ButtonPDF
+                        base64={contrato.anexosCalificaciones3}
+                        filename={`Calificaciones_3er_Trimestre_${contrato.fichaPersonal?.apellidos}_${contrato.fichaPersonal?.nombres}`}
+                        tipo={`Calificaciones 3er Trimestre: ${contrato.fichaPersonal?.apellidos} ${contrato.fichaPersonal?.nombres}`}
+                      />
                     </td>
                     <td className="tdFichas">
                       <Button

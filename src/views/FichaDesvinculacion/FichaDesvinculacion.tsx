@@ -23,6 +23,7 @@ import toast, { Toaster } from "react-hot-toast";
 import "../../styles/Fichas.css";
 import { InputTextarea } from "primereact/inputtextarea";
 import { PiFilePdfFill } from "react-icons/pi";
+import { ButtonPDF } from "../../common/ButtonPDF";
 
 function FichaDesvinculacion() {
   const [listFperonales, setListFperonales] = useState<IFichaPersonal[]>([]);
@@ -87,38 +88,6 @@ function FichaDesvinculacion() {
     }
   };
 
-  const decodeBase64 = (base64Data: string) => {
-    try {
-      // Eliminar encabezados o metadatos de la cadena base64
-      const base64WithoutHeader = base64Data.replace(/^data:.*,/, "");
-
-      const decodedData = atob(base64WithoutHeader); // Decodificar la cadena base64
-      const byteCharacters = new Uint8Array(decodedData.length);
-
-      for (let i = 0; i < decodedData.length; i++) {
-        byteCharacters[i] = decodedData.charCodeAt(i);
-      }
-
-      const byteArray = new Blob([byteCharacters], { type: "application/pdf" });
-      const fileUrl = URL.createObjectURL(byteArray);
-
-      const link = document.createElement("a");
-      link.href = fileUrl;
-      link.download = "AnexosExtras.pdf";
-      link.click();
-      swal({
-        title: "Ficha Desvinculación",
-        text: "Descargando pdf....",
-        icon: "success",
-        timer: 1000,
-      });
-      console.log("pdf descargado...");
-
-      URL.revokeObjectURL(fileUrl);
-    } catch (error) {
-      console.error("Error al decodificar la cadena base64:", error);
-    }
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -720,45 +689,6 @@ function FichaDesvinculacion() {
                   />
                 </div>
 
-                <div className="input-box">
-                  <label htmlFor="pdf" className="font-medium w-auto min-w-min">
-                    Subir Anexos Extra:
-                  </label>
-                  <FileUpload
-                    name="pdf"
-                    chooseLabel="Escoger"
-                    uploadLabel="Cargar"
-                    cancelLabel="Cancelar"
-                    emptyTemplate={
-                      <p className="m-0 p-button-rounded">
-                        Arrastre y suelte los archivos aquí para cargarlos.
-                      </p>
-                    }
-                    customUpload
-                    onSelect={customBytesUploader}
-                    accept="application/pdf"
-                  />
-                </div>
-
-                <div className="input-box">
-                  <label htmlFor="pdf" className="font-medium w-auto min-w-min">
-                    Subir Anexos Extra:
-                  </label>
-                  <FileUpload
-                    name="pdf"
-                    chooseLabel="Escoger"
-                    uploadLabel="Cargar"
-                    cancelLabel="Cancelar"
-                    emptyTemplate={
-                      <p className="m-0 p-button-rounded">
-                        Arrastre y suelte los archivos aquí para cargarlos.
-                      </p>
-                    }
-                    customUpload
-                    onSelect={customBytesUploader}
-                    accept="application/pdf"
-                  />
-                </div>
               </div>
               <div className="btnSend">
                 <div
@@ -849,9 +779,9 @@ function FichaDesvinculacion() {
                   <th className="trFichas">Apellidos</th>
                   <th className="trFichas">Fecha de Desvinculación </th>
                   <th className="trFichas">Motivo</th>
+                  <th className="trFichas">Anexo extra</th>
                   <th className="trFichas">Editar</th>
                   <th className="trFichas">Eliminar</th>
-                  <th className="trFichas">Evidencia</th>
                 </tr>
               </thead>
               <tbody>
@@ -881,6 +811,14 @@ function FichaDesvinculacion() {
                     </td>
                     <td className="tdFichas">{cargaF.motivo}</td>
                     <td className="tdFichas">
+                      <ButtonPDF
+                        base64={cargaF.anexosExtras}
+                        filename={`AnexoExtra_${cargaF.fichaPersonal?.apellidos}_${cargaF.fichaPersonal?.nombres}`}
+                        tipo={`Anexo Extra: ${cargaF.fichaPersonal?.apellidos} ${cargaF.fichaPersonal?.nombres}`}
+                      />
+
+                    </td>
+                    <td className="tdFichas">
                       <Button
                         className="buttonIcon"
                         type="button"
@@ -896,7 +834,7 @@ function FichaDesvinculacion() {
                         onClick={() =>
                           handleEdit(cargaF.idFichaDesvinculacion?.valueOf())
                         }
-                        // Agrega el evento onClick para la operación de editar
+                      // Agrega el evento onClick para la operación de editar
                       />
                     </td>
 
@@ -916,26 +854,10 @@ function FichaDesvinculacion() {
                         onClick={() =>
                           handleDelete(cargaF.idFichaDesvinculacion?.valueOf())
                         }
-                        // Agrega el evento onClick para la operación de eliminar
+                      // Agrega el evento onClick para la operación de eliminar
                       />
                     </td>
-                    <td className="tdFichas">
-                      {cargaF.anexosExtras ? (
-                        <button
-                          className="btnPdf"
-                          onClick={() => decodeBase64(cargaF.anexosExtras!)}
-                        >
-                          <div className="svg-wrapper-1">
-                            <div className="svg-wrapper">
-                              <PiFilePdfFill className="icono"></PiFilePdfFill>
-                            </div>
-                          </div>
-                          <span>Descargar PDF</span>
-                        </button>
-                      ) : (
-                        <span>Sin evidencia</span>
-                      )}
-                    </td>
+
                   </tr>
                 ))}
               </tbody>

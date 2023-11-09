@@ -145,7 +145,7 @@ function Reporte() {
     function loadExcelReportData(data: IReporte[]) {
         console.log(data)
 
-        const reportName = "Reporte General"
+        const reportName = "General"
         const logo = 'G1:I1'
 
         const rowData = data.map((item) => ({

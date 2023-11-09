@@ -93,6 +93,7 @@ function Asistencia() {
       }
     } else {
       setlListEstudiantes([]);
+      setEditMode(false)
     }
   }, [curso, fechaAsistencia]);
 
@@ -310,7 +311,13 @@ function Asistencia() {
 
   function loadExcelReportData(data: IAsistencia[]) {
     const cursoEncontrado = cursos.find((curso) => curso.idCurso === curso.idCurso);
-    const reportName = `Asistencia ${cursoEncontrado?.nombreCurso}`
+
+    const fecha: Date = new Date(fechaAsistencia?.toString() || '')
+    const dia = fecha.getDate().toString().padStart(2, '0'); // Garantiza 2 dígitos con un 0 adelante si es necesario
+    const mes = (fecha.getMonth() + 1).toString().padStart(2, '0'); // Garantiza 2 dígitos con un 0 adelante si es necesario
+    const anio = fecha.getFullYear();
+
+    const reportName = `Asistencia ${cursoEncontrado?.nombreCurso} ${dia}-${mes}-${anio}`
     const logo = 'G1:K1'
     const rowData = data.map((item, index) => (
       {

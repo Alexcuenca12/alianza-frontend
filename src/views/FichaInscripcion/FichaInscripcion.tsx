@@ -24,6 +24,7 @@ import { Divider } from "primereact/divider";
 import toast, { Toaster } from "react-hot-toast";
 import { InputTextarea } from "primereact/inputtextarea";
 import { PiFilePdfFill } from "react-icons/pi";
+import { ButtonPDF } from "../../common/ButtonPDF";
 
 function FichaInscripcionContext() {
   const fichaPersonalService = new FichaPersonalService();
@@ -406,8 +407,7 @@ function FichaInscripcionContext() {
       apellidos: item.fichaPersonal?.apellidos,
       fechaInscripcion:
         typeof item.fechaIngresoInscrip === "string" &&
-        `${item.fechaIngresoInscrip.split("-")[2]}/${
-          item.fechaIngresoInscrip.split("-")[1]
+        `${item.fechaIngresoInscrip.split("-")[2]}/${item.fechaIngresoInscrip.split("-")[1]
         }/${item.fechaIngresoInscrip.split("-")[0]}`,
       curso: item.curso?.nombreCurso,
       profe: `${item.curso?.docente?.persona?.nombresPersona} ${item.curso?.docente?.persona?.apellidosPersona}`,
@@ -1102,23 +1102,12 @@ function FichaInscripcionContext() {
                       {contrato.jornadaAsistenciaInscrip}
                     </td>
                     <td className="tdFichas">
-                      {contrato.anexosFichaSocioEconomica ? (
-                        <button
-                          className="btnPdf"
-                          onClick={() =>
-                            decodeBase64(contrato.anexosFichaSocioEconomica!)
-                          }
-                        >
-                          <div className="svg-wrapper-1">
-                            <div className="svg-wrapper">
-                              <PiFilePdfFill className="icono"></PiFilePdfFill>
-                            </div>
-                          </div>
-                          <span>Descargar PDF</span>
-                        </button>
-                      ) : (
-                        <span>Sin evidencia</span>
-                      )}
+                      <ButtonPDF
+                        base64={contrato.anexosFichaSocioEconomica}
+                        filename={`FichaSocioEconomica_${contrato.fichaPersonal?.apellidos}_${contrato.fichaPersonal?.nombres}`}
+                        tipo={`Ficha SocioEconomica: ${contrato.fichaPersonal?.apellidos} ${contrato.fichaPersonal?.nombres}`}
+                      />
+
                     </td>
                     <td className="tdFichas">
                       <Button

@@ -26,6 +26,7 @@ import {
 } from "../../interfaces/IExcelReportParams";
 import { ReportBar } from "../../common/ReportBar";
 import { PiFilePdfFill } from "react-icons/pi";
+import { ButtonPDF } from "../../common/ButtonPDF";
 
 function FichaSaludContext() {
   const fichaPersonalService = new FichaPersonalService();
@@ -577,7 +578,7 @@ function FichaSaludContext() {
         <Card
           header={cardHeader}
           className="border-solid border-red-800 border-3 flex-1 flex-wrap"
-          style={{ marginBottom: "35px", maxWidth: "1100px" }}
+          style={{ marginBottom: "35px", maxWidth: "1200px" }}
         >
           <div
             className="h1-rem"
@@ -1460,61 +1461,27 @@ function FichaSaludContext() {
                         "Ninguna"}
                     </td>
                     <td className="tdFichas">
-                      {contrato.anexosCertificadoSalud ? (
-                        <button
-                          className="btnPdf"
-                          onClick={() =>
-                            decodeBase64(contrato.anexosCertificadoSalud!)
-                          }
-                        >
-                          <div className="svg-wrapper-1">
-                            <div className="svg-wrapper">
-                              <PiFilePdfFill className="icono"></PiFilePdfFill>
-                            </div>
-                          </div>
-                          <span>Descargar PDF</span>
-                        </button>
-                      ) : (
-                        <span>Sin evidencia</span>
-                      )}
+                      <ButtonPDF
+                        base64={contrato.anexosCertificadoSalud}
+                        filename={`CertificadoMedico_${contrato.fichaPersonal?.apellidos}_${contrato.fichaPersonal?.nombres}`}
+                        tipo={`Certificado Medico: ${contrato.fichaPersonal?.apellidos} ${contrato.fichaPersonal?.nombres}`}
+                      />
+
                     </td>
                     <td className="tdFichas">
-                      {contrato.anexosCertificadoSalud2 ? (
-                        <button
-                          className="btnPdf"
-                          onClick={() =>
-                            decodeBase64(contrato.anexosCertificadoSalud2!)
-                          }
-                        >
-                          <div className="svg-wrapper-1">
-                            <div className="svg-wrapper">
-                              <PiFilePdfFill className="icono"></PiFilePdfFill>
-                            </div>
-                          </div>
-                          <span>Descargar PDF</span>
-                        </button>
-                      ) : (
-                        <span>Sin evidencia</span>
-                      )}
+                      <ButtonPDF
+                        base64={contrato.anexosCertificadoSalud2}
+                        filename={`CertificadoMedico2_${contrato.fichaPersonal?.apellidos}_${contrato.fichaPersonal?.nombres}`}
+                        tipo={`Certificado Medico 2: ${contrato.fichaPersonal?.apellidos} ${contrato.fichaPersonal?.nombres}`}
+                      />
+
                     </td>
                     <td className="tdFichas">
-                      {contrato.anexosDiscapacidad ? (
-                        <button
-                          className="btnPdf"
-                          onClick={() =>
-                            decodeBase64(contrato.anexosDiscapacidad!)
-                          }
-                        >
-                          <div className="svg-wrapper-1">
-                            <div className="svg-wrapper">
-                              <PiFilePdfFill className="icono"></PiFilePdfFill>
-                            </div>
-                          </div>
-                          <span>Descargar PDF</span>
-                        </button>
-                      ) : (
-                        <span>Sin evidencia</span>
-                      )}
+                      <ButtonPDF
+                        base64={contrato.anexosDiscapacidad}
+                        filename={`CertificadoDiscapacidad_${contrato.fichaPersonal?.apellidos}_${contrato.fichaPersonal?.nombres}`}
+                        tipo={`Certificado de Discapacidad: ${contrato.fichaPersonal?.apellidos} ${contrato.fichaPersonal?.nombres}`}
+                      />
                     </td>
                     <td className="tdFichas">
                       <Button

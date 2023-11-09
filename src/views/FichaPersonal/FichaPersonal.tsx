@@ -31,6 +31,10 @@ import {
 import toast, { Toaster } from "react-hot-toast";
 import { InputTextarea } from "primereact/inputtextarea";
 import { PiFilePdfFill } from "react-icons/pi";
+import previewBase64PDF from "../../common/previewPDF";
+import dowloadBase64 from "../../common/dowloadPDF";
+import { ButtonPDF } from "../../common/ButtonPDF";
+
 
 interface busqueda {
   ciNombre: string;
@@ -242,70 +246,6 @@ function FichaPersonal() {
       if (fileUploadRef.current) {
         fileUploadRef.current.clear();
       }
-    }
-  };
-
-  const decodeBase64Cedula = (base64Data: string) => {
-    try {
-      // Eliminar encabezados o metadatos de la cadena base64
-      const base64WithoutHeader = base64Data.replace(/^data:.*,/, "");
-
-      const decodedData = atob(base64WithoutHeader); // Decodificar la cadena base64
-      const byteCharacters = new Uint8Array(decodedData.length);
-
-      for (let i = 0; i < decodedData.length; i++) {
-        byteCharacters[i] = decodedData.charCodeAt(i);
-      }
-
-      const byteArray = new Blob([byteCharacters], { type: "application/pdf" });
-      const fileUrl = URL.createObjectURL(byteArray);
-
-      const link = document.createElement("a");
-      link.href = fileUrl;
-      link.download = "AnexoCedula.pdf";
-      link.click();
-      swal({
-        title: "Cedula NNA",
-        text: "Descargando pdf....",
-        icon: "success",
-        timer: 1000,
-      });
-      console.log("pdf descargado...");
-
-      URL.revokeObjectURL(fileUrl);
-    } catch (error) {
-      console.error("Error al decodificar la cadena base64:", error);
-    }
-  };
-
-  const decodeBase64Legales = (base64Data: string) => {
-    try {
-      // Eliminar encabezados o metadatos de la cadena base64
-      const base64WithoutHeader = base64Data.replace(/^data:.*,/, "");
-
-      const decodedData = atob(base64WithoutHeader); // Decodificar la cadena base64
-      const byteCharacters = new Uint8Array(decodedData.length);
-
-      for (let i = 0; i < decodedData.length; i++) {
-        byteCharacters[i] = decodedData.charCodeAt(i);
-      }
-
-      const byteArray = new Blob([byteCharacters], { type: "application/pdf" });
-      const fileUrl = URL.createObjectURL(byteArray);
-
-      const link = document.createElement("a");
-      link.href = fileUrl;
-      link.download = "AnexoDocumentosLegales.pdf";
-      link.click();
-      swal({
-        title: "Documenos Legales",
-        text: "Descargando pdf....",
-        icon: "success",
-        timer: 1000,
-      });
-      URL.revokeObjectURL(fileUrl);
-    } catch (error) {
-      console.error("Error al decodificar la cadena base64:", error);
     }
   };
 
@@ -542,7 +482,6 @@ function FichaPersonal() {
   };
 
   const loadBusqueda = () => {
-    // alert(busqueda.estado)
     fichaPersonalService
       .getBusquedaFP(busqueda.estado, busqueda.ciNombre)
       .then((data: IFichaPersonal[]) => {
@@ -968,8 +907,8 @@ function FichaPersonal() {
                       {!formData.tipoIdentificacion
                         ? "Debe seleccionar el tipo de identificaicon"
                         : formData.tipoIdentificacion === "Cédula"
-                        ? "Cédula:"
-                        : "Pasaporte:"}
+                          ? "Cédula:"
+                          : "Pasaporte:"}
                     </label>
 
                     <InputText
@@ -977,8 +916,8 @@ function FichaPersonal() {
                         !formData.tipoIdentificacion
                           ? "Se habilitara cuando seleccione el tipo de identificaicon"
                           : formData.tipoIdentificacion === "Cédula"
-                          ? "Ingrese el numero de cédula:"
-                          : "Ingrese el numero de pasaporte:"
+                            ? "Ingrese el numero de cédula:"
+                            : "Ingrese el numero de pasaporte:"
                       }
                       id="cedula"
                       disabled={!formData.tipoIdentificacion}
@@ -1934,43 +1873,20 @@ function FichaPersonal() {
                       {/*CEDULA*/}
                     </td>
                     <td className="tdFichas">
-                      {ficha.anexosCedula ? (
-                        <button
-                          className="btnPdf"
-                          onClick={() =>
-                            decodeBase64Cedula(ficha.anexosCedula!)
-                          }
-                        >
-                          <div className="svg-wrapper-1">
-                            <div className="svg-wrapper">
-                              <PiFilePdfFill className="icono"></PiFilePdfFill>
-                            </div>
-                          </div>
-                          <span>Descargar PDF</span>
-                        </button>
-                      ) : (
-                        <span>Sin evidencia</span>
-                      )}
+                      <ButtonPDF
+                        base64={ficha.anexosCedula}
+                        filename={`Cédula_${ficha.apellidos}_${ficha.nombres}`}
+                        tipo={`Cédula: ${ficha.apellidos} ${ficha.nombres}`}
+                      />
+
                     </td>
                     {/*Doc. Legales*/}
                     <td className="tdFichas">
-                      {ficha.anexosDocumentosLegales ? (
-                        <button
-                          className="btnPdf"
-                          onClick={() =>
-                            decodeBase64Legales(ficha.anexosDocumentosLegales!)
-                          }
-                        >
-                          <div className="svg-wrapper-1">
-                            <div className="svg-wrapper">
-                              <PiFilePdfFill className="icono"></PiFilePdfFill>
-                            </div>
-                          </div>
-                          <span>Descargar PDF</span>
-                        </button>
-                      ) : (
-                        <span>Sin evidencia</span>
-                      )}
+                      <ButtonPDF
+                        base64={ficha.anexosDocumentosLegales!}
+                        filename={`DocumentosLegales_${ficha.apellidos}_${ficha.nombres}`}
+                        tipo={`DocumentosLegales: ${ficha.apellidos} ${ficha.nombres}`}
+                      />
                     </td>
 
                     <td className="tdFichas">

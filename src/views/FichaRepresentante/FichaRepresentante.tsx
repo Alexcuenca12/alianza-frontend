@@ -24,6 +24,7 @@ import { Calendar, CalendarChangeEvent } from "primereact/calendar";
 import toast, { Toaster } from "react-hot-toast";
 import { calcularEdad } from "../../services/functions/calcularEdad";
 import { PiFilePdfFill } from "react-icons/pi";
+import { ButtonPDF } from "../../common/ButtonPDF";
 
 function FichaInscripcionContext() {
   const fichaPersonalService = new FichaPersonalService();
@@ -828,8 +829,8 @@ function FichaInscripcionContext() {
                       {!formData.tipoIdentificacionRepre
                         ? "Debe seleccionar el tipo de identificaicon:"
                         : formData.tipoIdentificacionRepre === "Cédula"
-                        ? "Cédula:"
-                        : "Pasaporte:"}
+                          ? "Cédula:"
+                          : "Pasaporte:"}
                     </label>
 
                     <InputText
@@ -837,8 +838,8 @@ function FichaInscripcionContext() {
                         !formData.tipoIdentificacionRepre
                           ? "Se habilitara cuando seleccione el tipo de identificaicon"
                           : formData.tipoIdentificacionRepre === "Cédula"
-                          ? "Ingrese el numero de cédula:"
-                          : "Ingrese el numero de pasaporte:"
+                            ? "Ingrese el numero de cédula:"
+                            : "Ingrese el numero de pasaporte:"
                       }
                       id="cedula"
                       disabled={!formData.tipoIdentificacionRepre}
@@ -1417,23 +1418,12 @@ function FichaInscripcionContext() {
                     </td>
 
                     <td className="tdFichas">
-                      {contrato.anexosCedulaPPFF ? (
-                        <button
-                          className="btnPdf"
-                          onClick={() =>
-                            decodeBase64(contrato.anexosCedulaPPFF!)
-                          }
-                        >
-                          <div className="svg-wrapper-1">
-                            <div className="svg-wrapper">
-                              <PiFilePdfFill className="icono"></PiFilePdfFill>
-                            </div>
-                          </div>
-                          <span>Descargar PDF</span>
-                        </button>
-                      ) : (
-                        <span>Sin evidencia</span>
-                      )}
+                      <ButtonPDF
+                        base64={contrato.anexosCedulaPPFF}
+                        filename={`CedulaRepresentante_${contrato.fichaPersonal?.apellidos}_${contrato.fichaPersonal?.nombres}`}
+                        tipo={`Cédula de Representante: ${contrato.fichaPersonal?.apellidos} ${contrato.fichaPersonal?.nombres}`}
+                      />
+
                     </td>
 
                     <td className="tdFichas">

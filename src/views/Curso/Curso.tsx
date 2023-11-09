@@ -141,7 +141,7 @@ function Curso() {
   };
 
   function loadExcelReportData(data: ICurso[]) {
-    const reportName = "Cursos";
+    const reportName = "Aulas";
     const logo = "G1:K1";
 
     const rowData = data.map((item) => ({
@@ -152,18 +152,17 @@ function Curso() {
         "",
       inicio: item.fechaInicio
         ? new Date(item.fechaInicio).toLocaleDateString("es-ES", {
-            year: "numeric",
-            month: "2-digit",
-            day: "2-digit",
-          })
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        })
         : "",
       rango:
         `${item.rangoEdad?.limInferior} - ${item.rangoEdad?.limSuperior}` ||
         "Sin rango",
       registro:
         typeof item.fechaRegistro === "string" &&
-        `${item.fechaRegistro.split("-")[2]}/${
-          item.fechaRegistro.split("-")[1]
+        `${item.fechaRegistro.split("-")[2]}/${item.fechaRegistro.split("-")[1]
         }/${item.fechaRegistro.split("-")[0]}`,
     }));
     const headerItems: IHeaderItem[] = [
@@ -737,13 +736,13 @@ function Curso() {
                     <td className="tdFichas">
                       {curso.fechaInicio
                         ? new Date(curso.fechaInicio).toLocaleDateString(
-                            "es-ES",
-                            {
-                              year: "numeric",
-                              month: "2-digit",
-                              day: "2-digit",
-                            }
-                          )
+                          "es-ES",
+                          {
+                            year: "numeric",
+                            month: "2-digit",
+                            day: "2-digit",
+                          }
+                        )
                         : ""}
                     </td>
                     <td className="tdFichas">

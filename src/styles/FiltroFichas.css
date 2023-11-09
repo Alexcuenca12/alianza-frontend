@@ -134,6 +134,14 @@
     transition: transform 0.3s ease-in-out;
 }
 
+.iconoView {
+    transform: scale(1.2);
+}
+
+.btnPdf .iconoView {
+    display: block;
+}
+
 .btnPdf:hover {
     background: #B51308;
 }
