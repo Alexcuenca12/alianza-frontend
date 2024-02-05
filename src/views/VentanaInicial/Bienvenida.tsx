@@ -53,18 +53,6 @@ const Bienvenida = () => {
               >
                 Iniciar Sesión
               </button>
-              <button
-                type="button"
-                className="btn-item bg-brown fw-4 ls-2"
-                style={{
-                  backgroundColor: "#E5BB2A",
-                  border: "none",
-                  color: "white",
-                }}
-                onClick={newUser}
-              >
-                Registrarse
-              </button>
             </div>
           </div>
         </div>

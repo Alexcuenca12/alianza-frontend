@@ -31,8 +31,6 @@ export function Login() {
       const rol = resp.rol.idRol;
       const id = resp.persona.idPersona;
       const datos = resp.persona;
-
-      console.log(datos)
       sessionStorage.setItem(
         "user",
         JSON.stringify({ id, rol, loggedIn: true })
@@ -65,7 +63,7 @@ export function Login() {
         <AuthCard >
           <form onSubmit={handleSubmit} autoComplete="off">
             <br />
-            <div className="mb-2 p-1 d-flex border rounded">
+            <div className="mb-2 p-1 d-flex border rounded" style={{marginTop:'25px'}}>
               <InputText
                 name="username"
                 id="inputLogin"
